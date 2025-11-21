@@ -1,6 +1,6 @@
-import React, {  } from 'react';
-import { View, ScrollView } from 'react-native';
-import { StyleSheet,  useUnistyles  };
+import React, { } from 'react';
+import { View } from 'react-native';
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -18,21 +18,24 @@ const insights = [
     title: "Spending Alert",
     description: "You're spending 23% more on food this week compared to last week.",
     suggestion: "Try meal prepping to save approximately $50/week",
-    impact: "High Impact" },
+    impact: "High Impact"
+  },
   {
     type: "success",
     icon: "trending-down",
     title: "Great Progress!",
     description: "Your entertainment expenses are down 15% this month.",
     suggestion: "Keep it up! You're on track to save $80 this month.",
-    impact: "Positive" },
+    impact: "Positive"
+  },
   {
     type: "info",
     icon: "target",
     title: "Budget Recommendation",
     description: "Based on your income, you could save an additional $200/month.",
     suggestion: "Consider setting up automatic savings of $50/week",
-    impact: "Medium Impact" },
+    impact: "Medium Impact"
+  },
 ] as const;
 
 const predictions = [
@@ -44,76 +47,10 @@ const predictions = [
 
 export const SmartSenseScreen = () => {
 
-const styles = StyleSheet.create(theme => ({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background },
-    header: {
-      backgroundColor: theme.colors.primary,
-      padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl },
-    headerTop: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-      marginBottom: theme.margins.md },
-    headerTitleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.sm },
-    headerTitle: {
-      color: 'white' },
-    headerSubtitle: {
-      color: 'rgba(255, 255, 255, 0.9)' },
-    content: {
-      padding: theme.paddings.md,
-      marginTop: -theme.margins.lg,
-      gap: theme.margins.lg },
-    sectionTitle: {
-      marginBottom: theme.margins.sm },
-    insightCard: {
-      marginBottom: theme.margins.md },
-    insightHeader: {
-      flexDirection: 'row',
-      gap: theme.margins.md },
-    insightIcon: {
-      padding: theme.paddings.sm,
-      borderRadius: theme.radius.md },
-    insightContent: {
-      flex: 1 },
-    insightTitleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: theme.margins.xs },
-    suggestionBox: {
-      flexDirection: 'row',
-      gap: theme.margins.sm,
-      backgroundColor: theme.colors.muted,
-      padding: theme.paddings.sm,
-      borderRadius: theme.radius.md,
-      marginTop: theme.margins.sm },
-    predictionRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: theme.paddings.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.muted },
-    savingsCard: {
-      backgroundColor: theme.colors.secondary,
-      borderWidth: 0 },
-    savingsContent: {
-      flexDirection: 'row',
-      gap: theme.margins.md },
-    savingsTextContainer: {
-      flex: 1 }
-  }));
-
-const { theme } = useUnistyles();
+  const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -128,8 +65,8 @@ const { theme } = useUnistyles();
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Button 
-            title="" 
+          <Button
+            title=""
             icon={<Feather name="arrow-left" size={24} color="white" />}
             variant="ghost"
             onPress={() => navigation.goBack()}
@@ -153,10 +90,10 @@ const { theme } = useUnistyles();
             <Card key={index} style={styles.insightCard}>
               <View style={styles.insightHeader}>
                 <View style={[styles.insightIcon, { backgroundColor: getStatusColor(insight.type) + '20' }]}>
-                  <Feather 
-                    name={insight.icon as any} 
-                    size={20} 
-                    color={getStatusColor(insight.type)} 
+                  <Feather
+                    name={insight.icon as any}
+                    size={20}
+                    color={getStatusColor(insight.type)}
                   />
                 </View>
                 <View style={styles.insightContent}>
@@ -183,7 +120,7 @@ const { theme } = useUnistyles();
           <Card>
             {predictions.map((pred, index) => (
               <View key={index} style={[
-                styles.predictionRow, 
+                styles.predictionRow,
                 index === predictions.length - 1 && { borderBottomWidth: 0 }
               ]}>
                 <View>
@@ -192,8 +129,8 @@ const { theme } = useUnistyles();
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text weight="600">{pred.predicted}</Text>
-                  <Text 
-                    variant="caption" 
+                  <Text
+                    variant="caption"
                     style={{ color: getStatusColor(pred.status) }}
                   >
                     {pred.trend}
@@ -211,15 +148,15 @@ const { theme } = useUnistyles();
             <View style={styles.savingsTextContainer}>
               <Text variant="h3" style={{ color: 'white' }}>Suggested Savings Goal</Text>
               <Text variant="caption" style={{ color: 'rgba(255, 255, 255, 0.9)', marginBottom: 16 }}>
-                Based on your spending patterns, you could save $500 in the next 3 months 
+                Based on your spending patterns, you could save $500 in the next 3 months
                 by optimizing your food and entertainment expenses.
               </Text>
-              <Button 
-                title="Set This Goal" 
+              <Button
+                title="Set This Goal"
                 variant="secondary"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', alignSelf: 'flex-start' }}
                 textStyle={{ color: 'white' }}
-                onPress={() => {}}
+                onPress={() => { }}
               />
             </View>
           </View>
@@ -228,3 +165,88 @@ const { theme } = useUnistyles();
     </ScreenWrapper>
   );
 };
+
+
+const styles = StyleSheet.create(theme => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background
+  },
+  header: {
+    backgroundColor: theme.colors.primary,
+    padding: theme.paddings.lg,
+    paddingBottom: theme.paddings.xl
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.md,
+    marginBottom: theme.margins.md
+  },
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.sm
+  },
+  headerTitle: {
+    color: 'white'
+  },
+  headerSubtitle: {
+    color: 'rgba(255, 255, 255, 0.9)'
+  },
+  content: {
+    padding: theme.paddings.md,
+    marginTop: -theme.margins.lg,
+    gap: theme.margins.lg
+  },
+  sectionTitle: {
+    marginBottom: theme.margins.sm
+  },
+  insightCard: {
+    marginBottom: theme.margins.md
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    gap: theme.margins.md
+  },
+  insightIcon: {
+    padding: theme.paddings.sm,
+    borderRadius: theme.radius.md
+  },
+  insightContent: {
+    flex: 1
+  },
+  insightTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: theme.margins.xs
+  },
+  suggestionBox: {
+    flexDirection: 'row',
+    gap: theme.margins.sm,
+    backgroundColor: theme.colors.muted,
+    padding: theme.paddings.sm,
+    borderRadius: theme.radius.md,
+    marginTop: theme.margins.sm
+  },
+  predictionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: theme.paddings.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.muted
+  },
+  savingsCard: {
+    backgroundColor: theme.colors.secondary,
+    borderWidth: 0
+  },
+  savingsContent: {
+    flexDirection: 'row',
+    gap: theme.margins.md
+  },
+  savingsTextContainer: {
+    flex: 1
+  }
+}));

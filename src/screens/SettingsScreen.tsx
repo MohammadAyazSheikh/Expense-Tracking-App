@@ -39,113 +39,6 @@ const settingsGroups = [
 
 export const SettingsScreen = () => {
 
-  const styles = StyleSheet.create(theme => ({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl * 1.5,
-    },
-    headerTitle: {
-      color: 'white',
-      marginBottom: theme.margins.lg,
-    },
-    profileCard: {
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      padding: theme.paddings.md,
-      borderRadius: theme.radius.lg,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-    },
-    avatar: {
-      width: 64,
-      height: 64,
-      borderRadius: 32,
-      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    avatarText: {
-      color: 'white',
-      fontSize: 24,
-      fontWeight: 'bold',
-    },
-    profileInfo: {
-      flex: 1,
-    },
-    profileName: {
-      color: 'white',
-      fontSize: 18,
-      fontWeight: '600',
-    },
-    profileEmail: {
-      color: 'rgba(255, 255, 255, 0.9)',
-      fontSize: 14,
-    },
-    editButton: {
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      paddingHorizontal: theme.paddings.sm,
-      paddingVertical: 4,
-      borderRadius: theme.radius.md,
-    },
-    content: {
-      padding: theme.paddings.md,
-      marginTop: -theme.margins.xl,
-      gap: theme.margins.lg,
-    },
-    togglesCard: {
-      padding: theme.paddings.lg,
-    },
-    toggleRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: theme.paddings.sm,
-    },
-    toggleInfo: {
-      flex: 1,
-      marginRight: theme.margins.md,
-    },
-    separator: {
-      height: 1,
-      backgroundColor: theme.colors.border,
-      marginVertical: theme.margins.xs,
-    },
-    groupTitle: {
-      color: theme.colors.mutedForeground,
-      marginBottom: theme.margins.xs,
-      marginLeft: theme.margins.xs,
-    },
-    settingsItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: theme.paddings.md,
-      gap: theme.margins.md,
-    },
-    itemIcon: {
-      color: theme.colors.mutedForeground,
-    },
-    itemLabel: {
-      flex: 1,
-      fontWeight: '500',
-    },
-    logoutButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: theme.margins.sm,
-      padding: theme.paddings.md,
-    },
-    version: {
-      textAlign: 'center',
-      color: theme.colors.mutedForeground,
-      marginTop: theme.margins.sm,
-    }
-  }));
 
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -268,3 +161,112 @@ export const SettingsScreen = () => {
     </ScreenWrapper>
   );
 };
+
+
+const styles = StyleSheet.create(theme => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  header: {
+    backgroundColor: theme.colors.primary,
+    padding: theme.paddings.lg,
+    paddingBottom: theme.paddings.xl * 1.5,
+  },
+  headerTitle: {
+    color: 'white',
+    marginBottom: theme.margins.lg,
+  },
+  profileCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    padding: theme.paddings.md,
+    borderRadius: theme.radius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.md,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  profileEmail: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 14,
+  },
+  editButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: theme.paddings.sm,
+    paddingVertical: 4,
+    borderRadius: theme.radius.md,
+  },
+  content: {
+    padding: theme.paddings.md,
+    marginTop: -theme.margins.xl,
+    gap: theme.margins.lg,
+  },
+  togglesCard: {
+    padding: theme.paddings.lg,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: theme.paddings.sm,
+  },
+  toggleInfo: {
+    flex: 1,
+    marginRight: theme.margins.md,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: theme.margins.xs,
+  },
+  groupTitle: {
+    color: theme.colors.mutedForeground,
+    marginBottom: theme.margins.xs,
+    marginLeft: theme.margins.xs,
+  },
+  settingsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.paddings.md,
+    gap: theme.margins.md,
+  },
+  itemIcon: {
+    color: theme.colors.mutedForeground,
+  },
+  itemLabel: {
+    flex: 1,
+    fontWeight: '500',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.margins.sm,
+    padding: theme.paddings.md,
+  },
+  version: {
+    textAlign: 'center',
+    color: theme.colors.mutedForeground,
+    marginTop: theme.margins.sm,
+  }
+}));

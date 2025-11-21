@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ScrollView, StatusBar, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import { StyleSheet } from 'react-native-unistyles';
 
 interface ScreenWrapperProps {
   children: React.ReactNode;
@@ -16,7 +16,6 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: theme.colors.background,
   },
   content: {
-    flex: 1,
     padding: theme.paddings.md,
   }
 }));
@@ -27,8 +26,6 @@ export const ScreenWrapper = ({
   style,
   contentContainerStyle
 }: ScreenWrapperProps) => {
-  const { theme } = useUnistyles();
-
   const Content = (
     <View style={[styles.content, style]}>
       {children}

@@ -10,15 +10,15 @@ export type RootStackParamList = {
   Security: undefined;
   HelpSupport: undefined;
   NotFound: undefined;
+  Wallets: undefined;
+  SmartSense: undefined;
 };
 
 export type MainTabParamList = {
   Dashboard: undefined;
   AddExpense: undefined;
-  SmartSense: undefined;
   Analytics: undefined;
   Transactions: undefined;
   Budget: undefined;
-  Wallets: undefined;
   Settings: undefined;
 };

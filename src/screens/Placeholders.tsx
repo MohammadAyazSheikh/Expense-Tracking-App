@@ -11,7 +11,7 @@ const styles = StyleSheet.create(theme => ({
   },
   text: {
     color: theme.colors.foreground,
-    fontSize: theme.fontSize.h3,
+    fontSize: theme.fontSize.lg,
   }
 }));
 
@@ -23,6 +23,5 @@ const PlaceholderScreen = ({ name }: { name: string }) => {
   );
 };
 
-export const SecurityScreen = () => <PlaceholderScreen name="Security" />;
-export const HelpSupportScreen = () => <PlaceholderScreen name="Help & Support" />;
+
 export const NotFoundScreen = () => <PlaceholderScreen name="Not Found" />;
