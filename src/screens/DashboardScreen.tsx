@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { View } from 'react-native';
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -73,7 +73,7 @@ export const DashboardScreen = () => {
 
 
   return (
-    <ScreenWrapper style={styles.container} scrollable>
+    <ScreenWrapper style={styles.container} contentContainerStyle={styles.content} scrollable>
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -85,7 +85,7 @@ export const DashboardScreen = () => {
           icon={<Feather name="zap" size={20} color={theme.colors.primary} />}
           variant="outline"
           onPress={() => { }}
-          style={{ width: 40, height: 40, borderRadius: 20, paddingHorizontal: 0 }}
+          style={{ width: 40, height: 40, borderRadius: 20, paddingHorizontal: 0, paddingVertical: 0, padding: 0, gap: 0, justifyContent: "center", alignItems: "center" }}
         />
       </View>
 
@@ -114,20 +114,20 @@ export const DashboardScreen = () => {
       {/* Quick Actions */}
       <View style={styles.quickActions}>
         <Card style={styles.actionCard} onPress={() => navigation.navigate('MainTab', { screen: 'Analytics' })}>
-          <View style={[styles.actionIcon, { backgroundColor: theme.colors.primaryLight + '20' }]}>
-            <Feather name="trending-up" size={24} color={theme.colors.primary} />
+          <View style={[styles.actionIcon, { backgroundColor: theme.colors.primaryLight }]}>
+            <Feather name="trending-up" size={24} color={theme.colors.muted} />
           </View>
           <Text variant="caption" weight="500">Analytics</Text>
         </Card>
-        <Card style={styles.actionCard} onPress={() => navigation.navigate('MainTab', { screen: 'Wallets' })}>
-          <View style={[styles.actionIcon, { backgroundColor: theme.colors.success + '20' }]}>
-            <Feather name="credit-card" size={24} color={theme.colors.success} />
+        <Card style={styles.actionCard} onPress={() => navigation.navigate('Wallets')}>
+          <View style={[styles.actionIcon, { backgroundColor: theme.colors.success }]}>
+            <Feather name="credit-card" size={24} color={theme.colors.muted} />
           </View>
           <Text variant="caption" weight="500">Wallets</Text>
         </Card>
         <Card style={styles.actionCard} onPress={() => navigation.navigate('MainTab', { screen: 'Budget' })}>
-          <View style={[styles.actionIcon, { backgroundColor: theme.colors.warning + '20' }]}>
-            <Feather name="target" size={24} color={theme.colors.warning} />
+          <View style={[styles.actionIcon, { backgroundColor: theme.colors.warning }]}>
+            <Feather name="target" size={24} color={theme.colors.muted} />
           </View>
           <Text variant="caption" weight="500">Budget</Text>
         </Card>
@@ -182,7 +182,7 @@ export const DashboardScreen = () => {
               size="sm"
               style={{ alignSelf: 'flex-start', paddingHorizontal: 0 }}
               textStyle={{ color: theme.colors.primary }}
-              onPress={() => navigation.navigate('MainTab', { screen: 'SmartSense' })}
+              onPress={() => navigation.navigate('SmartSense')}
             />
           </View>
         </View>
@@ -192,7 +192,7 @@ export const DashboardScreen = () => {
       <View style={{ marginBottom: 80 }}>
         <View style={styles.sectionTitle}>
           <Text variant="h3">Recent Transactions</Text>
-          <Button title="See All" variant="ghost" size="sm" onPress={() => navigation.navigate('MainTab', { screen: 'Transactions' })} />
+          <Button title="See All" variant="ghost" size="sm" onPress={() => navigation.navigate("Transactions" as any)} />
         </View>
         <View style={styles.transactionList}>
           {recentTransactions.map((tx) => (
@@ -229,6 +229,9 @@ const styles = StyleSheet.create(theme => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  content: {
+    paddingHorizontal: theme.paddings.md
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -247,7 +250,7 @@ const styles = StyleSheet.create(theme => ({
   },
   balanceValue: {
     color: 'white',
-    fontSize: 32,
+    fontSize: theme.fontSize.xxxl,
     fontWeight: 'bold',
     marginBottom: theme.margins.lg,
   },

@@ -18,6 +18,62 @@ interface ButtonProps {
   textStyle?: TextStyle;
 }
 
+
+export const Button = ({
+  title,
+  onPress,
+  variant = 'default',
+  size = 'md',
+  loading = false,
+  disabled = false,
+  icon,
+  style,
+  textStyle
+}: ButtonProps) => {
+
+  const getTextColorStyle = () => {
+    switch (variant) {
+      case 'outline': return styles.textOutline;
+      case 'ghost': return styles.textGhost;
+      case 'destructive': return styles.textDestructive;
+      case 'secondary': return styles.textSecondary;
+      default: return styles.textDefault;
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled || loading}
+      style={[
+        styles.container,
+        styles[variant],
+        styles[size],
+        disabled && styles.disabled,
+        style
+      ]}
+      activeOpacity={0.7}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color={getTextColorStyle().color} />
+      ) : (
+        <>
+          {icon}
+
+          {title && <Text
+            variant="label"
+            style={[getTextColorStyle(), textStyle]}
+            weight="600"
+          >
+            {title}
+          </Text>}
+        </>
+      )}
+    </TouchableOpacity>
+  );
+};
+
+
 const styles = StyleSheet.create(theme => ({
   container: {
     flexDirection: 'row',
@@ -78,56 +134,3 @@ const styles = StyleSheet.create(theme => ({
     color: theme.colors.secondaryForeground,
   }
 }));
-
-export const Button = ({
-  title,
-  onPress,
-  variant = 'default',
-  size = 'md',
-  loading = false,
-  disabled = false,
-  icon,
-  style,
-  textStyle
-}: ButtonProps) => {
-
-  const getTextColorStyle = () => {
-    switch (variant) {
-      case 'outline': return styles.textOutline;
-      case 'ghost': return styles.textGhost;
-      case 'destructive': return styles.textDestructive;
-      case 'secondary': return styles.textSecondary;
-      default: return styles.textDefault;
-    }
-  };
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled || loading}
-      style={[
-        styles.container,
-        styles[variant],
-        styles[size],
-        disabled && styles.disabled,
-        style
-      ]}
-      activeOpacity={0.7}
-    >
-      {loading ? (
-        <ActivityIndicator size="small" color={getTextColorStyle().color} />
-      ) : (
-        <>
-          {icon}
-          <Text
-            variant="label"
-            style={[getTextColorStyle(), textStyle]}
-            weight="600"
-          >
-            {title}
-          </Text>
-        </>
-      )}
-    </TouchableOpacity>
-  );
-};

@@ -16,7 +16,6 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: theme.colors.background,
   },
   content: {
-    padding: theme.paddings.md,
   }
 }));
 

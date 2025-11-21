@@ -15,30 +15,30 @@ interface CustomTextProps extends RNTextProps {
 const styles = StyleSheet.create(theme => ({
   h1: {
     fontSize: theme.fontSize.lg,
-    lineHeight: theme.fontSize.md * 1.2,
+    // lineHeight: theme.fontSize.md * 1.2,
     fontWeight: 'bold',
     color: theme.colors.foreground,
   },
   h2: {
     fontSize: theme.fontSize.md,
-    lineHeight: theme.fontSize.md * 1.2,
+    // lineHeight: theme.fontSize.md * 1.2,
     fontWeight: 'bold',
     color: theme.colors.foreground,
   },
   h3: {
     fontSize: theme.fontSize.sm,
-    lineHeight: theme.fontSize.sm * 1.2,
+    // lineHeight: theme.fontSize.sm * 1.2,
     fontWeight: '600',
     color: theme.colors.foreground,
   },
   body: {
     fontSize: theme.fontSize.md,
-    lineHeight: theme.fontSize.md * 1.5,
+    // lineHeight: theme.fontSize.md * 1.5,
     color: theme.colors.foreground,
   },
   label: {
     fontSize: theme.fontSize.lg,
-    lineHeight: theme.fontSize.lg * 1.4,
+    // lineHeight: theme.fontSize.lg * 1.4,
     color: theme.colors.foreground,
   },
   caption: {
