@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { Pressable, ViewStyle, Animated } from 'react-native';
+import React, { useEffect } from 'react';
+import { Pressable, ViewStyle } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 interface SwitchProps {
   value: boolean;
@@ -39,15 +40,19 @@ export const Switch = ({
   style
 }: SwitchProps) => {
   const { theme } = useUnistyles();
-  const translateX = useRef(new Animated.Value(value ? 20 : 0)).current;
+  const translateX = useSharedValue(value ? 20 : 0);
 
   useEffect(() => {
-    Animated.timing(translateX, {
-      toValue: value ? 20 : 0,
+    translateX.value = withTiming(value ? 20 : 0, {
       duration: 200,
-      useNativeDriver: true,
-    }).start();
+    });
   }, [value]);
+
+  const animatedThumbStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
 
   const handlePress = () => {
     onValueChange(!value);
@@ -70,7 +75,7 @@ export const Switch = ({
         style={[
           styles.thumb,
           { backgroundColor: thumbColor },
-          { transform: [{ translateX }] },
+          animatedThumbStyle,
         ]}
       />
     </Pressable>

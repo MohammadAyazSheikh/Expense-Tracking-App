@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, FlatList, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,14 @@ import { Text } from '../components/ui/Text';
 import { Button } from '../components/ui/Button';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  FadeIn,
+  FadeInDown
+} from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
@@ -97,12 +105,67 @@ const styles = StyleSheet.create(theme => ({
   },
   activeDot: {
     backgroundColor: theme.colors.primary,
-    width: 32,
   },
-  inactiveDot: {
-    width: 8,
-  }
 }));
+
+const AnimatedDot = ({ isActive }: { isActive: boolean }) => {
+  const width = useSharedValue(isActive ? 32 : 8);
+
+  useEffect(() => {
+    width.value = withTiming(isActive ? 32 : 8, { duration: 300 });
+  }, [isActive]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      width: width.value,
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[
+        styles.dot,
+        isActive && styles.activeDot,
+        animatedStyle,
+      ]}
+    />
+  );
+};
+
+const AnimatedSlide = ({ item, theme }: { item: typeof slides[number], theme: any }) => {
+  const scale = useSharedValue(0.8);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withSpring(1, { damping: 15 });
+    opacity.value = withTiming(1, { duration: 400 });
+  }, []);
+
+  const iconAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  return (
+    <View style={styles.slide}>
+      <Animated.View style={[styles.iconContainer, iconAnimatedStyle]}>
+        <Feather
+          name={item.icon as any}
+          size={80}
+          color={theme.colors[item.color as keyof typeof theme.colors] as string}
+        />
+      </Animated.View>
+      <Animated.View entering={FadeInDown.delay(200).duration(600)}>
+        <Text variant="h2" style={styles.title}>{item.title}</Text>
+      </Animated.View>
+      <Animated.View entering={FadeInDown.delay(400).duration(600)}>
+        <Text variant="body" style={styles.description}>{item.description}</Text>
+      </Animated.View>
+    </View>
+  );
+};
 
 export const OnboardingScreen = () => {
   const { theme } = useUnistyles();
@@ -130,9 +193,9 @@ export const OnboardingScreen = () => {
 
   return (
     <ScreenWrapper style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
         <Button title="Skip" variant="ghost" onPress={handleSkip} />
-      </View>
+      </Animated.View>
 
       <FlatList
         ref={flatListRef}
@@ -144,30 +207,14 @@ export const OnboardingScreen = () => {
         scrollEventThrottle={16}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.slide}>
-            <View style={styles.iconContainer}>
-              <Feather
-                name={item.icon as any}
-                size={80}
-                color={theme.colors[item.color as keyof typeof theme.colors] as string}
-              />
-            </View>
-            <Text variant="h2" style={styles.title}>{item.title}</Text>
-            <Text variant="body" style={styles.description}>{item.description}</Text>
-          </View>
+          <AnimatedSlide item={item} theme={theme} />
         )}
       />
 
-      <View style={styles.footer}>
+      <Animated.View entering={FadeInDown.delay(800).duration(600)} style={styles.footer}>
         <View style={styles.dots}>
           {slides.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dot,
-                index === currentIndex ? styles.activeDot : styles.inactiveDot
-              ]}
-            />
+            <AnimatedDot key={index} isActive={index === currentIndex} />
           ))}
         </View>
 
@@ -176,7 +223,7 @@ export const OnboardingScreen = () => {
           onPress={handleNext}
           size="lg"
         />
-      </View>
+      </Animated.View>
     </ScreenWrapper>
   );
 };
