@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -15,6 +15,9 @@ import { PieChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
 
 export const DashboardScreen = () => {
+
+
+
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { transactions, wallets } = useFinanceStore();
@@ -67,125 +70,7 @@ export const DashboardScreen = () => {
     }));
   }, [transactions, theme]);
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.margins.lg,
-    },
-    balanceCard: {
-      backgroundColor: theme.colors.primary,
-      padding: theme.paddings.lg,
-      borderRadius: theme.radius.lg,
-      marginBottom: theme.margins.lg,
-    },
-    balanceLabel: {
-      color: 'rgba(255, 255, 255, 0.9)',
-      marginBottom: theme.margins.xs,
-    },
-    balanceValue: {
-      color: 'white',
-      fontSize: 32,
-      fontWeight: 'bold',
-      marginBottom: theme.margins.lg,
-    },
-    statsRow: {
-      flexDirection: 'row',
-      gap: theme.margins.lg,
-    },
-    statItem: {
-      flex: 1,
-    },
-    statLabelRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      marginBottom: 4,
-    },
-    statLabel: {
-      color: 'rgba(255, 255, 255, 0.9)',
-      fontSize: theme.fontSize.sm,
-    },
-    statValue: {
-      color: 'white',
-      fontWeight: '600',
-      fontSize: theme.fontSize.md,
-    },
-    quickActions: {
-      flexDirection: 'row',
-      gap: theme.margins.md,
-      marginBottom: theme.margins.lg,
-    },
-    actionCard: {
-      flex: 1,
-      padding: theme.paddings.md,
-      alignItems: 'center',
-      gap: theme.margins.sm,
-    },
-    actionIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    sectionTitle: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.margins.md,
-    },
-    chartPlaceholder: {
-      height: 200,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.colors.muted,
-      borderRadius: theme.radius.md,
-    },
-    insightCard: {
-      marginBottom: theme.margins.lg,
-      borderColor: 'rgba(255, 255, 255, 0.2)', // Approximate gradient border
-    },
-    insightContent: {
-      flexDirection: 'row',
-      gap: theme.margins.md,
-    },
-    insightIcon: {
-      padding: theme.paddings.sm,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)', // Approximate primary/10
-      borderRadius: theme.radius.md,
-    },
-    transactionList: {
-      gap: theme.margins.sm,
-    },
-    transactionItem: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: theme.paddings.md,
-    },
-    fab: {
-      position: 'absolute',
-      bottom: theme.margins.lg,
-      right: theme.margins.lg,
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      backgroundColor: theme.colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      shadowColor: theme.colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 5,
-    }
-  }), [theme]);
+
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
@@ -195,11 +80,11 @@ export const DashboardScreen = () => {
           <Text variant="caption">Welcome back</Text>
           <Text variant="h2">Alex Johnson</Text>
         </View>
-        <Button 
-          title="" 
+        <Button
+          title=""
           icon={<Feather name="zap" size={20} color={theme.colors.primary} />}
           variant="outline"
-          onPress={() => {}}
+          onPress={() => { }}
           style={{ width: 40, height: 40, borderRadius: 20, paddingHorizontal: 0 }}
         />
       </View>
@@ -291,10 +176,10 @@ export const DashboardScreen = () => {
             <Text variant="caption" style={{ marginBottom: 8 }}>
               You're spending 23% more on food this week. Consider meal prepping to save $50/week.
             </Text>
-            <Button 
-              title="View Full Analysis →" 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              title="View Full Analysis →"
+              variant="ghost"
+              size="sm"
               style={{ alignSelf: 'flex-start', paddingHorizontal: 0 }}
               textStyle={{ color: theme.colors.primary }}
               onPress={() => navigation.navigate('MainTab', { screen: 'SmartSense' })}
@@ -316,8 +201,8 @@ export const DashboardScreen = () => {
                 <Text weight="500">{tx.name}</Text>
                 <Text variant="caption">{tx.date}</Text>
               </View>
-              <Text 
-                weight="600" 
+              <Text
+                weight="600"
                 style={{ color: tx.type === 'income' ? theme.colors.success : theme.colors.foreground }}
               >
                 {tx.type === 'income' ? '+' : ''}{Math.abs(tx.amount).toFixed(2)}
@@ -337,3 +222,124 @@ export const DashboardScreen = () => {
     </ScreenWrapper>
   );
 };
+
+
+const styles = StyleSheet.create(theme => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.margins.lg,
+  },
+  balanceCard: {
+    backgroundColor: theme.colors.primary,
+    padding: theme.paddings.lg,
+    borderRadius: theme.radius.lg,
+    marginBottom: theme.margins.lg,
+  },
+  balanceLabel: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: theme.margins.xs,
+  },
+  balanceValue: {
+    color: 'white',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: theme.margins.lg,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: theme.margins.lg,
+  },
+  statItem: {
+    flex: 1,
+  },
+  statLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  statLabel: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: theme.fontSize.sm,
+  },
+  statValue: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: theme.fontSize.md,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    gap: theme.margins.md,
+    marginBottom: theme.margins.lg,
+  },
+  actionCard: {
+    flex: 1,
+    padding: theme.paddings.md,
+    alignItems: 'center',
+    gap: theme.margins.sm,
+  },
+  actionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.margins.md,
+  },
+  chartPlaceholder: {
+    height: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.muted,
+    borderRadius: theme.radius.md,
+  },
+  insightCard: {
+    marginBottom: theme.margins.lg,
+    borderColor: 'rgba(255, 255, 255, 0.2)', // Approximate gradient border
+  },
+  insightContent: {
+    flexDirection: 'row',
+    gap: theme.margins.md,
+  },
+  insightIcon: {
+    padding: theme.paddings.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Approximate primary/10
+    borderRadius: theme.radius.md,
+  },
+  transactionList: {
+    gap: theme.margins.sm,
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: theme.paddings.md,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: theme.margins.lg,
+    right: theme.margins.lg,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  }
+}));

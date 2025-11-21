@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React, {  } from 'react';
+import { View, ScrollView } from 'react-native';
+import { StyleSheet,  useUnistyles  };
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -19,107 +19,92 @@ const recentTransfers = [
 ];
 
 export const WalletsScreen = () => {
-  const { theme } = useUnistyles();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const wallets = useFinanceStore((state) => state.wallets);
 
-  const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
-
-  const styles = useMemo(() => StyleSheet.create({
+const styles = StyleSheet.create(theme => ({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
-    },
+      backgroundColor: theme.colors.background },
     header: {
       backgroundColor: theme.colors.primary,
       padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl,
-    },
+      paddingBottom: theme.paddings.xl },
     headerTop: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: theme.margins.lg,
-    },
+      marginBottom: theme.margins.lg },
     headerLeft: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.margins.md,
-    },
+      gap: theme.margins.md },
     headerTitle: {
-      color: 'white',
-    },
+      color: 'white' },
     balanceCard: {
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
       padding: theme.paddings.lg,
-      borderRadius: theme.radius.lg,
-    },
+      borderRadius: theme.radius.lg },
     balanceLabel: {
       color: 'rgba(255, 255, 255, 0.8)',
-      marginBottom: 4,
-    },
+      marginBottom: 4 },
     balanceValue: {
       color: 'white',
       fontSize: 32,
       fontWeight: 'bold',
-      marginBottom: theme.margins.md,
-    },
+      marginBottom: theme.margins.md },
     content: {
       padding: theme.paddings.md,
       marginTop: -theme.margins.lg,
-      gap: theme.margins.md,
-    },
+      gap: theme.margins.md },
     walletCard: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: theme.paddings.lg,
-    },
+      padding: theme.paddings.lg },
     walletInfo: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.margins.md,
-    },
+      gap: theme.margins.md },
     walletIcon: {
       width: 48,
       height: 48,
       borderRadius: 12,
       alignItems: 'center',
-      justifyContent: 'center',
-    },
+      justifyContent: 'center' },
     transferButton: {
-      marginVertical: theme.margins.md,
-    },
+      marginVertical: theme.margins.md },
     transferItem: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: theme.paddings.md,
-    },
+      padding: theme.paddings.md },
     transferInfo: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.margins.md,
-    },
+      gap: theme.margins.md },
     transferIcon: {
       width: 40,
       height: 40,
       borderRadius: 20,
       backgroundColor: theme.colors.muted,
       alignItems: 'center',
-      justifyContent: 'center',
-    },
+      justifyContent: 'center' },
     statsGrid: {
       flexDirection: 'row',
       gap: theme.margins.md,
-      marginTop: theme.margins.md,
-    },
+      marginTop: theme.margins.md },
     statCard: {
       flex: 1,
       alignItems: 'center',
-      padding: theme.paddings.md,
-    }
-  }), [theme]);
+      padding: theme.paddings.md }
+  }));
+
+const { theme } = useUnistyles();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const wallets = useFinanceStore((state) => state.wallets);
+
+  const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
+
+  
 
   const getColor = (colorName: string) => {
     return theme.colors[colorName as keyof typeof theme.colors] as string;

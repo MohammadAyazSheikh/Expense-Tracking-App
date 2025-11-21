@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React, {  } from 'react';
+import { View, ScrollView } from 'react-native';
+import { StyleSheet,  useUnistyles  };
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -18,24 +18,21 @@ const insights = [
     title: "Spending Alert",
     description: "You're spending 23% more on food this week compared to last week.",
     suggestion: "Try meal prepping to save approximately $50/week",
-    impact: "High Impact",
-  },
+    impact: "High Impact" },
   {
     type: "success",
     icon: "trending-down",
     title: "Great Progress!",
     description: "Your entertainment expenses are down 15% this month.",
     suggestion: "Keep it up! You're on track to save $80 this month.",
-    impact: "Positive",
-  },
+    impact: "Positive" },
   {
     type: "info",
     icon: "target",
     title: "Budget Recommendation",
     description: "Based on your income, you could save an additional $200/month.",
     suggestion: "Consider setting up automatic savings of $50/week",
-    impact: "Medium Impact",
-  },
+    impact: "Medium Impact" },
 ] as const;
 
 const predictions = [
@@ -46,92 +43,77 @@ const predictions = [
 ] as const;
 
 export const SmartSenseScreen = () => {
-  const { theme } = useUnistyles();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const styles = useMemo(() => StyleSheet.create({
+const styles = StyleSheet.create(theme => ({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
-    },
+      backgroundColor: theme.colors.background },
     header: {
       backgroundColor: theme.colors.primary,
       padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl,
-    },
+      paddingBottom: theme.paddings.xl },
     headerTop: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: theme.margins.md,
-      marginBottom: theme.margins.md,
-    },
+      marginBottom: theme.margins.md },
     headerTitleRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: theme.margins.sm,
-    },
+      gap: theme.margins.sm },
     headerTitle: {
-      color: 'white',
-    },
+      color: 'white' },
     headerSubtitle: {
-      color: 'rgba(255, 255, 255, 0.9)',
-    },
+      color: 'rgba(255, 255, 255, 0.9)' },
     content: {
       padding: theme.paddings.md,
       marginTop: -theme.margins.lg,
-      gap: theme.margins.lg,
-    },
+      gap: theme.margins.lg },
     sectionTitle: {
-      marginBottom: theme.margins.sm,
-    },
+      marginBottom: theme.margins.sm },
     insightCard: {
-      marginBottom: theme.margins.md,
-    },
+      marginBottom: theme.margins.md },
     insightHeader: {
       flexDirection: 'row',
-      gap: theme.margins.md,
-    },
+      gap: theme.margins.md },
     insightIcon: {
       padding: theme.paddings.sm,
-      borderRadius: theme.radius.md,
-    },
+      borderRadius: theme.radius.md },
     insightContent: {
-      flex: 1,
-    },
+      flex: 1 },
     insightTitleRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: theme.margins.xs,
-    },
+      marginBottom: theme.margins.xs },
     suggestionBox: {
       flexDirection: 'row',
       gap: theme.margins.sm,
       backgroundColor: theme.colors.muted,
       padding: theme.paddings.sm,
       borderRadius: theme.radius.md,
-      marginTop: theme.margins.sm,
-    },
+      marginTop: theme.margins.sm },
     predictionRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingVertical: theme.paddings.sm,
       borderBottomWidth: 1,
-      borderBottomColor: theme.colors.muted,
-    },
+      borderBottomColor: theme.colors.muted },
     savingsCard: {
       backgroundColor: theme.colors.secondary,
-      borderWidth: 0,
-    },
+      borderWidth: 0 },
     savingsContent: {
       flexDirection: 'row',
-      gap: theme.margins.md,
-    },
+      gap: theme.margins.md },
     savingsTextContainer: {
-      flex: 1,
-    }
-  }), [theme]);
+      flex: 1 }
+  }));
+
+const { theme } = useUnistyles();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  
 
   const getStatusColor = (status: string) => {
     switch (status) {

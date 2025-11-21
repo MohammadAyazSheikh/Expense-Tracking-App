@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { View, ScrollView, TextInput, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React, { useMemo, useState } from 'react';
+import { View, TextInput } from 'react-native';
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -20,101 +20,26 @@ const getCategoryEmoji = (category: string) => {
     "Bills": "📱",
     "Income": "💰",
     "Shopping": "🛍️",
-    "Health": "💊",
+    "Health": "💊"
   };
   return emojis[category] || "📝";
 };
 
 export const TransactionsScreen = () => {
+
+
+
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [searchQuery, setSearchQuery] = useState("");
   const transactions = useFinanceStore((state) => state.transactions);
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl,
-    },
-    headerTop: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-      marginBottom: theme.margins.md,
-    },
-    headerTitle: {
-      color: 'white',
-    },
-    searchContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      borderRadius: theme.radius.md,
-      paddingHorizontal: theme.paddings.md,
-      height: 48,
-    },
-    searchInput: {
-      flex: 1,
-      color: 'white',
-      marginLeft: theme.margins.sm,
-      fontSize: theme.fontSize.md,
-    },
-    content: {
-      padding: theme.paddings.md,
-      marginTop: -theme.margins.lg,
-      gap: theme.margins.md,
-    },
-    summaryGrid: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      padding: theme.paddings.md,
-    },
-    summaryItem: {
-      alignItems: 'center',
-      flex: 1,
-    },
-    dateGroup: {
-      marginBottom: theme.margins.md,
-    },
-    dateLabel: {
-      marginBottom: theme.margins.sm,
-      paddingHorizontal: theme.paddings.xs,
-    },
-    transactionList: {
-      gap: theme.margins.sm,
-    },
-    transactionCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-      padding: theme.paddings.md,
-    },
-    transactionEmoji: {
-      fontSize: 24,
-    },
-    transactionInfo: {
-      flex: 1,
-    },
-    transactionMeta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.xs,
-      marginTop: 4,
-    },
-    transactionAmount: {
-      alignItems: 'flex-end',
-    }
-  }), [theme]);
+
 
   const groupedTransactions = useMemo(() => {
     return transactions.reduce((groups, transaction) => {
       // Simplified date grouping logic for demo
-      const date = transaction.date; 
+      const date = transaction.date;
       // In real app, use proper date formatting
       let dateLabel = date;
       if (date === "2024-06-15") dateLabel = "Today";
@@ -128,7 +53,7 @@ export const TransactionsScreen = () => {
     }, {} as Record<string, typeof transactions>);
   }, []);
 
-  const filteredGroups = Object.entries(groupedTransactions).filter(([_, items]) => 
+  const filteredGroups = Object.entries(groupedTransactions).filter(([_, items]) =>
     items.some(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -136,8 +61,8 @@ export const TransactionsScreen = () => {
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Button 
-            title="" 
+          <Button
+            title=""
             icon={<Feather name="arrow-left" size={24} color="white" />}
             variant="ghost"
             onPress={() => navigation.goBack()}
@@ -155,11 +80,11 @@ export const TransactionsScreen = () => {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <Button 
-            title="" 
+          <Button
+            title=""
             icon={<Feather name="sliders" size={20} color="white" />}
             variant="ghost"
-            onPress={() => {}}
+            onPress={() => { }}
             style={{ paddingHorizontal: 0, width: 32 }}
           />
         </View>
@@ -209,10 +134,10 @@ export const TransactionsScreen = () => {
                       </View>
                     </View>
                     <View style={styles.transactionAmount}>
-                      <Text 
-                        weight="600" 
-                        style={{ 
-                          color: transaction.type === 'income' ? theme.colors.success : theme.colors.foreground 
+                      <Text
+                        weight="600"
+                        style={{
+                          color: transaction.type === 'income' ? theme.colors.success : theme.colors.foreground
                         }}
                       >
                         {transaction.type === 'income' ? '+' : ''}{transaction.amount.toFixed(2)}
@@ -229,3 +154,84 @@ export const TransactionsScreen = () => {
     </ScreenWrapper>
   );
 };
+
+
+const styles = StyleSheet.create(theme => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background
+  },
+  header: {
+    backgroundColor: theme.colors.primary,
+    padding: theme.paddings.lg,
+    paddingBottom: theme.paddings.xl
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.md,
+    marginBottom: theme.margins.md
+  },
+  headerTitle: {
+    color: 'white'
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: theme.radius.md,
+    paddingHorizontal: theme.paddings.md,
+    height: 48
+  },
+  searchInput: {
+    flex: 1,
+    color: 'white',
+    marginLeft: theme.margins.sm,
+    fontSize: theme.fontSize.md
+  },
+  content: {
+    padding: theme.paddings.md,
+    marginTop: -theme.margins.lg,
+    gap: theme.margins.md
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: theme.paddings.md
+  },
+  summaryItem: {
+    alignItems: 'center',
+    flex: 1
+  },
+  dateGroup: {
+    marginBottom: theme.margins.md
+  },
+  dateLabel: {
+    marginBottom: theme.margins.sm,
+    paddingHorizontal: theme.paddings.xs
+  },
+  transactionList: {
+    gap: theme.margins.sm
+  },
+  transactionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.md,
+    padding: theme.paddings.md
+  },
+  transactionEmoji: {
+    fontSize: 24
+  },
+  transactionInfo: {
+    flex: 1
+  },
+  transactionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.xs,
+    marginTop: 4
+  },
+  transactionAmount: {
+    alignItems: 'flex-end'
+  }
+}));

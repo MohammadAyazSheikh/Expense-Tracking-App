@@ -1,68 +1,69 @@
-import React, { useMemo } from 'react';
-import { Text as RNText, TextProps as RNTextProps, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React from 'react';
+import { Text as RNText, TextProps as RNTextProps } from 'react-native';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
-type TextVariant = 'h1' | 'h2' | 'h3' | 'body' | 'caption' | 'label';
+type TextVariant = 'h1' | 'h2' | 'h3' | 'body' | 'label' | 'caption';
+type TextWeight = 'normal' | '500' | '600' | '700';
+type TextAlign = 'left' | 'center' | 'right';
 
-interface TextProps extends RNTextProps {
+interface CustomTextProps extends RNTextProps {
   variant?: TextVariant;
-  color?: string;
-  weight?: 'normal' | 'bold' | '500' | '600';
-  align?: 'left' | 'center' | 'right';
+  weight?: TextWeight;
+  align?: TextAlign;
 }
 
-export const Text = ({ 
-  variant = 'body', 
-  color, 
-  weight, 
-  align, 
-  style, 
-  ...props 
-}: TextProps) => {
-  const { theme } = useUnistyles();
+const styles = StyleSheet.create(theme => ({
+  h1: {
+    fontSize: theme.fontSize.h1,
+    lineHeight: theme.fontSize.h1 * 1.2,
+    fontWeight: 'bold',
+    color: theme.colors.foreground,
+  },
+  h2: {
+    fontSize: theme.fontSize.h2,
+    lineHeight: theme.fontSize.h2 * 1.2,
+    fontWeight: 'bold',
+    color: theme.colors.foreground,
+  },
+  h3: {
+    fontSize: theme.fontSize.h3,
+    lineHeight: theme.fontSize.h3 * 1.2,
+    fontWeight: '600',
+    color: theme.colors.foreground,
+  },
+  body: {
+    fontSize: theme.fontSize.body,
+    lineHeight: theme.fontSize.body * 1.5,
+    color: theme.colors.foreground,
+  },
+  label: {
+    fontSize: theme.fontSize.label,
+    lineHeight: theme.fontSize.label * 1.4,
+    color: theme.colors.foreground,
+  },
+  caption: {
+    fontSize: theme.fontSize.caption,
+    lineHeight: theme.fontSize.caption * 1.4,
+    color: theme.colors.mutedForeground,
+  },
+  left: { textAlign: 'left' },
+  center: { textAlign: 'center' },
+  right: { textAlign: 'right' },
+}));
 
-  const styles = useMemo(() => StyleSheet.create({
-    text: {
-      color: theme.colors.foreground,
-    },
-    h1: {
-      fontSize: theme.fontSize.xxxl,
-      fontWeight: 'bold',
-      marginBottom: theme.margins.sm,
-    },
-    h2: {
-      fontSize: theme.fontSize.xxl,
-      fontWeight: 'bold',
-      marginBottom: theme.margins.sm,
-    },
-    h3: {
-      fontSize: theme.fontSize.xl,
-      fontWeight: '600',
-      marginBottom: theme.margins.xs,
-    },
-    body: {
-      fontSize: theme.fontSize.md,
-      lineHeight: 24,
-    },
-    caption: {
-      fontSize: theme.fontSize.sm,
-      color: theme.colors.mutedForeground,
-    },
-    label: {
-      fontSize: theme.fontSize.sm,
-      fontWeight: '500',
-      color: theme.colors.foreground,
-    }
-  }), [theme]);
-
+export const Text = ({
+  variant = 'body',
+  weight = 'normal',
+  align = 'left',
+  style,
+  ...props
+}: CustomTextProps) => {
   return (
     <RNText
       style={[
-        styles.text,
         styles[variant],
-        color ? { color } : undefined,
-        weight ? { fontWeight: weight } : undefined,
-        align ? { textAlign: align } : undefined,
+        { fontWeight: weight },
+        styles[align],
         style
       ]}
       {...props}

@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React, { } from 'react';
+import { View } from 'react-native';
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -55,84 +55,11 @@ const notificationCategories = [
 ];
 
 export const NotificationsScreen = () => {
+
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl,
-    },
-    headerTop: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: theme.margins.lg,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-    },
-    headerTitle: {
-      color: 'white',
-    },
-    masterToggleCard: {
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      padding: theme.paddings.md,
-      borderRadius: theme.radius.lg,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    masterToggleInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-    },
-    content: {
-      padding: theme.paddings.md,
-      marginTop: -theme.margins.lg,
-      gap: theme.margins.md,
-    },
-    categoryCard: {
-      padding: theme.paddings.lg,
-    },
-    categoryHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-      marginBottom: theme.margins.md,
-    },
-    categoryIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: theme.colors.muted,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    notificationItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: theme.paddings.sm,
-    },
-    itemInfo: {
-      flex: 1,
-      marginRight: theme.margins.md,
-    },
-    separator: {
-      height: 1,
-      backgroundColor: theme.colors.border,
-      marginVertical: theme.margins.xs,
-    }
-  }), [theme]);
+
 
   const getColor = (colorName: string) => {
     return theme.colors[colorName as keyof typeof theme.colors] as string;
@@ -143,8 +70,8 @@ export const NotificationsScreen = () => {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
-            <Button 
-              title="" 
+            <Button
+              title=""
               icon={<Feather name="arrow-left" size={24} color="white" />}
               variant="ghost"
               onPress={() => navigation.goBack()}
@@ -165,7 +92,7 @@ export const NotificationsScreen = () => {
               <Text variant="caption" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Receive all app notifications</Text>
             </View>
           </View>
-          <Switch value={true} onValueChange={() => {}} />
+          <Switch value={true} onValueChange={() => { }} />
         </View>
       </View>
 
@@ -176,15 +103,15 @@ export const NotificationsScreen = () => {
             <Card key={category.title} style={styles.categoryCard}>
               <View style={styles.categoryHeader}>
                 <View style={styles.categoryIcon}>
-                  <Feather 
-                    name={category.icon as any} 
-                    size={20} 
-                    color={getColor(category.color)} 
+                  <Feather
+                    name={category.icon as any}
+                    size={20}
+                    color={getColor(category.color)}
                   />
                 </View>
                 <Text variant="h3">{category.title}</Text>
               </View>
-              
+
               <View>
                 {category.items.map((item, index) => (
                   <View key={item.label}>
@@ -194,7 +121,7 @@ export const NotificationsScreen = () => {
                         <Text weight="500">{item.label}</Text>
                         <Text variant="caption">{item.description}</Text>
                       </View>
-                      <Switch value={item.enabled} onValueChange={() => {}} />
+                      <Switch value={item.enabled} onValueChange={() => { }} />
                     </View>
                   </View>
                 ))}
@@ -212,7 +139,7 @@ export const NotificationsScreen = () => {
                 <Text weight="500">Monthly Reports</Text>
                 <Text variant="caption">Detailed financial summary</Text>
               </View>
-              <Switch value={true} onValueChange={() => {}} />
+              <Switch value={true} onValueChange={() => { }} />
             </View>
             <View style={styles.separator} />
             <View style={styles.notificationItem}>
@@ -220,7 +147,7 @@ export const NotificationsScreen = () => {
                 <Text weight="500">Product Updates</Text>
                 <Text variant="caption">New features and improvements</Text>
               </View>
-              <Switch value={false} onValueChange={() => {}} />
+              <Switch value={false} onValueChange={() => { }} />
             </View>
           </View>
         </Card>
@@ -228,3 +155,80 @@ export const NotificationsScreen = () => {
     </ScreenWrapper>
   );
 };
+
+
+const styles = StyleSheet.create(theme => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background
+  },
+  header: {
+    backgroundColor: theme.colors.primary,
+    padding: theme.paddings.lg,
+    paddingBottom: theme.paddings.xl
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: theme.margins.lg
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.md
+  },
+  headerTitle: {
+    color: 'white'
+  },
+  masterToggleCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    padding: theme.paddings.md,
+    borderRadius: theme.radius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  masterToggleInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.md
+  },
+  content: {
+    padding: theme.paddings.md,
+    marginTop: -theme.margins.lg,
+    gap: theme.margins.md
+  },
+  categoryCard: {
+    padding: theme.paddings.lg
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.margins.md,
+    marginBottom: theme.margins.md
+  },
+  categoryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.muted,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  notificationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: theme.paddings.sm
+  },
+  itemInfo: {
+    flex: 1,
+    marginRight: theme.margins.md
+  },
+  separator: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: theme.margins.xs
+  }
+}));

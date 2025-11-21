@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { TouchableOpacity, ActivityIndicator, ViewStyle, TextStyle, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React from 'react';
+import { TouchableOpacity, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { Text } from './Text';
 
 type ButtonVariant = 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary';
@@ -18,6 +18,67 @@ interface ButtonProps {
   textStyle?: TextStyle;
 }
 
+const styles = StyleSheet.create(theme => ({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.md,
+    gap: theme.margins.sm,
+  },
+  // Variants
+  default: {
+    backgroundColor: theme.colors.primary,
+  },
+  outline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  ghost: {
+    backgroundColor: 'transparent',
+  },
+  destructive: {
+    backgroundColor: theme.colors.destructive,
+  },
+  secondary: {
+    backgroundColor: theme.colors.secondary,
+  },
+  // Sizes
+  sm: {
+    paddingVertical: theme.paddings.sm / 2,
+    paddingHorizontal: theme.paddings.md,
+  },
+  md: {
+    paddingVertical: theme.paddings.sm,
+    paddingHorizontal: theme.paddings.lg,
+  },
+  lg: {
+    paddingVertical: theme.paddings.md,
+    paddingHorizontal: theme.paddings.xl,
+  },
+  // Disabled
+  disabled: {
+    opacity: 0.5,
+  },
+  // Text Colors
+  textDefault: {
+    color: theme.colors.primaryForeground,
+  },
+  textOutline: {
+    color: theme.colors.foreground,
+  },
+  textGhost: {
+    color: theme.colors.foreground,
+  },
+  textDestructive: {
+    color: theme.colors.destructiveForeground,
+  },
+  textSecondary: {
+    color: theme.colors.secondaryForeground,
+  }
+}));
+
 export const Button = ({
   title,
   onPress,
@@ -29,68 +90,6 @@ export const Button = ({
   style,
   textStyle
 }: ButtonProps) => {
-  const { theme } = useUnistyles();
-
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderRadius: theme.radius.md,
-      gap: theme.margins.sm,
-    },
-    // Variants
-    default: {
-      backgroundColor: theme.colors.primary,
-    },
-    outline: {
-      backgroundColor: 'transparent',
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    ghost: {
-      backgroundColor: 'transparent',
-    },
-    destructive: {
-      backgroundColor: theme.colors.destructive,
-    },
-    secondary: {
-      backgroundColor: theme.colors.secondary,
-    },
-    // Sizes
-    sm: {
-      paddingVertical: theme.paddings.sm / 2,
-      paddingHorizontal: theme.paddings.md,
-    },
-    md: {
-      paddingVertical: theme.paddings.sm,
-      paddingHorizontal: theme.paddings.lg,
-    },
-    lg: {
-      paddingVertical: theme.paddings.md,
-      paddingHorizontal: theme.paddings.xl,
-    },
-    // Disabled
-    disabled: {
-      opacity: 0.5,
-    },
-    // Text Colors
-    textDefault: {
-      color: theme.colors.primaryForeground,
-    },
-    textOutline: {
-      color: theme.colors.foreground,
-    },
-    textGhost: {
-      color: theme.colors.foreground,
-    },
-    textDestructive: {
-      color: theme.colors.destructiveForeground,
-    },
-    textSecondary: {
-      color: theme.colors.secondaryForeground,
-    }
-  }), [theme]);
 
   const getTextColorStyle = () => {
     switch (variant) {
@@ -120,8 +119,8 @@ export const Button = ({
       ) : (
         <>
           {icon}
-          <Text 
-            variant="label" 
+          <Text
+            variant="label"
             style={[getTextColorStyle(), textStyle]}
             weight="600"
           >

@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React, {  } from 'react';
+import { View, ScrollView } from 'react-native';
+import { StyleSheet,  useUnistyles  };
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -15,7 +15,101 @@ import { Feather } from '@expo/vector-icons';
 import { useFinanceStore } from '../store';
 
 export const BudgetScreen = () => {
-  const { theme } = useUnistyles();
+
+const styles = StyleSheet.create(theme => ({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background },
+    header: {
+      backgroundColor: theme.colors.primary,
+      padding: theme.paddings.lg,
+      paddingBottom: theme.paddings.xl },
+    headerTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: theme.margins.lg },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.margins.md },
+    headerTitle: {
+      color: 'white' },
+    summaryCard: {
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      padding: theme.paddings.lg,
+      borderRadius: theme.radius.lg },
+    summaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: theme.margins.md },
+    summaryLabel: {
+      color: 'rgba(255, 255, 255, 0.8)',
+      marginBottom: 4 },
+    summaryValue: {
+      color: 'white',
+      fontSize: 24,
+      fontWeight: 'bold' },
+    summaryRemaining: {
+      color: 'rgba(255, 255, 255, 0.8)',
+      marginTop: theme.margins.sm },
+    content: {
+      padding: theme.paddings.md,
+      marginTop: -theme.margins.lg,
+      gap: theme.margins.md },
+    insightCard: {
+      flexDirection: 'row',
+      gap: theme.margins.md,
+      backgroundColor: theme.colors.card,
+      borderWidth: 1,
+      borderColor: theme.colors.primary + '30' },
+    insightIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.colors.primary + '15',
+      alignItems: 'center',
+      justifyContent: 'center' },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.margins.xs },
+    budgetCard: {
+      padding: theme.paddings.lg },
+    budgetHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.margins.md },
+    budgetInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.margins.md },
+    budgetIcon: {
+      fontSize: 24 },
+    budgetStats: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: theme.margins.sm },
+    goalCard: {
+      marginTop: theme.margins.md },
+    goalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.margins.md,
+      marginBottom: theme.margins.md },
+    goalIcon: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: theme.colors.primary + '15',
+      alignItems: 'center',
+      justifyContent: 'center' }
+  }));
+
+const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const budgets = useFinanceStore((state) => state.budgets);
 
@@ -23,120 +117,7 @@ export const BudgetScreen = () => {
   const totalLimit = budgets.reduce((sum, b) => sum + b.limit, 0);
   const overallProgress = (totalSpent / totalLimit) * 100;
 
-  const styles = useMemo(() => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl,
-    },
-    headerTop: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: theme.margins.lg,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-    },
-    headerTitle: {
-      color: 'white',
-    },
-    summaryCard: {
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      padding: theme.paddings.lg,
-      borderRadius: theme.radius.lg,
-    },
-    summaryRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: theme.margins.md,
-    },
-    summaryLabel: {
-      color: 'rgba(255, 255, 255, 0.8)',
-      marginBottom: 4,
-    },
-    summaryValue: {
-      color: 'white',
-      fontSize: 24,
-      fontWeight: 'bold',
-    },
-    summaryRemaining: {
-      color: 'rgba(255, 255, 255, 0.8)',
-      marginTop: theme.margins.sm,
-    },
-    content: {
-      padding: theme.paddings.md,
-      marginTop: -theme.margins.lg,
-      gap: theme.margins.md,
-    },
-    insightCard: {
-      flexDirection: 'row',
-      gap: theme.margins.md,
-      backgroundColor: theme.colors.card,
-      borderWidth: 1,
-      borderColor: theme.colors.primary + '30',
-    },
-    insightIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: theme.colors.primary + '15',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.margins.xs,
-    },
-    budgetCard: {
-      padding: theme.paddings.lg,
-    },
-    budgetHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.margins.md,
-    },
-    budgetInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-    },
-    budgetIcon: {
-      fontSize: 24,
-    },
-    budgetStats: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: theme.margins.sm,
-    },
-    goalCard: {
-      marginTop: theme.margins.md,
-    },
-    goalHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: theme.margins.md,
-      marginBottom: theme.margins.md,
-    },
-    goalIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      backgroundColor: theme.colors.primary + '15',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }
-  }), [theme]);
+  
 
   const getColor = (colorName: string) => {
     return theme.colors[colorName as keyof typeof theme.colors] as string;

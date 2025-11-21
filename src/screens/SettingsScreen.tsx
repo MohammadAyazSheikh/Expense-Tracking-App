@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React, { } from 'react';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -38,10 +38,8 @@ const settingsGroups = [
 ];
 
 export const SettingsScreen = () => {
-  const { theme } = useUnistyles();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = StyleSheet.create(theme => ({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
@@ -147,13 +145,18 @@ export const SettingsScreen = () => {
       color: theme.colors.mutedForeground,
       marginTop: theme.margins.sm,
     }
-  }), [theme]);
+  }));
+
+  const { theme } = useUnistyles();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
         <Text variant="h2" style={styles.headerTitle}>Settings</Text>
-        
+
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>AJ</Text>
@@ -162,7 +165,7 @@ export const SettingsScreen = () => {
             <Text style={styles.profileName}>Alex Johnson</Text>
             <Text style={styles.profileEmail}>alex.johnson@email.com</Text>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.editButton}
             onPress={() => navigation.navigate('Profile')}
           >
@@ -179,10 +182,10 @@ export const SettingsScreen = () => {
               <Text weight="500">Dark Mode</Text>
               <Text variant="caption">Switch between light and dark themes</Text>
             </View>
-            <Switch value={false} onValueChange={() => {}} />
+            <Switch value={false} onValueChange={() => { }} />
           </View>
           <View style={styles.separator} />
-          
+
           <View style={styles.toggleRow}>
             <View style={[styles.toggleInfo, { flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
               <Feather name="globe" size={20} color={theme.colors.primary} />
@@ -191,11 +194,11 @@ export const SettingsScreen = () => {
                 <Text variant="caption">Change app language</Text>
               </View>
             </View>
-            <Button 
-              title="English" 
-              variant="outline" 
+            <Button
+              title="English"
+              variant="outline"
               size="sm"
-              onPress={() => {}}
+              onPress={() => { }}
             />
           </View>
           <View style={styles.separator} />
@@ -205,7 +208,7 @@ export const SettingsScreen = () => {
               <Text weight="500">AI Insights</Text>
               <Text variant="caption">Get personalized financial advice</Text>
             </View>
-            <Switch value={true} onValueChange={() => {}} />
+            <Switch value={true} onValueChange={() => { }} />
           </View>
           <View style={styles.separator} />
 
@@ -214,7 +217,7 @@ export const SettingsScreen = () => {
               <Text weight="500">Push Notifications</Text>
               <Text variant="caption">Receive updates and alerts</Text>
             </View>
-            <Switch value={true} onValueChange={() => {}} />
+            <Switch value={true} onValueChange={() => { }} />
           </View>
         </Card>
 
@@ -229,7 +232,7 @@ export const SettingsScreen = () => {
                 {group.items.map((item, index) => (
                   <View key={item.label}>
                     {index > 0 && <View style={styles.separator} />}
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.settingsItem}
                       onPress={() => item.path && navigation.navigate(item.path as any)}
                     >
@@ -251,7 +254,7 @@ export const SettingsScreen = () => {
 
         {/* Logout */}
         <Card style={{ padding: 0 }}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.logoutButton}
             onPress={() => navigation.navigate('Auth')}
           >

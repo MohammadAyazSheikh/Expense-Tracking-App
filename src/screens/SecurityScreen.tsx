@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { useUnistyles } from 'react-native-unistyles';
+import React from 'react';
+import {  View,   } from \'react-native\';
+import { StyleSheet,  useUnistyles  } from 'react-native-unistyles';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -12,10 +12,8 @@ import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
 
 export const SecurityScreen = () => {
-  const { theme } = useUnistyles();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const styles = useMemo(() => StyleSheet.create({
+const styles = StyleSheet.create(theme => ({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
@@ -54,7 +52,12 @@ export const SecurityScreen = () => {
       backgroundColor: theme.colors.border,
       marginVertical: theme.margins.xs,
     }
-  }), [theme]);
+  }));
+
+const { theme } = useUnistyles();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
