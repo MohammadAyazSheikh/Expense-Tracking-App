@@ -35,7 +35,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
   persist(
     (set, get) => ({
       // Initial state
-      locale: getDeviceLocale(),
+      locale:  'en',//getDeviceLocale(),
       isRTL: false,
       theme: 'system',
       effectiveTheme: getSystemTheme(),
@@ -43,51 +43,51 @@ export const useAppSettingsStore = create<AppSettingsState>()(
 
       // Initialize app settings
       initialize: async () => {
-        try {
-          const { locale } = get();
-          await changeLanguage(locale);
-          set({ isLoading: false });
-        } catch (error) {
-          console.error('Error initializing app settings:', error);
-          set({ isLoading: false });
-        }
+        // try {
+        //   const { locale } = get();
+        //   await changeLanguage(locale);
+        //   set({ isLoading: false });
+        // } catch (error) {
+        //   console.error('Error initializing app settings:', error);
+        //   set({ isLoading: false });
+        // }
       },
 
       // Change locale
       changeLocale: async (newLocale: SupportedLocale) => {
-        try {
-          const currentIsRTL = get().isRTL;
-          const newIsRTL = isRTL(newLocale);
-          const needsRTLChange = newIsRTL !== currentIsRTL;
+        // try {
+        //   const currentIsRTL = get().isRTL;
+        //   const newIsRTL = isRTL(newLocale);
+        //   const needsRTLChange = newIsRTL !== currentIsRTL;
 
-          await changeLanguage(newLocale);
+        //   await changeLanguage(newLocale);
 
-          set({
-            locale: newLocale,
-            isRTL: newIsRTL,
-          });
+        //   set({
+        //     locale: newLocale,
+        //     isRTL: newIsRTL,
+        //   });
 
-          // Only prompt to reload if RTL direction changed
-          if (needsRTLChange) {
-            Alert.alert(
-              'Language Changed',
-              'Please restart the app for the layout changes to take effect.',
-              [
-                {
-                  text: 'Restart Now',
-                  onPress: () => Updates.reloadAsync(),
-                },
-                {
-                  text: 'Later',
-                  style: 'cancel',
-                },
-              ]
-            );
-          }
-        } catch (error) {
-          console.error('Error changing locale:', error);
-          throw error;
-        }
+        //   // Only prompt to reload if RTL direction changed
+        //   if (needsRTLChange) {
+        //     Alert.alert(
+        //       'Language Changed',
+        //       'Please restart the app for the layout changes to take effect.',
+        //       [
+        //         {
+        //           text: 'Restart Now',
+        //           onPress: () => Updates.reloadAsync(),
+        //         },
+        //         {
+        //           text: 'Later',
+        //           style: 'cancel',
+        //         },
+        //       ]
+        //     );
+        //   }
+        // } catch (error) {
+        //   console.error('Error changing locale:', error);
+        //   throw error;
+        // }
       },
 
       // Change theme

@@ -28,6 +28,20 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
 }
 
+
+const data = {
+  user: {
+    id: "123",
+    name: "John",
+    email: "john@yopmail.com"
+  },
+  token: "token",
+  refreshToken: "refershToken",
+  isAuthenticated: true,
+  isLoading: false,
+  error: null,
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -43,27 +57,20 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
         try {
-          // Replace with your actual API call
-          const response = await fetch('YOUR_API_URL/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password }),
-          });
+          // // Replace with your actual API call
+          // const response = await fetch('YOUR_API_URL/auth/login', {
+          //   method: 'POST',
+          //   headers: { 'Content-Type': 'application/json' },
+          //   body: JSON.stringify({ email, password }),
+          // });
 
-          if (!response.ok) {
-            throw new Error('Login failed');
-          }
+          // if (!response.ok) {
+          //   throw new Error('Login failed');
+          // }
 
-          const data = await response.json();
+          // const data = await response.json();
 
-          set({
-            user: data.user,
-            token: data.token,
-            refreshToken: data.refreshToken,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
+          set(data);
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Login failed',
@@ -77,27 +84,22 @@ export const useAuthStore = create<AuthState>()(
       register: async (email: string, password: string, name: string) => {
         set({ isLoading: true, error: null });
         try {
-          // Replace with your actual API call
-          const response = await fetch('YOUR_API_URL/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, name }),
-          });
+          // // Replace with your actual API call
+          // const response =
 
-          if (!response.ok) {
-            throw new Error('Registration failed');
-          }
+          //   await fetch('YOUR_API_URL/auth/register', {
+          //     method: 'POST',
+          //     headers: { 'Content-Type': 'application/json' },
+          //     body: JSON.stringify({ email, password, name }),
+          //   });
 
-          const data = await response.json();
+          // if (!response.ok) {
+          //   throw new Error('Registration failed');
+          // }
 
-          set({
-            user: data.user,
-            token: data.token,
-            refreshToken: data.refreshToken,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
+          // const data = await response.json();
+
+          set(data);
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Registration failed',
