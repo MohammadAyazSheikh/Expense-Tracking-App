@@ -27,7 +27,7 @@ export const getCurrentFonts = () => {
     bold: getFontFamily(locale, "bold"),
     extraBold: getFontFamily(locale, "extraBold"),
     italic: getFontFamily(locale, "italic"),
-    fancy: getFontFamily(locale, "fancy"),
+    black: getFontFamily(locale, "black"),
   };
 };
 
@@ -35,6 +35,6 @@ export const getCurrentFonts = () => {
  * Get current locale
  */
 export const getCurrentLocale = (): SupportedLocale => {
-   const { locale } = useAppSettingsStore();
-   return locale;
+  const { locale } = useAppSettingsStore();
+  return locale;
 };

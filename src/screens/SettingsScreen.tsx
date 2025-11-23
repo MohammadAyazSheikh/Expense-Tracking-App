@@ -12,6 +12,7 @@ import { Switch } from '../components/ui/Switch';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
 import { useAppSettingsStore } from '../store';
+import { SUPPORTED_LOCALES } from '../i18n/types';
 
 const settingsGroups = [
   {
@@ -42,7 +43,7 @@ export const SettingsScreen = () => {
 
 
   const { theme } = useUnistyles();
-  const { theme: appTheme, changeTheme } = useAppSettingsStore()
+  const { theme: appTheme, changeTheme, locale, changeLocale } = useAppSettingsStore()
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
 
@@ -90,10 +91,10 @@ export const SettingsScreen = () => {
               </View>
             </View>
             <Button
-              title="English"
+              title={SUPPORTED_LOCALES[locale].nativeName}
               variant="outline"
               size="sm"
-              onPress={() => { }}
+              onPress={() => { changeLocale(locale == "en" ? "ar" : "en") }}
             />
           </View>
           <View style={styles.separator} />
