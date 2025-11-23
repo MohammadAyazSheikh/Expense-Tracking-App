@@ -175,7 +175,7 @@ export const DashboardScreen = () => {
               donut
               radius={width * 0.3}
               innerRadius={width * 0.2}
-              backgroundColor={theme.colors.background}
+              backgroundColor={theme.colors.popover}
               centerLabelComponent={() => (
                 <View style={{ alignItems: 'center' }}>
                   <Text variant="caption" style={{ color: theme.colors.mutedForeground }}>Total</Text>
