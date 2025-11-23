@@ -11,6 +11,7 @@ import { Badge } from '../components/ui/Badge';
 import { Switch } from '../components/ui/Switch';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
+import { useAppSettingsStore } from '../store';
 
 const settingsGroups = [
   {
@@ -41,6 +42,7 @@ export const SettingsScreen = () => {
 
 
   const { theme } = useUnistyles();
+  const { theme: appTheme, changeTheme } = useAppSettingsStore()
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
 
@@ -75,7 +77,7 @@ export const SettingsScreen = () => {
               <Text weight="500">Dark Mode</Text>
               <Text variant="caption">Switch between light and dark themes</Text>
             </View>
-            <Switch value={false} onValueChange={() => { }} />
+            <Switch value={appTheme == "dark"} onValueChange={() => { changeTheme(appTheme == "dark" ? "light" : "dark") }} />
           </View>
           <View style={styles.separator} />
 
