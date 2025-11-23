@@ -41,7 +41,6 @@ export const AuthScreen = () => {
       } else {
         await register(data.email, data.password, data.name);
       }
-      navigation.replace('MainTab', { screen: 'Dashboard' });
     } catch (err) {
       console.error(err);
     }
@@ -68,13 +67,13 @@ export const AuthScreen = () => {
               style={[styles.tab, activeTab === 'login' && styles.activeTab]}
               onPress={() => setActiveTab('login')}
             >
-              <Text weight={activeTab === 'login' ? '600' : 'normal'}>Login</Text>
+              <Text weight={activeTab === 'login' ? "bold" : "medium"}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tab, activeTab === 'signup' && styles.activeTab]}
               onPress={() => setActiveTab('signup')}
             >
-              <Text weight={activeTab === 'signup' ? '600' : 'normal'}>Sign Up</Text>
+              <Text weight={activeTab === 'signup' ? "bold" : "medium"}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 

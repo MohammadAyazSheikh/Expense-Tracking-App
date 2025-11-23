@@ -11,7 +11,7 @@ import { Badge } from '../components/ui/Badge';
 import { Switch } from '../components/ui/Switch';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
-import { useAppSettingsStore } from '../store';
+import { useAppSettingsStore, useAuthStore } from '../store';
 import { SUPPORTED_LOCALES } from '../i18n/types';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -21,7 +21,8 @@ import { useTranslation } from '../hooks/useTranslation';
 export const SettingsScreen = () => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
-  const { theme: appTheme, changeTheme, locale, changeLocale } = useAppSettingsStore()
+  const { theme: appTheme, changeTheme, locale, changeLocale } = useAppSettingsStore();
+  const { logout } = useAuthStore();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const settingsGroups = [
@@ -155,7 +156,7 @@ export const SettingsScreen = () => {
         <Card style={{ padding: 0 }}>
           <TouchableOpacity
             style={styles.logoutButton}
-            onPress={() => navigation.navigate('Auth')}
+            onPress={logout}
           >
             <Feather name="log-out" size={20} color={theme.colors.destructive} />
             <Text weight="semiBold" style={{ color: theme.colors.destructive }}>{t('settings.logOut')}</Text>

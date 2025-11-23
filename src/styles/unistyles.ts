@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native-unistyles'
 import { lightTheme, darkTheme } from './theme'
+import { storage } from '../utils/storage'
 
 StyleSheet.configure({
   themes: {
@@ -7,6 +8,9 @@ StyleSheet.configure({
     dark: darkTheme,
   },
   settings: {
-    initialTheme: 'light',
-  },
+    initialTheme: () => {
+      const theme = JSON.parse(storage.getString("app-settings-storage") || "data:{{effectiveTheme: 'light'}}")?.state?.effectiveTheme;
+      return theme;
+    }
+  }
 })

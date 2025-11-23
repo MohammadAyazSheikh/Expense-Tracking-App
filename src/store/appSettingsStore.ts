@@ -93,11 +93,12 @@ export const useAppSettingsStore = create<AppSettingsState>()(
 
       // Change theme
       changeTheme: (newTheme: ThemeMode) => {
+        const effectiveTheme = getEffectiveTheme(newTheme)
         set({
           theme: newTheme,
-          effectiveTheme: getEffectiveTheme(newTheme),
+          effectiveTheme
         });
-        UnistylesRuntime.setTheme(newTheme == "dark" ? "dark" : "light")
+        UnistylesRuntime.setTheme(effectiveTheme == "dark" ? "dark" : "light")
       },
 
       // Update system theme (call when system theme changes)
