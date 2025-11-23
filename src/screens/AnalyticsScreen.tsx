@@ -8,7 +8,7 @@ import { Text } from '../components/ui/Text';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { LineChart, BarChart } from 'react-native-chart-kit';
+import { LineChart, BarChart } from 'react-native-gifted-charts';
 import { Dimensions } from 'react-native';
 import { useFinanceStore } from '../store';
 import { Feather } from '@expo/vector-icons';
@@ -36,21 +36,38 @@ export const AnalyticsScreen = () => {
       .map(t => Math.abs(t.amount))
       .reverse();
 
-    return {
-      labels: ["1", "2", "3", "4", "5", "6"],
-      datasets: [{ data: last6.length > 0 ? last6 : [0, 0, 0, 0, 0, 0] }]
-    };
+    const data = last6.length > 0 ? last6 : [0, 0, 0, 0, 0, 0];
+
+    return data.map((value, index) => ({
+      value,
+      label: `${index + 1}`,
+      dataPointText: `$${value.toFixed(0)}`,
+    }));
   }, [transactions]);
 
   const barChartData = useMemo(() => {
     const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount), 0);
 
-    return {
-      labels: ["Income", "Expense"],
-      datasets: [{ data: [income, expense] }]
-    };
-  }, [transactions]);
+    return [
+      {
+        value: income,
+        label: 'Income',
+        frontColor: theme.colors.success,
+        topLabelComponent: () => (
+          <Text variant="caption" style={{ marginBottom: 4 }}>${income.toFixed(0)}</Text>
+        ),
+      },
+      {
+        value: expense,
+        label: 'Expense',
+        frontColor: theme.colors.accent,
+        topLabelComponent: () => (
+          <Text variant="caption" style={{ marginBottom: 4 }}>${expense.toFixed(0)}</Text>
+        ),
+      },
+    ];
+  }, [transactions, theme]);
 
 
 
@@ -98,24 +115,37 @@ export const AnalyticsScreen = () => {
         {/* Spending Trends */}
         <Card>
           <Text variant="h3">Spending Trends</Text>
-          <View style={{ alignItems: 'center' }}>
+          <View style={{ alignItems: 'center', marginTop: theme.margins.md }}>
             <LineChart
               data={lineChartData}
-              width={Dimensions.get("window").width - 64}
-              height={220}
-              yAxisLabel="$"
-              chartConfig={{
-                backgroundColor: theme.colors.card,
-                backgroundGradientFrom: theme.colors.card,
-                backgroundGradientTo: theme.colors.card,
-                decimalPlaces: 0,
-                color: (opacity = 1) => theme.colors.primary,
-                labelColor: (opacity = 1) => theme.colors.mutedForeground,
-                style: { borderRadius: 16 },
-                propsForDots: { r: "6", strokeWidth: "2", stroke: theme.colors.primary }
-              }}
-              bezier
-              style={{ marginVertical: 8, borderRadius: 16 }}
+              width={Dimensions.get("window").width - 80}
+              height={200}
+              spacing={44}
+              initialSpacing={10}
+              color={theme.colors.primary}
+              thickness={3}
+              startFillColor={theme.colors.primary}
+              endFillColor={theme.colors.card}
+              startOpacity={0.4}
+              endOpacity={0.1}
+              areaChart
+              curved
+              yAxisColor={theme.colors.mutedForeground}
+              xAxisColor={theme.colors.mutedForeground}
+              yAxisTextStyle={{ color: theme.colors.mutedForeground, fontSize: 10 }}
+              xAxisLabelTextStyle={{ color: theme.colors.mutedForeground, fontSize: 10 }}
+              hideDataPoints={false}
+              dataPointsColor={theme.colors.primary}
+              dataPointsRadius={5}
+              showValuesAsDataPointsText
+              textShiftY={-8}
+              textShiftX={-5}
+              textFontSize={10}
+              textColor={theme.colors.mutedForeground}
+              animateOnDataChange
+              animationDuration={1000}
+              onDataChangeAnimationDuration={300}
+              isAnimated
             />
           </View>
         </Card>
@@ -123,23 +153,23 @@ export const AnalyticsScreen = () => {
         {/* Income vs Expenses */}
         <Card>
           <Text variant="h3">Income vs Expenses</Text>
-          <View style={{ alignItems: 'center' }}>
+          <View style={{ alignItems: 'center', marginTop: theme.margins.lg }}>
             <BarChart
               data={barChartData}
-              width={Dimensions.get("window").width - 64}
-              height={220}
-              yAxisLabel="$"
-              yAxisSuffix=""
-              chartConfig={{
-                backgroundColor: theme.colors.card,
-                backgroundGradientFrom: theme.colors.card,
-                backgroundGradientTo: theme.colors.card,
-                decimalPlaces: 0,
-                color: (opacity = 1) => theme.colors.secondary,
-                labelColor: (opacity = 1) => theme.colors.mutedForeground,
-                barPercentage: 0.5
-              }}
-              style={{ marginVertical: 8, borderRadius: 16 }}
+              width={Dimensions.get("window").width - 80}
+              height={200}
+              barWidth={60}
+              spacing={40}
+              barBorderRadius={8}
+              yAxisThickness={0}
+              xAxisThickness={0}
+              hideRules
+              hideYAxisText
+              showGradient
+              gradientColor={theme.colors.primaryLight}
+              frontColor={theme.colors.primary}
+              isAnimated
+              animationDuration={800}
             />
           </View>
           <View style={styles.legend}>

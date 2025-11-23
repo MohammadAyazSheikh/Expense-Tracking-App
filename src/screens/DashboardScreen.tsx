@@ -1,22 +1,21 @@
 import React, { useMemo } from 'react';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
-import { Text } from '../components/ui/Text';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/types';
+import { PieChart } from 'react-native-gifted-charts';
+import { Button } from '../components/ui/Button';
+import { Text } from '../components/ui/Text';
+import { Card } from '../components/ui/Card';
 import { Feather } from '@expo/vector-icons';
-
 import { useFinanceStore } from '../store';
-import { PieChart } from 'react-native-chart-kit';
-import { Dimensions } from 'react-native';
+
 
 export const DashboardScreen = () => {
 
-
+  const { width } = useWindowDimensions();
 
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -62,15 +61,44 @@ export const DashboardScreen = () => {
     ];
 
     return Object.entries(categoryTotals).map(([name, amount], index) => ({
-      name,
-      population: amount,
-      color: colors[index % colors.length],
-      legendFontColor: theme.colors.foreground,
-      legendFontSize: 12,
+      value: amount,
+      text: name,
+      color: colors[index % colors.length]
     }));
   }, [transactions, theme]);
 
+  const renderDot = (color: string) => {
+    return (
+      <View
+        style={{
+          height: 10,
+          width: 10,
+          borderRadius: 5,
+          backgroundColor: color,
+          marginRight: 10,
+        }}
+      />
+    );
+  };
 
+  const renderLegendComponent = () => {
+    return (
+      <>
+        <View style={styles.legendContainer}>
+          {
+            chartData.map((item, index) => (
+              <View
+                key={index}
+                style={styles.legendItem}>
+                {renderDot(item.color)}
+                <Text style={styles.legendLabel}>{item.text}: {item.value}%</Text>
+              </View>
+            ))
+          }
+        </View>
+      </>
+    );
+  };
 
   return (
     <ScreenWrapper style={styles.container} contentContainerStyle={styles.content} scrollable>
@@ -141,22 +169,34 @@ export const DashboardScreen = () => {
           <Button title="See All" variant="ghost" size="sm" onPress={() => navigation.navigate('MainTab', { screen: 'Analytics' })} />
         </View>
         {chartData.length > 0 ? (
-          <PieChart
-            data={chartData}
-            width={Dimensions.get('window').width - 64} // Adjust for padding
-            height={220}
-            chartConfig={{
-              backgroundColor: theme.colors.card,
-              backgroundGradientFrom: theme.colors.card,
-              backgroundGradientTo: theme.colors.card,
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            }}
-            accessor={"population"}
-            backgroundColor={"transparent"}
-            paddingLeft={"15"}
-            center={[10, 0]}
-            absolute
-          />
+          <View style={{ alignItems: 'center', marginTop: theme.margins.md }}>
+            <PieChart
+              data={chartData}
+              donut
+              radius={width * 0.3}
+              innerRadius={width * 0.2}
+              backgroundColor={theme.colors.background}
+              centerLabelComponent={() => (
+                <View style={{ alignItems: 'center' }}>
+                  <Text variant="caption" style={{ color: theme.colors.mutedForeground }}>Total</Text>
+                  <Text variant="h3" weight="bold">${expenses.toFixed(0)}</Text>
+                </View>
+              )}
+              focusOnPress
+              sectionAutoFocus
+              // labelsPosition="outward"
+              // textColor={theme.colors.foreground}
+              // textSize={12}
+              // showValuesAsLabels
+              // showText
+              isAnimated
+              animationDuration={800}
+
+
+
+            />
+            {renderLegendComponent()}
+          </View>
         ) : (
           <View style={styles.chartPlaceholder}>
             <Feather name="pie-chart" size={48} color={theme.colors.mutedForeground} />
@@ -304,6 +344,24 @@ const styles = StyleSheet.create(theme => ({
     justifyContent: 'center',
     backgroundColor: theme.colors.muted,
     borderRadius: theme.radius.md,
+  },
+  legendLabel: {
+    color: theme.colors.accent,
+    fontSize: theme.fontSize.md,
+  },
+  legendContainer: {
+    width: "100%",
+    flexDirection: 'row',
+    justifyContent: "space-around",
+    flexWrap: 'wrap',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: "50%",
+    flex: 1,
+    paddingHorizontal: theme.paddings.md,
+    paddingVertical: theme.paddings.sm,
   },
   insightCard: {
     marginBottom: theme.margins.lg,
