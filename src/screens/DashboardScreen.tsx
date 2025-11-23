@@ -92,21 +92,21 @@ export const DashboardScreen = () => {
       {/* Balance Card */}
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Total Balance</Text>
-        <Text style={styles.balanceValue}>${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+        <Text style={styles.balanceValue} weight="bold">${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <View style={styles.statLabelRow}>
               <Feather name="arrow-up-right" size={16} color="white" />
               <Text style={styles.statLabel}>Income</Text>
             </View>
-            <Text style={styles.statValue}>${income.toLocaleString()}</Text>
+            <Text style={styles.statValue} weight="semiBold">${income.toLocaleString()}</Text>
           </View>
           <View style={styles.statItem}>
             <View style={styles.statLabelRow}>
               <Feather name="arrow-down-right" size={16} color="white" />
               <Text style={styles.statLabel}>Expenses</Text>
             </View>
-            <Text style={styles.statValue}>${expenses.toLocaleString()}</Text>
+            <Text style={styles.statValue} weight="semiBold">${expenses.toLocaleString()}</Text>
           </View>
         </View>
       </View>
@@ -117,19 +117,19 @@ export const DashboardScreen = () => {
           <View style={[styles.actionIcon, { backgroundColor: theme.colors.primaryLight }]}>
             <Feather name="trending-up" size={24} color={theme.colors.muted} />
           </View>
-          <Text variant="caption" weight="500">Analytics</Text>
+          <Text variant="caption" weight="medium">Analytics</Text>
         </Card>
         <Card style={styles.actionCard} onPress={() => navigation.navigate('Wallets')}>
           <View style={[styles.actionIcon, { backgroundColor: theme.colors.success }]}>
             <Feather name="credit-card" size={24} color={theme.colors.muted} />
           </View>
-          <Text variant="caption" weight="500">Wallets</Text>
+          <Text variant="caption" weight="medium">Wallets</Text>
         </Card>
         <Card style={styles.actionCard} onPress={() => navigation.navigate('MainTab', { screen: 'Budget' })}>
           <View style={[styles.actionIcon, { backgroundColor: theme.colors.warning }]}>
             <Feather name="target" size={24} color={theme.colors.muted} />
           </View>
-          <Text variant="caption" weight="500">Budget</Text>
+          <Text variant="caption" weight="medium">Budget</Text>
         </Card>
       </View>
 
@@ -172,7 +172,7 @@ export const DashboardScreen = () => {
             <Feather name="zap" size={20} color={theme.colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text weight="600" style={{ marginBottom: 4 }}>SmartSense™ Insight</Text>
+            <Text weight="semiBold" style={{ marginBottom: 4 }}>SmartSense™ Insight</Text>
             <Text variant="caption" style={{ marginBottom: 8 }}>
               You're spending 23% more on food this week. Consider meal prepping to save $50/week.
             </Text>
@@ -198,11 +198,11 @@ export const DashboardScreen = () => {
           {recentTransactions.map((tx) => (
             <Card key={tx.id} style={styles.transactionItem}>
               <View>
-                <Text weight="500">{tx.name}</Text>
+                <Text weight="medium">{tx.name}</Text>
                 <Text variant="caption">{tx.date}</Text>
               </View>
               <Text
-                weight="600"
+                weight="semiBold"
                 style={{ color: tx.type === 'income' ? theme.colors.success : theme.colors.foreground }}
               >
                 {tx.type === 'income' ? '+' : ''}{Math.abs(tx.amount).toFixed(2)}
@@ -251,7 +251,6 @@ const styles = StyleSheet.create(theme => ({
   balanceValue: {
     color: 'white',
     fontSize: theme.fontSize.xxxl,
-    fontWeight: 'bold',
     marginBottom: theme.margins.lg,
   },
   statsRow: {
@@ -273,7 +272,6 @@ const styles = StyleSheet.create(theme => ({
   },
   statValue: {
     color: 'white',
-    fontWeight: '600',
     fontSize: theme.fontSize.md,
   },
   quickActions: {

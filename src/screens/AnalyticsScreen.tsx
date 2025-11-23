@@ -161,9 +161,9 @@ export const AnalyticsScreen = () => {
             {categoryBreakdown.map((category) => (
               <View key={category.name} style={styles.categoryItem}>
                 <View style={styles.categoryHeader}>
-                  <Text weight="500">{category.name}</Text>
+                  <Text weight="medium">{category.name}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text weight="600" style={{ marginRight: 8 }}>${category.amount}</Text>
+                    <Text weight="semiBold" style={{ marginRight: 8 }}>${category.amount}</Text>
                     <Text variant="caption">{category.percentage}%</Text>
                   </View>
                 </View>

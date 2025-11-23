@@ -54,10 +54,10 @@ export const SettingsScreen = () => {
 
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>AJ</Text>
+            <Text style={styles.avatarText} weight="bold">AJ</Text>
           </View>
           <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>Alex Johnson</Text>
+            <Text style={styles.profileName} weight="semiBold">Alex Johnson</Text>
             <Text style={styles.profileEmail}>alex.johnson@email.com</Text>
           </View>
           <TouchableOpacity
@@ -74,7 +74,7 @@ export const SettingsScreen = () => {
         <Card style={styles.togglesCard}>
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
-              <Text weight="500">Dark Mode</Text>
+              <Text weight="medium">Dark Mode</Text>
               <Text variant="caption">Switch between light and dark themes</Text>
             </View>
             <Switch value={appTheme == "dark"} onValueChange={() => { changeTheme(appTheme == "dark" ? "light" : "dark") }} />
@@ -85,7 +85,7 @@ export const SettingsScreen = () => {
             <View style={[styles.toggleInfo, { flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
               <Feather name="globe" size={20} color={theme.colors.primary} />
               <View>
-                <Text weight="500">Language</Text>
+                <Text weight="medium">Language</Text>
                 <Text variant="caption">Change app language</Text>
               </View>
             </View>
@@ -100,7 +100,7 @@ export const SettingsScreen = () => {
 
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
-              <Text weight="500">AI Insights</Text>
+              <Text weight="medium">AI Insights</Text>
               <Text variant="caption">Get personalized financial advice</Text>
             </View>
             <Switch value={true} onValueChange={() => { }} />
@@ -109,7 +109,7 @@ export const SettingsScreen = () => {
 
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
-              <Text weight="500">Push Notifications</Text>
+              <Text weight="medium">Push Notifications</Text>
               <Text variant="caption">Receive updates and alerts</Text>
             </View>
             <Switch value={true} onValueChange={() => { }} />
@@ -120,7 +120,7 @@ export const SettingsScreen = () => {
         <View style={{ gap: theme.margins.lg }}>
           {settingsGroups.map((group) => (
             <View key={group.title}>
-              <Text variant="caption" weight="600" style={styles.groupTitle}>
+              <Text variant="caption" weight="semiBold" style={styles.groupTitle}>
                 {group.title.toUpperCase()}
               </Text>
               <Card style={{ padding: 0 }}>
@@ -132,7 +132,7 @@ export const SettingsScreen = () => {
                       onPress={() => item.path && navigation.navigate(item.path as any)}
                     >
                       <Feather name={item.icon as any} size={20} style={styles.itemIcon} />
-                      <Text style={styles.itemLabel}>{item.label}</Text>
+                      <Text style={styles.itemLabel} weight="medium">{item.label}</Text>
                       {item.badge && (
                         <Badge variant="secondary" style={{ paddingVertical: 0, paddingHorizontal: 6 }}>
                           {item.badge}
@@ -154,7 +154,7 @@ export const SettingsScreen = () => {
             onPress={() => navigation.navigate('Auth')}
           >
             <Feather name="log-out" size={20} color={theme.colors.destructive} />
-            <Text weight="600" style={{ color: theme.colors.destructive }}>Log Out</Text>
+            <Text weight="semiBold" style={{ color: theme.colors.destructive }}>Log Out</Text>
           </TouchableOpacity>
         </Card>
 
@@ -198,7 +198,6 @@ const styles = StyleSheet.create(theme => ({
   avatarText: {
     color: 'white',
     fontSize: 24,
-    fontWeight: 'bold',
   },
   profileInfo: {
     flex: 1,
@@ -206,7 +205,6 @@ const styles = StyleSheet.create(theme => ({
   profileName: {
     color: 'white',
     fontSize: 18,
-    fontWeight: '600',
   },
   profileEmail: {
     color: 'rgba(255, 255, 255, 0.9)',
@@ -257,7 +255,6 @@ const styles = StyleSheet.create(theme => ({
   },
   itemLabel: {
     flex: 1,
-    fontWeight: '500',
   },
   logoutButton: {
     flexDirection: 'row',

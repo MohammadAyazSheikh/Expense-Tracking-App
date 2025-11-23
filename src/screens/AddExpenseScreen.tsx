@@ -12,6 +12,7 @@ import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
 import { useForm, Controller } from 'react-hook-form';
 import { useFinanceStore } from '../store';
+import { useFonts } from '../hooks/useFonts';
 
 const categories = [
   { id: "food", name: "Food", emoji: "🍔", color: "hsl(10 80% 65%)" },
@@ -52,19 +53,17 @@ const styles = StyleSheet.create(theme => ({
     color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: theme.margins.xs,
   },
+  currencySymbol: {
+    color: 'white',
+    fontSize: 48,
+  },
   amountInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  currencySymbol: {
-    color: 'white',
-    fontSize: 48,
-    fontWeight: 'bold',
-  },
   amountInput: {
     color: 'white',
     fontSize: 48,
-    fontWeight: 'bold',
     minWidth: 100,
     textAlign: 'center',
   },
@@ -131,6 +130,7 @@ export const AddExpenseScreen = () => {
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const addTransaction = useFinanceStore((state) => state.addTransaction);
+  const { getFont } = useFonts();
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -166,8 +166,8 @@ export const AddExpenseScreen = () => {
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Button 
-            title="" 
+          <Button
+            title=""
             icon={<Feather name="arrow-left" size={24} color="white" />}
             variant="ghost"
             onPress={() => navigation.goBack()}
@@ -179,7 +179,7 @@ export const AddExpenseScreen = () => {
         <View style={styles.amountContainer}>
           <Text variant="caption" style={styles.amountLabel}>Amount</Text>
           <View style={styles.amountInputContainer}>
-            <Text style={styles.currencySymbol}>$</Text>
+            <Text style={styles.currencySymbol} variant='h1' weight="bold">$</Text>
             <Controller
               control={control}
               name="amount"
@@ -188,7 +188,7 @@ export const AddExpenseScreen = () => {
                 <TextInput
                   value={value}
                   onChangeText={onChange}
-                  style={styles.amountInput}
+                  style={[styles.amountInput, { fontFamily: getFont('bold') }]}
                   keyboardType="decimal-pad"
                   placeholder="0.00"
                   placeholderTextColor="rgba(255, 255, 255, 0.5)"
@@ -202,7 +202,7 @@ export const AddExpenseScreen = () => {
       <View style={styles.content}>
         {/* Category Selection */}
         <Card>
-          <Text weight="600" style={styles.sectionLabel}>Category</Text>
+          <Text weight="semiBold" style={styles.sectionLabel}>Category</Text>
           <View style={styles.categoryGrid}>
             {categories.map((category) => (
               <TouchableOpacity
@@ -215,7 +215,7 @@ export const AddExpenseScreen = () => {
                 activeOpacity={0.7}
               >
                 <Text style={styles.categoryEmoji}>{category.emoji}</Text>
-                <Text variant="caption" weight="500">{category.name}</Text>
+                <Text variant="caption" weight="medium">{category.name}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -223,7 +223,7 @@ export const AddExpenseScreen = () => {
 
         {/* Payment Mode */}
         <Card>
-          <Text weight="600" style={styles.sectionLabel}>Payment Mode</Text>
+          <Text weight="semiBold" style={styles.sectionLabel}>Payment Mode</Text>
           <View style={styles.paymentRow}>
             {paymentModes.map((mode) => (
               <Button
@@ -245,7 +245,7 @@ export const AddExpenseScreen = () => {
             name="description"
             rules={{ required: 'Description is required' }}
             render={({ field: { onChange, value } }) => (
-              <Input 
+              <Input
                 label="Description"
                 placeholder="e.g., Lunch at Cafe"
                 value={value}
@@ -258,7 +258,7 @@ export const AddExpenseScreen = () => {
             control={control}
             name="notes"
             render={({ field: { onChange, value } }) => (
-              <Input 
+              <Input
                 label="Notes (Optional)"
                 placeholder="Add any additional notes..."
                 multiline
@@ -273,7 +273,7 @@ export const AddExpenseScreen = () => {
             control={control}
             name="tags"
             render={({ field: { onChange, value } }) => (
-              <Input 
+              <Input
                 label="Tags (Optional)"
                 placeholder="e.g., work, lunch, coffee"
                 value={value}
@@ -285,7 +285,7 @@ export const AddExpenseScreen = () => {
 
         {/* Upload Receipt */}
         <Card>
-          <Text weight="600" style={styles.sectionLabel}>Receipt (Optional)</Text>
+          <Text weight="semiBold" style={styles.sectionLabel}>Receipt (Optional)</Text>
           <TouchableOpacity style={styles.uploadButton}>
             <Feather name="upload" size={24} color={theme.colors.mutedForeground} />
             <Text variant="caption">Upload Receipt</Text>
@@ -296,11 +296,11 @@ export const AddExpenseScreen = () => {
         <Card>
           <View style={styles.recurringRow}>
             <View>
-              <Text weight="600">Recurring Expense</Text>
+              <Text weight="semiBold">Recurring Expense</Text>
               <Text variant="caption">Set this expense to repeat automatically</Text>
             </View>
-            <Switch 
-              value={isRecurring} 
+            <Switch
+              value={isRecurring}
               onValueChange={(val) => setValue('isRecurring', val)}
               trackColor={{ false: theme.colors.muted, true: theme.colors.primary }}
               thumbColor="white"
@@ -308,9 +308,9 @@ export const AddExpenseScreen = () => {
           </View>
         </Card>
 
-        <Button 
-          title="Add Expense" 
-          size="lg" 
+        <Button
+          title="Add Expense"
+          size="lg"
           style={styles.submitButton}
           onPress={handleSubmit(onSubmit)}
         />

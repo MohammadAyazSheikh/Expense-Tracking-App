@@ -7,28 +7,28 @@ export interface FontConfig {
   bold: string;
   extraBold: string;
   italic: string;
-  fancy: string;
+  black: string;
 }
 
 // Defining fonts for each locale
 const FONTS: Record<SupportedLocale, FontConfig> = {
   en: {
-    regular: 'Lato-Regular',
-    medium: 'Lato-Thin',
-    semiBold: 'Lato-Bold',
-    bold: 'Lato-Bold',
-    extraBold: 'Lato-Black',
-    italic: 'Lato-Italic',
-    fancy: 'Prohibition',
+    regular: 'Nunito-Regular',
+    medium: 'Nunito-Medium',
+    semiBold: 'Nunito-SemiBold',
+    bold: 'Nunito-Bold',
+    extraBold: 'Nunito-ExtraBold',
+    italic: 'Nunito-Italic',
+    black: 'Nunito-Black',
   },
   ar: {
     regular: 'NotoNaskhArabic-Regular',
     medium: 'NotoNaskhArabic-Medium',
     semiBold: 'NotoNaskhArabic-SemiBold',
     bold: 'NotoNaskhArabic-Bold',
-    extraBold: 'NotoNaskhArabic-Bold',
-    italic: 'NotoNaskhArabic-Regular',
-    fancy: 'NotoNaskhArabic-Bold',
+    extraBold: 'NotoNaskhArabic-Bold', // Fallback to Bold as ExtraBold isn't available
+    italic: 'NotoNaskhArabic-Regular', // Arabic usually doesn't have italic, fallback to regular
+    black: 'NotoNaskhArabic-Bold',
   },
 };
 
@@ -40,7 +40,7 @@ export type FontWeight =
   | 'bold'
   | 'extraBold'
   | 'italic'
-  | 'fancy';
+  | 'black';
 
 // Get font family based on locale and weight
 export const getFontFamily = (locale: SupportedLocale, weight: FontWeight = 'regular'): string => {

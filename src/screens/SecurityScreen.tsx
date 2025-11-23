@@ -40,7 +40,7 @@ export const SecurityScreen = () => {
               <Feather name="shield" size={24} color="white" />
             </View>
             <View style={styles.securityStatusText}>
-              <Text weight="600" style={styles.securityStatusTitle}>Protected</Text>
+              <Text weight="semiBold" style={styles.securityStatusTitle}>Protected</Text>
               <Text variant="caption" style={styles.securityStatusSubtitle}>
                 Your account is secure
               </Text>
@@ -61,7 +61,7 @@ export const SecurityScreen = () => {
                   <Feather name="smartphone" size={20} color={theme.colors.primary} />
                 </View>
                 <View style={styles.authOptionText}>
-                  <Text weight="600">Biometric Login</Text>
+                  <Text weight="semiBold">Biometric Login</Text>
                   <Text variant="caption">Use fingerprint/Face ID</Text>
                 </View>
               </View>
@@ -74,7 +74,7 @@ export const SecurityScreen = () => {
                   <Feather name="lock" size={20} color={theme.colors.warning} />
                 </View>
                 <View style={styles.authOptionText}>
-                  <Text weight="600">Two-Factor Authentication</Text>
+                  <Text weight="semiBold">Two-Factor Authentication</Text>
                   <Text variant="caption">SMS or authenticator app</Text>
                 </View>
               </View>
@@ -120,14 +120,14 @@ export const SecurityScreen = () => {
           <View style={styles.sessions}>
             <View style={[styles.sessionItem, { backgroundColor: theme.colors.muted }]}>
               <View style={styles.sessionInfo}>
-                <Text weight="600">iPhone 14 Pro</Text>
+                <Text weight="semiBold">iPhone 14 Pro</Text>
                 <Text variant="caption">Current device • New York, US</Text>
               </View>
               <Badge variant="success">Active</Badge>
             </View>
             <View style={[styles.sessionItem, { backgroundColor: theme.colors.muted }]}>
               <View style={styles.sessionInfo}>
-                <Text weight="600">MacBook Pro</Text>
+                <Text weight="semiBold">MacBook Pro</Text>
                 <Text variant="caption">2 days ago • New York, US</Text>
               </View>
               <Button
@@ -155,7 +155,7 @@ export const SecurityScreen = () => {
               <View style={styles.privacyOptionLeft}>
                 <Feather name="key" size={20} color={theme.colors.mutedForeground} />
                 <View style={styles.privacyOptionText}>
-                  <Text weight="600">Data & Privacy</Text>
+                  <Text weight="semiBold">Data & Privacy</Text>
                   <Text variant="caption">Manage your data</Text>
                 </View>
               </View>
@@ -165,7 +165,7 @@ export const SecurityScreen = () => {
               <View style={styles.privacyOptionLeft}>
                 <Feather name="shield" size={20} color={theme.colors.mutedForeground} />
                 <View style={styles.privacyOptionText}>
-                  <Text weight="600">Connected Apps</Text>
+                  <Text weight="semiBold">Connected Apps</Text>
                   <Text variant="caption">Review app permissions</Text>
                 </View>
               </View>

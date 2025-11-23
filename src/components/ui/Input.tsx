@@ -15,7 +15,6 @@ const styles = StyleSheet.create(theme => ({
   label: {
     marginBottom: theme.margins.xs,
     color: theme.colors.foreground,
-    fontWeight: '500',
   },
   input: {
     borderWidth: 1,
@@ -41,7 +40,7 @@ export const Input = ({ label, error, style, ...props }: InputProps) => {
 
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={styles.label} weight="medium">{label}</Text>}
       <TextInput
         style={[styles.input, error && styles.inputError, style]}
         placeholderTextColor={theme.colors.mutedForeground}

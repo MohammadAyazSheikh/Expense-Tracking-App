@@ -42,7 +42,7 @@ export const ProgressBar = ({
     <View style={[styles.container, style]}>
       {showLabel && (
         <View style={styles.labelRow}>
-          <Text variant="caption" weight="600">{value.toFixed(0)}</Text>
+          <Text variant="caption" weight="semiBold">{value.toFixed(0)}</Text>
           <Text variant="caption">{max.toFixed(0)}</Text>
         </View>
       )}

@@ -138,7 +138,7 @@ export const HelpSupportScreen = () => {
                       <Feather name={option.icon as any} size={24} color={theme.colors[option.color as keyof typeof theme.colors] as string} />
                     </View>
                     <View style={styles.contactInfo}>
-                      <Text weight="600">{option.title}</Text>
+                      <Text weight="semiBold">{option.title}</Text>
                       <Text variant="caption" style={styles.contactDescription} numberOfLines={1}>
                         {option.description}
                       </Text>

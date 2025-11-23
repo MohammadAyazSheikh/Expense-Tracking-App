@@ -57,7 +57,6 @@ const styles = StyleSheet.create(theme => ({
     color: 'white',
     marginTop: theme.margins.sm,
     textAlign: 'center',
-    fontWeight: '500',
   },
   footer: {
     gap: theme.margins.md,
@@ -88,19 +87,19 @@ export const IndexScreen = () => {
         <View style={styles.grid}>
           <View style={styles.featureCard}>
             <Feather name="trending-up" size={32} color="white" />
-            <Text style={styles.featureText}>Smart Analytics</Text>
+            <Text style={styles.featureText} weight="medium">Smart Analytics</Text>
           </View>
           <View style={styles.featureCard}>
             <Feather name="pie-chart" size={32} color="white" />
-            <Text style={styles.featureText}>Budget Tracking</Text>
+            <Text style={styles.featureText} weight="medium">Budget Tracking</Text>
           </View>
           <View style={styles.featureCard}>
             <Feather name="credit-card" size={32} color="white" />
-            <Text style={styles.featureText}>Multi-Wallet</Text>
+            <Text style={styles.featureText} weight="medium">Multi-Wallet</Text>
           </View>
           <View style={styles.featureCard}>
             <Feather name="zap" size={32} color="white" />
-            <Text style={styles.featureText}>AI Assistant</Text>
+            <Text style={styles.featureText} weight="medium">AI Assistant</Text>
           </View>
         </View>
 

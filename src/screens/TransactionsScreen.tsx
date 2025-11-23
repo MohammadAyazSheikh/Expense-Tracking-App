@@ -96,17 +96,17 @@ export const TransactionsScreen = () => {
           <View style={styles.summaryGrid}>
             <View style={styles.summaryItem}>
               <Text variant="caption" style={{ marginBottom: 4 }}>Total</Text>
-              <Text weight="600">{transactions.length}</Text>
+              <Text weight="semiBold">{transactions.length}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Text variant="caption" style={{ marginBottom: 4 }}>Income</Text>
-              <Text weight="600" style={{ color: theme.colors.success }}>
+              <Text weight="semiBold" style={{ color: theme.colors.success }}>
                 ${transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)}
               </Text>
             </View>
             <View style={styles.summaryItem}>
               <Text variant="caption" style={{ marginBottom: 4 }}>Expenses</Text>
-              <Text weight="600" style={{ color: theme.colors.accent }}>
+              <Text weight="semiBold" style={{ color: theme.colors.accent }}>
                 ${Math.abs(transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0))}
               </Text>
             </View>
@@ -117,7 +117,7 @@ export const TransactionsScreen = () => {
         <View>
           {filteredGroups.map(([date, dateTransactions]) => (
             <View key={date} style={styles.dateGroup}>
-              <Text variant="caption" weight="600" style={styles.dateLabel}>{date}</Text>
+              <Text variant="caption" weight="semiBold" style={styles.dateLabel}>{date}</Text>
               <View style={styles.transactionList}>
                 {dateTransactions.map((transaction) => (
                   <Card key={transaction.id} style={styles.transactionCard}>
@@ -125,7 +125,7 @@ export const TransactionsScreen = () => {
                       {getCategoryEmoji(transaction.category)}
                     </Text>
                     <View style={styles.transactionInfo}>
-                      <Text weight="500" numberOfLines={1}>{transaction.name}</Text>
+                      <Text weight="medium" numberOfLines={1}>{transaction.name}</Text>
                       <View style={styles.transactionMeta}>
                         <Badge variant="outline" style={{ paddingVertical: 0, paddingHorizontal: 6 }}>
                           {transaction.category}
@@ -135,7 +135,7 @@ export const TransactionsScreen = () => {
                     </View>
                     <View style={styles.transactionAmount}>
                       <Text
-                        weight="600"
+                        weight="semiBold"
                         style={{
                           color: transaction.type === 'income' ? theme.colors.success : theme.colors.foreground
                         }}

@@ -88,7 +88,7 @@ export const NotificationsScreen = () => {
           <View style={styles.masterToggleInfo}>
             <Feather name="bell" size={24} color="white" />
             <View>
-              <Text weight="600" style={{ color: 'white' }}>Push Notifications</Text>
+              <Text weight="semiBold" style={{ color: 'white' }}>Push Notifications</Text>
               <Text variant="caption" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Receive all app notifications</Text>
             </View>
           </View>
@@ -118,7 +118,7 @@ export const NotificationsScreen = () => {
                     {index > 0 && <View style={styles.separator} />}
                     <View style={styles.notificationItem}>
                       <View style={styles.itemInfo}>
-                        <Text weight="500">{item.label}</Text>
+                        <Text weight="medium">{item.label}</Text>
                         <Text variant="caption">{item.description}</Text>
                       </View>
                       <Switch value={item.enabled} onValueChange={() => { }} />
@@ -136,7 +136,7 @@ export const NotificationsScreen = () => {
           <View>
             <View style={styles.notificationItem}>
               <View style={styles.itemInfo}>
-                <Text weight="500">Monthly Reports</Text>
+                <Text weight="medium">Monthly Reports</Text>
                 <Text variant="caption">Detailed financial summary</Text>
               </View>
               <Switch value={true} onValueChange={() => { }} />
@@ -144,7 +144,7 @@ export const NotificationsScreen = () => {
             <View style={styles.separator} />
             <View style={styles.notificationItem}>
               <View style={styles.itemInfo}>
-                <Text weight="500">Product Updates</Text>
+                <Text weight="medium">Product Updates</Text>
                 <Text variant="caption">New features and improvements</Text>
               </View>
               <Switch value={false} onValueChange={() => { }} />

@@ -63,7 +63,7 @@ export const Button = ({
           {title && <Text
             variant="label"
             style={[getTextColorStyle(), textStyle]}
-            weight="600"
+            weight="semiBold"
           >
             {title}
           </Text>}

@@ -59,7 +59,7 @@ export const WalletsScreen = () => {
 
         <View style={styles.balanceCard}>
           <Text variant="caption" style={styles.balanceLabel}>Total Balance</Text>
-          <Text style={styles.balanceValue}>${totalBalance.toFixed(2)}</Text>
+          <Text style={styles.balanceValue} weight="bold">${totalBalance.toFixed(2)}</Text>
           <Badge style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', borderWidth: 0 }}>
             <Text style={{ color: 'white', fontSize: 12 }}>{wallets.length} Accounts</Text>
           </Badge>
@@ -80,7 +80,7 @@ export const WalletsScreen = () => {
                   />
                 </View>
                 <View>
-                  <Text weight="600">{wallet.name}</Text>
+                  <Text weight="semiBold">{wallet.name}</Text>
                   {wallet.accountNumber && (
                     <Text variant="caption">{wallet.accountNumber}</Text>
                   )}
@@ -114,12 +114,12 @@ export const WalletsScreen = () => {
                     <Feather name="refresh-cw" size={16} color={theme.colors.mutedForeground} />
                   </View>
                   <View>
-                    <Text weight="500">{transfer.from}</Text>
+                    <Text weight="medium">{transfer.from}</Text>
                     <Text variant="caption">to {transfer.to}</Text>
                     <Text variant="caption">{transfer.date}</Text>
                   </View>
                 </View>
-                <Text weight="600">${transfer.amount}</Text>
+                <Text weight="semiBold">${transfer.amount}</Text>
               </Card>
             ))}
           </View>
@@ -180,7 +180,6 @@ const styles = StyleSheet.create(theme => ({
   balanceValue: {
     color: 'white',
     fontSize: 32,
-    fontWeight: 'bold',
     marginBottom: theme.margins.md
   },
   content: {

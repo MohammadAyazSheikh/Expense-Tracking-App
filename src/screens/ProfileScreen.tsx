@@ -37,7 +37,7 @@ export const ProfileScreen = () => {
         <View style={styles.avatarContainer}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>AJ</Text>
+              <Text style={styles.avatarText} weight="bold">AJ</Text>
             </View>
             <TouchableOpacity style={styles.cameraButton}>
               <Feather name="camera" size={16} color={theme.colors.primary} />
@@ -149,7 +149,6 @@ const styles = StyleSheet.create(theme => ({
   avatarText: {
     color: 'white',
     fontSize: 32,
-    fontWeight: 'bold',
   },
   cameraButton: {
     position: 'absolute',

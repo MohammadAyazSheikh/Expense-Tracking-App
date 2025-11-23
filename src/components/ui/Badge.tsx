@@ -48,7 +48,7 @@ export const Badge = ({ children, variant = 'default', style }: BadgeProps) => {
 
   return (
     <View style={[styles.container, styles[variant], style]}>
-      <Text style={{ fontSize: 10, fontWeight: '600', color: textColor }}>{children}</Text>
+      <Text weight="semiBold" style={{ fontSize: 10, color: textColor }}>{children}</Text>
     </View>
   );
 };

@@ -98,7 +98,7 @@ export const SmartSenseScreen = () => {
                 </View>
                 <View style={styles.insightContent}>
                   <View style={styles.insightTitleRow}>
-                    <Text weight="600">{insight.title}</Text>
+                    <Text weight="semiBold">{insight.title}</Text>
                     <Badge variant={insight.type as any}>
                       {insight.impact}
                     </Badge>
@@ -124,11 +124,11 @@ export const SmartSenseScreen = () => {
                 index === predictions.length - 1 && { borderBottomWidth: 0 }
               ]}>
                 <View>
-                  <Text weight="500">{pred.category}</Text>
+                  <Text weight="medium">{pred.category}</Text>
                   <Text variant="caption">Predicted</Text>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Text weight="600">{pred.predicted}</Text>
+                  <Text weight="semiBold">{pred.predicted}</Text>
                   <Text
                     variant="caption"
                     style={{ color: getStatusColor(pred.status) }}
