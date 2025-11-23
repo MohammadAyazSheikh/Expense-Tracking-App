@@ -30,6 +30,15 @@ const FONTS: Record<SupportedLocale, FontConfig> = {
     italic: 'NotoNaskhArabic-Regular', // Arabic usually doesn't have italic, fallback to regular
     black: 'NotoNaskhArabic-Bold',
   },
+  ur: {
+    regular: 'NotoNaskhArabic-Regular',
+    medium: 'NotoNaskhArabic-Medium',
+    semiBold: 'NotoNaskhArabic-SemiBold',
+    bold: 'NotoNaskhArabic-Bold',
+    extraBold: 'NotoNaskhArabic-Bold', // Fallback to Bold as ExtraBold isn't available
+    italic: 'NotoNaskhArabic-Regular', // Arabic usually doesn't have italic, fallback to regular
+    black: 'NotoNaskhArabic-Bold',
+  },
 };
 
 // Font weights mapping

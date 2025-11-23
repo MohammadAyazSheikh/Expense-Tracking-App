@@ -9,6 +9,7 @@ import { SupportedLocale, SUPPORTED_LOCALES, isRTL } from './types';
 // Import translations
 import en from './locales/en.json';
 import ar from './locales/ar.json';
+import ur from './locales/ur.json';
 
 // ============================================
 // Type-safe translation key generation
@@ -16,10 +17,10 @@ import ar from './locales/ar.json';
 
 type PathImpl<T, Key extends keyof T> = Key extends string
   ? T[Key] extends Record<string, any>
-    ?
-        | `${Key}.${PathImpl<T[Key], Exclude<keyof T[Key], keyof any[]>> & string}`
-        | `${Key}.${Exclude<keyof T[Key], keyof any[]> & string}`
-    : never
+  ?
+  | `${Key}.${PathImpl<T[Key], Exclude<keyof T[Key], keyof any[]>> & string}`
+  | `${Key}.${Exclude<keyof T[Key], keyof any[]> & string}`
+  : never
   : never;
 
 type PathImpl2<T> = PathImpl<T, keyof T> | keyof T;
@@ -36,6 +37,7 @@ export type TranslationKeys = Path<typeof en>;
 const MOMENT_LOCALE_MAP: Record<SupportedLocale, string> = {
   en: 'en',
   ar: 'ar',
+  ur: 'ur',
 };
 
 
@@ -46,7 +48,9 @@ const MOMENT_LOCALE_MAP: Record<SupportedLocale, string> = {
 const resources = {
   en: { translation: en },
   ar: { translation: ar },
+  ur: { translation: ur },
 };
+
 
 /**
  * Sets the Moment.js locale to match the app locale

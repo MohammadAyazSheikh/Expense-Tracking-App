@@ -13,45 +13,48 @@ import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
 import { useAppSettingsStore } from '../store';
 import { SUPPORTED_LOCALES } from '../i18n/types';
+import { useTranslation } from '../hooks/useTranslation';
 
-const settingsGroups = [
-  {
-    title: "Account",
-    items: [
-      { icon: "user", label: "Profile Settings", badge: null, path: "Profile" },
-      { icon: "bell", label: "Notifications", badge: "3 New", path: "Notifications" },
-      { icon: "lock", label: "Security", badge: null, path: "Security" },
-    ]
-  },
-  {
-    title: "Preferences",
-    items: [
-      { icon: "credit-card", label: "Manage Accounts", badge: null, path: "Wallets" },
-      { icon: "file-text", label: "Export Data", badge: null, path: "Profile" },
-    ]
-  },
-  {
-    title: "Support",
-    items: [
-      { icon: "help-circle", label: "Help & Support", badge: null, path: "HelpSupport" },
-      { icon: "zap", label: "SmartSense™ Settings", badge: "AI", path: "SmartSense" },
-    ]
-  }
-];
+
+
 
 export const SettingsScreen = () => {
-
-
+  const { t } = useTranslation();
   const { theme } = useUnistyles();
   const { theme: appTheme, changeTheme, locale, changeLocale } = useAppSettingsStore()
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  const settingsGroups = [
+    {
+      title: t('settings.account'),
+      items: [
+        { icon: "user", label: t('settings.profileSettings'), badge: null, path: "Profile" },
+        { icon: "bell", label: t('settings.notifications'), badge: "3 New", path: "Notifications" },
+        { icon: "lock", label: t('settings.security'), badge: null, path: "Security" },
+      ]
+    },
+    {
+      title: t('settings.preferences'),
+      items: [
+        { icon: "credit-card", label: t('settings.manageAccounts'), badge: null, path: "Wallets" },
+        { icon: "file-text", label: t('settings.exportData'), badge: null, path: "Profile" },
+      ]
+    },
+    {
+      title: t('settings.support'),
+      items: [
+        { icon: "help-circle", label: t('settings.helpSupport'), badge: null, path: "HelpSupport" },
+        { icon: "zap", label: t('settings.smartSenseSettings'), badge: "AI", path: "SmartSense" },
+      ]
+    }
+  ];
 
 
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
-        <Text variant="h2" style={styles.headerTitle}>Settings</Text>
+        <Text variant="h2" style={styles.headerTitle}>{t('settings.title')}</Text>
 
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
@@ -65,7 +68,7 @@ export const SettingsScreen = () => {
             style={styles.editButton}
             onPress={() => navigation.navigate('Profile')}
           >
-            <Text style={{ color: 'white', fontSize: 12 }}>Edit</Text>
+            <Text style={{ color: 'white', fontSize: 12 }}>{t('common.edit')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -75,8 +78,8 @@ export const SettingsScreen = () => {
         <Card style={styles.togglesCard}>
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
-              <Text weight="medium">Dark Mode</Text>
-              <Text variant="caption">Switch between light and dark themes</Text>
+              <Text weight="medium">{t('settings.darkMode')}</Text>
+              <Text variant="caption">{t('settings.switchThemes')}</Text>
             </View>
             <Switch value={appTheme == "dark"} onValueChange={() => { changeTheme(appTheme == "dark" ? "light" : "dark") }} />
           </View>
@@ -86,23 +89,23 @@ export const SettingsScreen = () => {
             <View style={[styles.toggleInfo, { flexDirection: 'row', alignItems: 'center', gap: 8 }]}>
               <Feather name="globe" size={20} color={theme.colors.primary} />
               <View>
-                <Text weight="medium">Language</Text>
-                <Text variant="caption">Change app language</Text>
+                <Text weight="medium">{t('settings.language')}</Text>
+                <Text variant="caption">{t('settings.changeLanguage')}</Text>
               </View>
             </View>
             <Button
               title={SUPPORTED_LOCALES[locale].nativeName}
               variant="outline"
               size="sm"
-              onPress={() => { changeLocale(locale == "en" ? "ar" : "en") }}
+              onPress={() => { changeLocale(locale == "en" ? "ur" : "en") }}
             />
           </View>
           <View style={styles.separator} />
 
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
-              <Text weight="medium">AI Insights</Text>
-              <Text variant="caption">Get personalized financial advice</Text>
+              <Text weight="medium">{t('settings.aiInsights')}</Text>
+              <Text variant="caption">{t('settings.personalizedAdvice')}</Text>
             </View>
             <Switch value={true} onValueChange={() => { }} />
           </View>
@@ -110,8 +113,8 @@ export const SettingsScreen = () => {
 
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
-              <Text weight="medium">Push Notifications</Text>
-              <Text variant="caption">Receive updates and alerts</Text>
+              <Text weight="medium">{t('settings.pushNotifications')}</Text>
+              <Text variant="caption">{t('settings.receiveUpdates')}</Text>
             </View>
             <Switch value={true} onValueChange={() => { }} />
           </View>
@@ -155,11 +158,11 @@ export const SettingsScreen = () => {
             onPress={() => navigation.navigate('Auth')}
           >
             <Feather name="log-out" size={20} color={theme.colors.destructive} />
-            <Text weight="semiBold" style={{ color: theme.colors.destructive }}>Log Out</Text>
+            <Text weight="semiBold" style={{ color: theme.colors.destructive }}>{t('settings.logOut')}</Text>
           </TouchableOpacity>
         </Card>
 
-        <Text variant="caption" style={styles.version}>Version 1.0.0</Text>
+        <Text variant="caption" style={styles.version}>{t('settings.version')} 1.0.0</Text>
       </View>
     </ScreenWrapper>
   );

@@ -10,6 +10,7 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { Feather } from '@expo/vector-icons';
+import { useTranslation } from '../hooks/useTranslation';
 
 import { useFinanceStore } from '../store';
 
@@ -26,9 +27,7 @@ const getCategoryEmoji = (category: string) => {
 };
 
 export const TransactionsScreen = () => {
-
-
-
+  const { t } = useTranslation();
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,8 +41,8 @@ export const TransactionsScreen = () => {
       const date = transaction.date;
       // In real app, use proper date formatting
       let dateLabel = date;
-      if (date === "2024-06-15") dateLabel = "Today";
-      else if (date === "2024-06-14") dateLabel = "Yesterday";
+      if (date === "2024-06-15") dateLabel = t('transactions.today');
+      else if (date === "2024-06-14") dateLabel = t('transactions.yesterday');
 
       if (!groups[dateLabel]) {
         groups[dateLabel] = [];
@@ -68,14 +67,14 @@ export const TransactionsScreen = () => {
             onPress={() => navigation.goBack()}
             style={{ paddingHorizontal: 0, width: 40 }}
           />
-          <Text variant="h2" style={styles.headerTitle}>Transactions</Text>
+          <Text variant="h2" style={styles.headerTitle}>{t('transactions.title')}</Text>
         </View>
 
         <View style={styles.searchContainer}>
           <Feather name="search" size={20} color="rgba(255, 255, 255, 0.6)" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search transactions..."
+            placeholder={t('transactions.searchTransactions')}
             placeholderTextColor="rgba(255, 255, 255, 0.6)"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -95,17 +94,17 @@ export const TransactionsScreen = () => {
         <Card>
           <View style={styles.summaryGrid}>
             <View style={styles.summaryItem}>
-              <Text variant="caption" style={{ marginBottom: 4 }}>Total</Text>
+              <Text variant="caption" style={{ marginBottom: 4 }}>{t('transactions.all')}</Text>
               <Text weight="semiBold">{transactions.length}</Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text variant="caption" style={{ marginBottom: 4 }}>Income</Text>
+              <Text variant="caption" style={{ marginBottom: 4 }}>{t('transactions.income')}</Text>
               <Text weight="semiBold" style={{ color: theme.colors.success }}>
                 ${transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)}
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text variant="caption" style={{ marginBottom: 4 }}>Expenses</Text>
+              <Text variant="caption" style={{ marginBottom: 4 }}>{t('transactions.expenses')}</Text>
               <Text weight="semiBold" style={{ color: theme.colors.accent }}>
                 ${Math.abs(transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0))}
               </Text>

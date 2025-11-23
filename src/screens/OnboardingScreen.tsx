@@ -16,39 +16,10 @@ import Animated, {
   FadeIn,
   FadeInDown
 } from 'react-native-reanimated';
+import { useTranslation } from '../hooks/useTranslation';
 
 const { width } = Dimensions.get('window');
 
-const slides = [
-  {
-    id: '1',
-    icon: 'trending-up',
-    title: "Track Every Expense",
-    description: "Effortlessly monitor your daily spending across all categories with intuitive tracking",
-    color: "success"
-  },
-  {
-    id: '2',
-    icon: 'pie-chart',
-    title: "Smart Budgeting",
-    description: "Set intelligent budgets and get real-time alerts when you're close to limits",
-    color: "accent"
-  },
-  {
-    id: '3',
-    icon: 'credit-card',
-    title: "Manage Multiple Wallets",
-    description: "Handle cash, cards, and digital wallets all in one place with easy transfers",
-    color: "warning"
-  },
-  {
-    id: '4',
-    icon: 'zap',
-    title: "AI-Powered Insights",
-    description: "Meet SmartSense™ - your personal AI financial assistant that helps you save smarter",
-    color: "primary"
-  }
-] as const;
 
 const styles = StyleSheet.create(theme => ({
   container: {
@@ -132,7 +103,7 @@ const AnimatedDot = ({ isActive }: { isActive: boolean }) => {
   );
 };
 
-const AnimatedSlide = ({ item, theme }: { item: typeof slides[number], theme: any }) => {
+const AnimatedSlide = ({ item, theme, t }: { item: { id: string; icon: string; title: string; description: string; color: string }, theme: any, t: (key: any) => string }) => {
   const scale = useSharedValue(0.8);
   const opacity = useSharedValue(0);
 
@@ -158,20 +129,52 @@ const AnimatedSlide = ({ item, theme }: { item: typeof slides[number], theme: an
         />
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(200).duration(600)}>
-        <Text variant="h2" style={styles.title}>{item.title}</Text>
+        <Text variant="h2" style={styles.title}>{t(item.title)}</Text>
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(400).duration(600)}>
-        <Text variant="body" style={styles.description}>{item.description}</Text>
+        <Text variant="body" style={styles.description}>{t(item.description)}</Text>
       </Animated.View>
     </View>
   );
 };
 
 export const OnboardingScreen = () => {
+  const { t } = useTranslation();
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
+
+  const slides = [
+    {
+      id: '1',
+      icon: 'trending-up',
+      title: 'onboarding.title1' as const,
+      description: 'onboarding.description1' as const,
+      color: "success"
+    },
+    {
+      id: '2',
+      icon: 'pie-chart',
+      title: 'onboarding.title2' as const,
+      description: 'onboarding.description2' as const,
+      color: "accent"
+    },
+    {
+      id: '3',
+      icon: 'credit-card',
+      title: 'onboarding.title3' as const,
+      description: 'onboarding.description3' as const,
+      color: "warning"
+    },
+    {
+      id: '4',
+      icon: 'zap',
+      title: 'onboarding.title4' as const,
+      description: 'onboarding.description4' as const,
+      color: "primary"
+    }
+  ] as const;
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
@@ -194,7 +197,7 @@ export const OnboardingScreen = () => {
   return (
     <ScreenWrapper style={styles.container}>
       <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
-        <Button title="Skip" variant="ghost" onPress={handleSkip} />
+        <Button title={t('onboarding.skip')} variant="ghost" onPress={handleSkip} />
       </Animated.View>
 
       <FlatList
@@ -207,7 +210,7 @@ export const OnboardingScreen = () => {
         scrollEventThrottle={16}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <AnimatedSlide item={item} theme={theme} />
+          <AnimatedSlide item={item} theme={theme} t={t} />
         )}
       />
 
@@ -219,7 +222,7 @@ export const OnboardingScreen = () => {
         </View>
 
         <Button
-          title={currentIndex === slides.length - 1 ? "Get Started" : "Next"}
+          title={currentIndex === slides.length - 1 ? t('onboarding.getStarted') : t('common.next')}
           onPress={handleNext}
           size="lg"
         />
