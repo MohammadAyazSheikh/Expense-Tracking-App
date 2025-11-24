@@ -165,6 +165,24 @@
         "rent": "کرایہ",
         "bills": "بل"
     },
+    "categoryManager": {
+        "title": "زمرہ جات",
+        "newCategory": "نیا زمرہ",
+        "categoryName": "زمرہ کا نام",
+        "selectIcon": "آئیکن منتخب کریں",
+        "selectColor": "رنگ منتخب کریں",
+        "tags": "ٹیگز",
+        "addTag": "ٹیگ شامل کریں...",
+        "noCategories": "کوئی زمرہ نہیں ملا۔ ایک شامل کریں!",
+        "deleteConfirmTitle": "زمرہ حذف کریں",
+        "deleteConfirmMessage": "کیا آپ واقعی اس زمرے کو حذف کرنا چاہتے ہیں؟",
+        "manage": "انتظام کریں"
+    },
+    "filter": {
+        "title": "لین دین کو فلٹر کریں",
+        "transactionType": "لین دین کی قسم",
+        "applyFilters": "فلٹرز لاگو کریں"
+    },
     "budget": {
         "title": "بجٹ",
         "manager": "بجٹ منیجر",

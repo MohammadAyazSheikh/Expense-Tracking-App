@@ -16,7 +16,7 @@ interface FinanceState {
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   deleteTransaction: (id: string) => void;
   updateTransaction: (id: string, transaction: Partial<Transaction>) => void;
-  
+
   addBudget: (budget: Omit<Budget, 'id'>) => void;
   updateBudget: (id: string, budget: Partial<Budget>) => void;
   deleteBudget: (id: string) => void;
@@ -24,6 +24,10 @@ interface FinanceState {
   addWallet: (wallet: Omit<Wallet, 'id'>) => void;
   updateWallet: (id: string, wallet: Partial<Wallet>) => void;
   deleteWallet: (id: string) => void;
+
+  addCategory: (category: Omit<Category, 'id'>) => void;
+  updateCategory: (id: string, category: Partial<Category>) => void;
+  deleteCategory: (id: string) => void;
 }
 
 // Mock Data
@@ -122,6 +126,27 @@ export const useFinanceStore = create<FinanceState>()(
       deleteWallet: (id) => {
         set((state) => ({
           wallets: state.wallets.filter((w) => w.id !== id),
+        }));
+      },
+
+      addCategory: (category) => {
+        const newCategory = { ...category, id: Math.random().toString(36).substr(2, 9) };
+        set((state) => ({
+          categories: [...state.categories, newCategory],
+        }));
+      },
+
+      updateCategory: (id, updatedCategory) => {
+        set((state) => ({
+          categories: state.categories.map((c) =>
+            c.id === id ? { ...c, ...updatedCategory } : c
+          ),
+        }));
+      },
+
+      deleteCategory: (id) => {
+        set((state) => ({
+          categories: state.categories.filter((c) => c.id !== id),
         }));
       },
     }),

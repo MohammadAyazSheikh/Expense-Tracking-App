@@ -8,9 +8,10 @@ StyleSheet.configure({
     dark: darkTheme,
   },
   settings: {
-    initialTheme: () => {
-      const theme = JSON.parse(storage.getString("app-settings-storage") || "data:{{effectiveTheme: 'light'}}")?.state?.effectiveTheme;
-      return theme;
-    }
+    initialTheme: "light"
+    // initialTheme: () => {
+    //   const theme = JSON.parse(storage.getString("app-settings-storage") || "data:{{effectiveTheme: 'light'}}")?.state?.effectiveTheme;
+    //   return theme;
+    // }
   }
 })

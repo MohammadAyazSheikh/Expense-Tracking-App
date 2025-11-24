@@ -14,14 +14,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { useFinanceStore } from '../store';
 import { useFonts } from '../hooks/useFonts';
 
-const categories = [
-  { id: "food", name: "Food", emoji: "🍔", color: "hsl(10 80% 65%)" },
-  { id: "transport", name: "Transport", emoji: "🚗", color: "hsl(255 70% 65%)" },
-  { id: "shopping", name: "Shopping", emoji: "🛍️", color: "hsl(35 90% 60%)" },
-  { id: "bills", name: "Bills", emoji: "📱", color: "hsl(160 70% 60%)" },
-  { id: "entertainment", name: "Entertainment", emoji: "🎬", color: "hsl(230 75% 70%)" },
-  { id: "health", name: "Health", emoji: "💊", color: "hsl(145 70% 55%)" },
-];
+
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
 
@@ -126,10 +119,14 @@ const styles = StyleSheet.create(theme => ({
   }
 }));
 
+import { useTranslation } from '../hooks/useTranslation';
+
 export const AddExpenseScreen = () => {
   const { theme } = useUnistyles();
+  const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const addTransaction = useFinanceStore((state) => state.addTransaction);
+  const categories = useFinanceStore((state) => state.categories);
   const { getFont } = useFonts();
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm({
@@ -202,7 +199,12 @@ export const AddExpenseScreen = () => {
       <View style={styles.content}>
         {/* Category Selection */}
         <Card>
-          <Text weight="semiBold" style={styles.sectionLabel}>Category</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.margins.sm }}>
+            <Text weight="semiBold">{t('addExpense.category')}</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('CategoryManager')}>
+              <Text variant="caption" style={{ color: theme.colors.primary }}>{t('categoryManager.manage')}</Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.categoryGrid}>
             {categories.map((category) => (
               <TouchableOpacity
@@ -214,7 +216,9 @@ export const AddExpenseScreen = () => {
                 onPress={() => setValue('category', category.id)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.categoryEmoji}>{category.emoji}</Text>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: category.color, justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
+                  <Feather name={category.icon as any || 'help-circle'} size={20} color="white" />
+                </View>
                 <Text variant="caption" weight="medium">{category.name}</Text>
               </TouchableOpacity>
             ))}

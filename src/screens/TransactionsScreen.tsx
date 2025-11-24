@@ -9,12 +9,20 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '../hooks/useTranslation';
+import { FilterModal, FilterState } from '../components/Transactions/FilterModal';
 
 import { useFinanceStore } from '../store';
 
-const getCategoryEmoji = (category: string) => {
+const getCategoryEmoji = (categoryName: string, categories: any[]) => {
+  const category = categories.find(c => c.name === categoryName);
+  if (category && category.icon) {
+    // If it's an ionicon name, we can't render it as text easily here without changing the structure.
+    // For now, let's return a default emoji or try to map common names.
+    // Or better, the UI below should render an Icon if it's not an emoji.
+    return "📝";
+  }
   const emojis: Record<string, string> = {
     "Food": "🍔",
     "Transport": "🚗",
@@ -23,7 +31,7 @@ const getCategoryEmoji = (category: string) => {
     "Shopping": "🛍️",
     "Health": "💊"
   };
-  return emojis[category] || "📝";
+  return emojis[categoryName] || "📝";
 };
 
 export const TransactionsScreen = () => {
@@ -32,8 +40,10 @@ export const TransactionsScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [searchQuery, setSearchQuery] = useState("");
   const transactions = useFinanceStore((state) => state.transactions);
+  const categories = useFinanceStore((state) => state.categories);
 
-
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({ type: 'all', categories: [] });
 
   const groupedTransactions = useMemo(() => {
     return transactions.reduce((groups, transaction) => {
@@ -50,11 +60,27 @@ export const TransactionsScreen = () => {
       groups[dateLabel].push(transaction);
       return groups;
     }, {} as Record<string, typeof transactions>);
-  }, []);
+  }, [transactions, t]);
 
-  const filteredGroups = Object.entries(groupedTransactions).filter(([_, items]) =>
-    items.some(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredGroups = Object.entries(groupedTransactions).reduce((acc, [date, items]) => {
+    const filteredItems = items.filter(t => {
+      const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesType = filters.type === 'all' || t.type === filters.type;
+      // For category matching, we need to match by name or ID. 
+      // Transaction stores category NAME currently (based on AddExpense logic).
+      // Filter stores category IDs.
+      // We need to find the category ID for the transaction category name.
+      const category = categories.find(c => c.name === t.category);
+      const matchesCategory = filters.categories.length === 0 || (category && filters.categories.includes(category.id));
+
+      return matchesSearch && matchesType && matchesCategory;
+    });
+
+    if (filteredItems.length > 0) {
+      acc.push([date, filteredItems]);
+    }
+    return acc;
+  }, [] as [string, typeof transactions][]);
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
@@ -83,7 +109,7 @@ export const TransactionsScreen = () => {
             title=""
             icon={<Feather name="sliders" size={20} color="white" />}
             variant="ghost"
-            onPress={() => { }}
+            onPress={() => setIsFilterVisible(true)}
             style={{ paddingHorizontal: 0, width: 32 }}
           />
         </View>
@@ -118,38 +144,48 @@ export const TransactionsScreen = () => {
             <View key={date} style={styles.dateGroup}>
               <Text variant="caption" weight="semiBold" style={styles.dateLabel}>{date}</Text>
               <View style={styles.transactionList}>
-                {dateTransactions.map((transaction) => (
-                  <Card key={transaction.id} style={styles.transactionCard}>
-                    <Text style={styles.transactionEmoji}>
-                      {getCategoryEmoji(transaction.category)}
-                    </Text>
-                    <View style={styles.transactionInfo}>
-                      <Text weight="medium" numberOfLines={1}>{transaction.name}</Text>
-                      <View style={styles.transactionMeta}>
-                        <Badge variant="outline" style={{ paddingVertical: 0, paddingHorizontal: 6 }}>
-                          {transaction.category}
-                        </Badge>
-                        <Text variant="caption">{transaction.time}</Text>
+                {dateTransactions.map((transaction) => {
+                  const category = categories.find(c => c.name === transaction.category);
+                  return (
+                    <Card key={transaction.id} style={styles.transactionCard}>
+                      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: category?.color || theme.colors.muted, justifyContent: 'center', alignItems: 'center' }}>
+                        <Ionicons name={category?.icon as any || 'help'} size={20} color="white" />
                       </View>
-                    </View>
-                    <View style={styles.transactionAmount}>
-                      <Text
-                        weight="semiBold"
-                        style={{
-                          color: transaction.type === 'income' ? theme.colors.success : theme.colors.foreground
-                        }}
-                      >
-                        {transaction.type === 'income' ? '+' : ''}{transaction.amount.toFixed(2)}
-                      </Text>
-                      <Text variant="caption">{transaction.payment}</Text>
-                    </View>
-                  </Card>
-                ))}
+                      <View style={styles.transactionInfo}>
+                        <Text weight="medium" numberOfLines={1}>{transaction.name}</Text>
+                        <View style={styles.transactionMeta}>
+                          <Badge variant="outline" style={{ paddingVertical: 0, paddingHorizontal: 6 }}>
+                            {transaction.category}
+                          </Badge>
+                          <Text variant="caption">{transaction.time}</Text>
+                        </View>
+                      </View>
+                      <View style={styles.transactionAmount}>
+                        <Text
+                          weight="semiBold"
+                          style={{
+                            color: transaction.type === 'income' ? theme.colors.success : theme.colors.foreground
+                          }}
+                        >
+                          {transaction.type === 'income' ? '+' : ''}{transaction.amount.toFixed(2)}
+                        </Text>
+                        <Text variant="caption">{transaction.payment}</Text>
+                      </View>
+                    </Card>
+                  )
+                })}
               </View>
             </View>
           ))}
         </View>
       </View>
+
+      <FilterModal
+        visible={isFilterVisible}
+        onClose={() => setIsFilterVisible(false)}
+        onApply={setFilters}
+        initialFilters={filters}
+      />
     </ScreenWrapper>
   );
 };

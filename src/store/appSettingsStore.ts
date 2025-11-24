@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
+import { alertService } from '../utils/AlertService';
 import { SupportedLocale, isRTL } from '../i18n/types';
 import { changeLanguage, getDeviceLocale } from '../i18n';
 import * as Updates from 'expo-updates';
-import { Alert, Appearance } from 'react-native';
+import { Appearance } from 'react-native';
 import { UnistylesRuntime } from 'react-native-unistyles';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -70,7 +71,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
 
           // Only prompt to reload if RTL direction changed
           if (needsRTLChange) {
-            Alert.alert(
+            alertService.show(
               'Language Changed',
               'Please restart the app for the layout changes to take effect.',
               [

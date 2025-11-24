@@ -12,6 +12,7 @@ import { WalletsScreen } from '../screens/WalletsScreen';
 import { SecurityScreen } from '../screens/SecurityScreen';
 import { HelpSupportScreen } from '../screens/HelpSupportScreen';
 import { SmartSenseScreen } from '../screens/SmartSenseScreen';
+import { CategoryManagerScreen } from '../screens/CategoryManagerScreen';
 import { useAuthStore } from '../store';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -37,6 +38,7 @@ const mainRoutes = () => {
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
       <Stack.Screen name="Wallets" component={WalletsScreen} />
       <Stack.Screen name="SmartSense" component={SmartSenseScreen} />
+      <Stack.Screen name="CategoryManager" component={CategoryManagerScreen} />
     </Stack.Navigator>
   )
 }

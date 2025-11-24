@@ -38,4 +38,5 @@ export interface Category {
   icon: string;
   color: string;
   type: 'income' | 'expense';
+  tags?: string[];
 }

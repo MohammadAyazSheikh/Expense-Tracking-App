@@ -57,7 +57,7 @@ const resources = {
  */
 export const setMomentLocale = (locale: SupportedLocale) => {
   const momentLocale = MOMENT_LOCALE_MAP[locale];
-  moment.locale(momentLocale);
+  moment.locale("en");
 };
 
 export const getDeviceLocale = (): SupportedLocale => {

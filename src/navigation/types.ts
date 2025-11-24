@@ -12,6 +12,7 @@ export type RootStackParamList = {
   NotFound: undefined;
   Wallets: undefined;
   SmartSense: undefined;
+  CategoryManager: undefined;
 };
 
 export type MainTabParamList = {

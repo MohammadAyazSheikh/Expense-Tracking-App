@@ -5,6 +5,9 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAppSettingsStore } from './src/store';
+import Toast from 'react-native-toast-message';
+import ToastConfig from './src/components/ui/ToastConfig';
+import { CustomAlert } from './src/components/ui/CustomAlert';
 
 export default function App() {
   const { initialize, effectiveTheme } = useAppSettingsStore();
@@ -18,6 +21,8 @@ export default function App() {
       <NavigationContainer>
         <StatusBar style={effectiveTheme == "dark" ? "dark" : "light"} backgroundColor={effectiveTheme == "dark" ? "white" : "black"} />
         <RootNavigator />
+        <Toast config={ToastConfig} />
+        <CustomAlert />
       </NavigationContainer>
     </SafeAreaProvider>
   );
