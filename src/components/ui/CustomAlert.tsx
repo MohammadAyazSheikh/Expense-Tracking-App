@@ -1,105 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { View, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { alertService } from '../../utils/AlertService';
+import { AlertButton, AlertConfig, alertService } from '../../utils/AlertService';
+import { StyleSheet } from 'react-native-unistyles';
 import { Text } from './Text';
 
-type AlertButton = {
-    text: string;
-    onPress?: () => void;
-    style?: 'default' | 'cancel' | 'destructive';
-};
 
-type AlertConfig = {
-    title: string;
-    message?: string;
-    buttons?: AlertButton[];
-    options?: {
-        cancelable?: boolean;
-        onDismiss?: () => void;
-    };
-};
 
-const styles = StyleSheet.create((theme) => ({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    alertContainer: {
-        width: 270,
-        backgroundColor: theme.colors.card,
-        borderRadius: 14,
-        overflow: 'hidden',
-    },
-    contentContainer: {
-        padding: 20,
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 17,
-        fontWeight: '600',
-        color: theme.colors.foreground,
-        textAlign: 'center',
-        marginBottom: 4,
-    },
-    message: {
-        fontSize: 13,
-        color: theme.colors.foreground,
-        textAlign: 'center',
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        borderTopWidth: 0.5,
-        borderTopColor: theme.colors.border,
-        flexWrap: 'wrap',
-    },
-    button: {
-        flex: 1,
-        paddingVertical: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonBorderLeft: {
-        borderLeftWidth: 0.5,
-        borderLeftColor: theme.colors.border,
-    },
-    buttonBorderTop: {
-        borderTopWidth: 0.5,
-        borderTopColor: theme.colors.border,
-    },
-    buttonText: {
-        fontSize: 17,
-        color: theme.colors.primary, // Or system blue
-        fontWeight: '600',
-        variants: {
-            variant: {
-                default: {},
-                destructive: {
-                    color: theme.colors.destructive
-                },
-                cancel: {
-                    fontWeight: 'normal'
-                }
-            }
-        }
-    },
-}));
+type AlertButtonProps = {
+    btn: AlertButton,
+    index: number,
+    totalButtons: number,
+    onPress: () => void
+}
 
 const AlertButtonComponent = ({
     btn,
     index,
     totalButtons,
     onPress
-}: {
-    btn: AlertButton,
-    index: number,
-    totalButtons: number,
-    onPress: () => void
-}) => {
+}: AlertButtonProps) => {
     styles.useVariants({
-        variant: btn.style || 'default'
+        variant: btn.style
     });
 
     const isVertical = totalButtons > 2;
@@ -193,3 +114,73 @@ export const CustomAlert = () => {
         </Modal>
     );
 };
+
+
+const styles = StyleSheet.create((theme) => ({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    alertContainer: {
+        width: 270,
+        backgroundColor: theme.colors.card,
+        borderRadius: 14,
+        overflow: 'hidden',
+    },
+    contentContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 17,
+        fontWeight: '600',
+        color: theme.colors.foreground,
+        textAlign: 'center',
+        marginBottom: 4,
+    },
+    message: {
+        fontSize: 13,
+        color: theme.colors.foreground,
+        textAlign: 'center',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        borderTopWidth: 0.5,
+        borderTopColor: theme.colors.border,
+        flexWrap: 'wrap',
+    },
+    button: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttonBorderLeft: {
+        borderLeftWidth: 0.5,
+        borderLeftColor: theme.colors.border,
+    },
+    buttonBorderTop: {
+        borderTopWidth: 0.5,
+        borderTopColor: theme.colors.border,
+    },
+    buttonText: {
+        fontSize: 17,
+        color: theme.colors.primary, // Or system blue
+        fontWeight: '600',
+        variants: {
+            variant: {
+                default: {
+                    color: theme.colors.primary
+                },
+                destructive: {
+                    color: theme.colors.destructive
+                },
+                cancel: {
+                    color: theme.colors.secondary
+                }
+            }
+        }
+    },
+}));

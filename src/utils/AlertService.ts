@@ -1,7 +1,7 @@
-type AlertButton = {
+export type AlertButton = {
     text: string;
     onPress?: () => void;
-    style?: 'default' | 'cancel' | 'destructive';
+    style?: 'cancel' | 'destructive';
 };
 
 type AlertOptions = {
@@ -9,7 +9,7 @@ type AlertOptions = {
     onDismiss?: () => void;
 };
 
-type AlertConfig = {
+export type AlertConfig = {
     title: string;
     message?: string;
     buttons?: AlertButton[];

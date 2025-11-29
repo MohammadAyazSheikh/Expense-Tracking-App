@@ -1,7 +1,68 @@
 import React from 'react';
 import { TouchableOpacity, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { StyleSheet, useUnistyles, UnistylesVariants } from 'react-native-unistyles';
+import { StyleSheet, UnistylesVariants } from 'react-native-unistyles';
 import { Text } from './Text';
+
+type ButtonVariants = UnistylesVariants<typeof styles>;
+
+type ButtonProps = ButtonVariants & {
+  title: string;
+  onPress: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  icon?: React.ReactNode;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  size?: 'sm' | 'md' | 'lg';
+}
+
+
+export const Button = ({
+  title,
+  onPress,
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  disabled = false,
+  icon,
+  style,
+  textStyle
+}: ButtonProps) => {
+
+  styles.useVariants({
+    variant,
+    size,
+    disabled
+  });
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled || loading}
+      style={[
+        styles.container,
+        style
+      ]}
+      activeOpacity={0.7}
+    >
+      {loading ? (
+        <ActivityIndicator size="small" color={styles.text.color as string} />
+      ) : (
+        <>
+          {icon}
+
+          {title && <Text
+            variant="label"
+            style={[styles.text, textStyle]}
+            weight="semiBold"
+          >
+            {title}
+          </Text>}
+        </>
+      )}
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create(theme => ({
   container: {
@@ -73,63 +134,3 @@ const styles = StyleSheet.create(theme => ({
     }
   }
 }));
-
-type ButtonVariants = UnistylesVariants<typeof styles>;
-
-type ButtonProps = ButtonVariants & {
-  title: string;
-  onPress: () => void;
-  loading?: boolean;
-  disabled?: boolean; // Keep explicit disabled prop for TouchableOpacity
-  icon?: React.ReactNode;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-}
-
-
-export const Button = ({
-  title,
-  onPress,
-  variant = 'primary',
-  size = 'md',
-  loading = false,
-  disabled = false,
-  icon,
-  style,
-  textStyle
-}: ButtonProps) => {
-
-  styles.useVariants({
-    variant,
-    size,
-    disabled
-  });
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled || loading}
-      style={[
-        styles.container,
-        style
-      ]}
-      activeOpacity={0.7}
-    >
-      {loading ? (
-        <ActivityIndicator size="small" color={styles.text.color as string} />
-      ) : (
-        <>
-          {icon}
-
-          {title && <Text
-            variant="label"
-            style={[styles.text, textStyle]}
-            weight="semiBold"
-          >
-            {title}
-          </Text>}
-        </>
-      )}
-    </TouchableOpacity>
-  );
-};

@@ -255,7 +255,7 @@ export const AddExpenseScreen = () => {
               <Button
                 key={mode}
                 title={mode}
-                variant={selectedPayment === mode ? "default" : "outline"}
+                variant={selectedPayment === mode ? undefined : "outline"}
                 size="sm"
                 onPress={() => setValue('payment', mode)}
                 style={styles.paymentButton}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Modal, TouchableOpacity, ScrollView } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import { StyleSheet } from 'react-native-unistyles';
 import { Ionicons } from '@expo/vector-icons';
 import { useFinanceStore } from '../../store';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -126,7 +126,6 @@ const styles = StyleSheet.create((theme) => ({
             active: {
                 true: {
                     color: theme.colors.primary,
-                    fontWeight: '500',
                 }
             }
         }
