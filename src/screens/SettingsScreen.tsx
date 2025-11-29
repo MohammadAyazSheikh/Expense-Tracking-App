@@ -191,6 +191,13 @@ const styles = StyleSheet.create(theme => ({
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.margins.md,
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: {
+      md: 'center'
+    },
+    width: '100%'
   },
   avatar: {
     width: 64,
@@ -225,6 +232,11 @@ const styles = StyleSheet.create(theme => ({
     padding: theme.paddings.md,
     marginTop: -theme.margins.xl,
     gap: theme.margins.lg,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   togglesCard: {
     padding: theme.paddings.lg,

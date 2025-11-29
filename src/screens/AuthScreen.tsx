@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useNavigation } from '@react-navigation/native';
@@ -60,21 +60,19 @@ export const AuthScreen = () => {
         </Animated.View>
       </Animated.View>
 
-      <Animated.View entering={FadeInUp.delay(600).duration(600)}>
+      <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.contentContainer}>
         <Card>
           <View style={styles.tabs}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'login' && styles.activeTab]}
+            <AuthTab
+              title="Login"
+              isActive={activeTab === 'login'}
               onPress={() => setActiveTab('login')}
-            >
-              <Text weight={activeTab === 'login' ? "bold" : "medium"}>Login</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'signup' && styles.activeTab]}
+            />
+            <AuthTab
+              title="Sign Up"
+              isActive={activeTab === 'signup'}
               onPress={() => setActiveTab('signup')}
-            >
-              <Text weight={activeTab === 'signup' ? "bold" : "medium"}>Sign Up</Text>
-            </TouchableOpacity>
+            />
           </View>
 
           <Animated.View layout={Layout.springify()} style={styles.form}>
@@ -201,6 +199,20 @@ export const AuthScreen = () => {
   );
 };
 
+const AuthTab = ({ title, isActive, onPress }: { title: string, isActive: boolean, onPress: () => void }) => {
+  styles.useVariants({
+    active: isActive
+  });
+
+  return (
+    <TouchableOpacity
+      style={styles.tab}
+      onPress={onPress}
+    >
+      <Text weight={isActive ? "bold" : "medium"}>{title}</Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create(theme => ({
   container: {
@@ -211,6 +223,13 @@ const styles = StyleSheet.create(theme => ({
   header: {
     alignItems: 'center',
     marginBottom: theme.margins.xl,
+  },
+  contentContainer: {
+    width: '100%',
+    maxWidth: {
+      md: 500
+    },
+    alignSelf: 'center',
   },
   logoContainer: {
     width: 64,
@@ -233,14 +252,18 @@ const styles = StyleSheet.create(theme => ({
     paddingVertical: theme.paddings.sm,
     alignItems: 'center',
     borderRadius: theme.radius.sm,
-  },
-  activeTab: {
-    backgroundColor: theme.colors.background,
-    shadowColor: theme.colors.foreground,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    variants: {
+      active: {
+        true: {
+          backgroundColor: theme.colors.background,
+          shadowColor: theme.colors.foreground,
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+          elevation: 2,
+        }
+      }
+    }
   },
   form: {
     gap: theme.margins.md,

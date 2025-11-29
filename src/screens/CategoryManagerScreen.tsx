@@ -115,6 +115,11 @@ const styles = StyleSheet.create((theme) => ({
     },
     listContent: {
         padding: theme.paddings.md,
+        maxWidth: {
+            md: 800
+        },
+        alignSelf: 'center',
+        width: '100%'
     },
     categoryItem: {
         flexDirection: 'row',

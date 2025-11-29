@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet, useUnistyles, UnistylesRuntime } from "react-native-unistyles";
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -9,7 +9,6 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ScreenWrapper } from '../components/ui/ScreenWrapper';
 import { LineChart, BarChart } from 'react-native-gifted-charts';
-import { Dimensions } from 'react-native';
 import { useFinanceStore } from '../store';
 import { Feather } from '@expo/vector-icons';
 
@@ -26,6 +25,8 @@ export const AnalyticsScreen = () => {
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const transactions = useFinanceStore((state) => state.transactions);
+
+  const chartWidth = UnistylesRuntime.screen.width - (UnistylesRuntime.screen.width > 768 ? 120 : 80);
 
   const lineChartData = useMemo(() => {
     // Simplified: Last 6 transactions amounts for demo
@@ -118,7 +119,7 @@ export const AnalyticsScreen = () => {
           <View style={{ alignItems: 'center', marginTop: theme.margins.md }}>
             <LineChart
               data={lineChartData}
-              width={Dimensions.get("window").width - 80}
+              width={chartWidth}
               height={200}
               spacing={44}
               initialSpacing={10}
@@ -156,7 +157,7 @@ export const AnalyticsScreen = () => {
           <View style={{ alignItems: 'center', marginTop: theme.margins.lg }}>
             <BarChart
               data={barChartData}
-              width={Dimensions.get("window").width - 80}
+              width={chartWidth}
               height={200}
               barWidth={60}
               spacing={40}
@@ -241,7 +242,12 @@ const styles = StyleSheet.create(theme => ({
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
-    gap: theme.margins.md
+    gap: theme.margins.md,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   summaryGrid: {
     flexDirection: 'row',

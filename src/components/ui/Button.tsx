@@ -1,18 +1,86 @@
 import React from 'react';
 import { TouchableOpacity, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import { StyleSheet, useUnistyles, UnistylesVariants } from 'react-native-unistyles';
 import { Text } from './Text';
 
-type ButtonVariant = 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary';
-type ButtonSize = 'sm' | 'md' | 'lg';
+const styles = StyleSheet.create(theme => ({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: theme.radius.md,
+    gap: theme.margins.sm,
+    variants: {
+      variant: {
+        primary: {
+          backgroundColor: theme.colors.primary,
+        },
+        outline: {
+          backgroundColor: 'transparent',
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+        },
+        ghost: {
+          backgroundColor: 'transparent',
+        },
+        destructive: {
+          backgroundColor: theme.colors.destructive,
+        },
+        secondary: {
+          backgroundColor: theme.colors.secondary,
+        },
+      },
+      size: {
+        sm: {
+          paddingVertical: theme.paddings.sm / 2,
+          paddingHorizontal: theme.paddings.md,
+        },
+        md: {
+          paddingVertical: theme.paddings.sm,
+          paddingHorizontal: theme.paddings.lg,
+        },
+        lg: {
+          paddingVertical: theme.paddings.md,
+          paddingHorizontal: theme.paddings.xl,
+        },
+      },
+      disabled: {
+        true: {
+          opacity: 0.5,
+        }
+      }
+    }
+  },
+  text: {
+    variants: {
+      variant: {
+        primary: {
+          color: theme.colors.primaryForeground,
+        },
+        outline: {
+          color: theme.colors.foreground,
+        },
+        ghost: {
+          color: theme.colors.foreground,
+        },
+        destructive: {
+          color: theme.colors.destructiveForeground,
+        },
+        secondary: {
+          color: theme.colors.secondaryForeground,
+        },
+      }
+    }
+  }
+}));
 
-interface ButtonProps {
+type ButtonVariants = UnistylesVariants<typeof styles>;
+
+type ButtonProps = ButtonVariants & {
   title: string;
   onPress: () => void;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
   loading?: boolean;
-  disabled?: boolean;
+  disabled?: boolean; // Keep explicit disabled prop for TouchableOpacity
   icon?: React.ReactNode;
   style?: ViewStyle;
   textStyle?: TextStyle;
@@ -22,7 +90,7 @@ interface ButtonProps {
 export const Button = ({
   title,
   onPress,
-  variant = 'default',
+  variant = 'primary',
   size = 'md',
   loading = false,
   disabled = false,
@@ -31,15 +99,11 @@ export const Button = ({
   textStyle
 }: ButtonProps) => {
 
-  const getTextColorStyle = () => {
-    switch (variant) {
-      case 'outline': return styles.textOutline;
-      case 'ghost': return styles.textGhost;
-      case 'destructive': return styles.textDestructive;
-      case 'secondary': return styles.textSecondary;
-      default: return styles.textDefault;
-    }
-  };
+  styles.useVariants({
+    variant,
+    size,
+    disabled
+  });
 
   return (
     <TouchableOpacity
@@ -47,22 +111,19 @@ export const Button = ({
       disabled={disabled || loading}
       style={[
         styles.container,
-        styles[variant],
-        styles[size],
-        disabled && styles.disabled,
         style
       ]}
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={getTextColorStyle().color} />
+        <ActivityIndicator size="small" color={styles.text.color as string} />
       ) : (
         <>
           {icon}
 
           {title && <Text
             variant="label"
-            style={[getTextColorStyle(), textStyle]}
+            style={[styles.text, textStyle]}
             weight="semiBold"
           >
             {title}
@@ -72,65 +133,3 @@ export const Button = ({
     </TouchableOpacity>
   );
 };
-
-
-const styles = StyleSheet.create(theme => ({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: theme.radius.md,
-    gap: theme.margins.sm,
-  },
-  // Variants
-  default: {
-    backgroundColor: theme.colors.primary,
-  },
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  destructive: {
-    backgroundColor: theme.colors.destructive,
-  },
-  secondary: {
-    backgroundColor: theme.colors.secondary,
-  },
-  // Sizes
-  sm: {
-    paddingVertical: theme.paddings.sm / 2,
-    paddingHorizontal: theme.paddings.md,
-  },
-  md: {
-    paddingVertical: theme.paddings.sm,
-    paddingHorizontal: theme.paddings.lg,
-  },
-  lg: {
-    paddingVertical: theme.paddings.md,
-    paddingHorizontal: theme.paddings.xl,
-  },
-  // Disabled
-  disabled: {
-    opacity: 0.5,
-  },
-  // Text Colors
-  textDefault: {
-    color: theme.colors.primaryForeground,
-  },
-  textOutline: {
-    color: theme.colors.foreground,
-  },
-  textGhost: {
-    color: theme.colors.foreground,
-  },
-  textDestructive: {
-    color: theme.colors.destructiveForeground,
-  },
-  textSecondary: {
-    color: theme.colors.secondaryForeground,
-  }
-}));

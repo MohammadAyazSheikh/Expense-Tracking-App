@@ -187,7 +187,14 @@ const styles = StyleSheet.create(theme => ({
     borderRadius: theme.radius.lg,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: {
+      md: 'center'
+    },
+    width: '100%'
   },
   masterToggleInfo: {
     flexDirection: 'row',
@@ -197,7 +204,12 @@ const styles = StyleSheet.create(theme => ({
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
-    gap: theme.margins.md
+    gap: theme.margins.md,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   categoryCard: {
     padding: theme.paddings.lg

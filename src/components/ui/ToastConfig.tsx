@@ -4,65 +4,6 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from './Text';
 
-const ToastConfig = {
-    success: (props: any) => {
-        const { theme } = useUnistyles();
-        return (
-            <View style={[styles.container, { borderLeftColor: theme.colors.success }]}>
-                <View style={styles.iconContainer}>
-                    <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
-                </View>
-                <View style={styles.textContainer}>
-                    <Text style={styles.title}>{props.text1}</Text>
-                    {props.text2 && <Text style={styles.message}>{props.text2}</Text>}
-                </View>
-            </View>
-        );
-    },
-    error: (props: any) => {
-        const { theme } = useUnistyles();
-        return (
-            <View style={[styles.container, { borderLeftColor: theme.colors.destructive }]}>
-                <View style={styles.iconContainer}>
-                    <Ionicons name="alert-circle" size={24} color={theme.colors.destructive} />
-                </View>
-                <View style={styles.textContainer}>
-                    <Text style={styles.title}>{props.text1}</Text>
-                    {props.text2 && <Text style={styles.message}>{props.text2}</Text>}
-                </View>
-            </View>
-        );
-    },
-    info: (props: any) => {
-        const { theme } = useUnistyles();
-        return (
-            <View style={[styles.container, { borderLeftColor: theme.colors.primary }]}>
-                <View style={styles.iconContainer}>
-                    <Ionicons name="information-circle" size={24} color={theme.colors.primary} />
-                </View>
-                <View style={styles.textContainer}>
-                    <Text style={styles.title}>{props.text1}</Text>
-                    {props.text2 && <Text style={styles.message}>{props.text2}</Text>}
-                </View>
-            </View>
-        );
-    },
-    warning: (props: any) => {
-        const { theme } = useUnistyles();
-        return (
-            <View style={[styles.container, { borderLeftColor: theme.colors.warning }]}>
-                <View style={styles.iconContainer}>
-                    <Ionicons name="warning" size={24} color={theme.colors.warning} />
-                </View>
-                <View style={styles.textContainer}>
-                    <Text style={styles.title}>{props.text1}</Text>
-                    {props.text2 && <Text style={styles.message}>{props.text2}</Text>}
-                </View>
-            </View>
-        );
-    },
-};
-
 const styles = StyleSheet.create((theme) => ({
     container: {
         width: '90%',
@@ -78,6 +19,22 @@ const styles = StyleSheet.create((theme) => ({
         shadowRadius: 4,
         elevation: 4,
         marginTop: theme.margins.lg,
+        variants: {
+            type: {
+                success: {
+                    borderLeftColor: theme.colors.success,
+                },
+                error: {
+                    borderLeftColor: theme.colors.destructive,
+                },
+                info: {
+                    borderLeftColor: theme.colors.primary,
+                },
+                warning: {
+                    borderLeftColor: theme.colors.warning,
+                },
+            }
+        }
     },
     iconContainer: {
         marginRight: theme.margins.md,
@@ -97,5 +54,41 @@ const styles = StyleSheet.create((theme) => ({
         color: theme.colors.mutedForeground,
     },
 }));
+
+const ToastItem = ({ type, text1, text2 }: { type: 'success' | 'error' | 'info' | 'warning', text1: string, text2?: string }) => {
+    const { theme } = useUnistyles();
+
+    styles.useVariants({
+        type
+    });
+
+    const getIcon = () => {
+        switch (type) {
+            case 'success': return <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />;
+            case 'error': return <Ionicons name="alert-circle" size={24} color={theme.colors.destructive} />;
+            case 'info': return <Ionicons name="information-circle" size={24} color={theme.colors.primary} />;
+            case 'warning': return <Ionicons name="warning" size={24} color={theme.colors.warning} />;
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.iconContainer}>
+                {getIcon()}
+            </View>
+            <View style={styles.textContainer}>
+                <Text style={styles.title}>{text1}</Text>
+                {text2 && <Text style={styles.message}>{text2}</Text>}
+            </View>
+        </View>
+    );
+};
+
+const ToastConfig = {
+    success: (props: any) => <ToastItem type="success" {...props} />,
+    error: (props: any) => <ToastItem type="error" {...props} />,
+    info: (props: any) => <ToastItem type="info" {...props} />,
+    warning: (props: any) => <ToastItem type="warning" {...props} />,
+};
 
 export default ToastConfig;

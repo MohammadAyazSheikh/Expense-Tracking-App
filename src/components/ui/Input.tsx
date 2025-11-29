@@ -24,9 +24,13 @@ const styles = StyleSheet.create(theme => ({
     fontSize: theme.fontSize.md,
     color: theme.colors.foreground,
     backgroundColor: theme.colors.background,
-  },
-  inputError: {
-    borderColor: theme.colors.destructive,
+    variants: {
+      error: {
+        true: {
+          borderColor: theme.colors.destructive,
+        }
+      }
+    }
   },
   error: {
     marginTop: theme.margins.xs,
@@ -38,11 +42,15 @@ const styles = StyleSheet.create(theme => ({
 export const Input = ({ label, error, style, ...props }: InputProps) => {
   const { theme } = useUnistyles();
 
+  styles.useVariants({
+    error: !!error
+  });
+
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label} weight="medium">{label}</Text>}
       <TextInput
-        style={[styles.input, error && styles.inputError, style]}
+        style={[styles.input, style]}
         placeholderTextColor={theme.colors.mutedForeground}
         {...props}
       />

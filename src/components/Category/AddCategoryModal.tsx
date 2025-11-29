@@ -24,125 +24,6 @@ const COLORS = [
     '#E67E22', '#2ECC71', '#1ABC9C', '#F1C40F', '#E74C3C', '#34495E', '#95A5A6', '#7F8C8D'
 ];
 
-export const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ visible, onClose, onSave }) => {
-    const { theme } = useUnistyles();
-    const { t } = useTranslation();
-    const [name, setName] = useState('');
-    const [selectedIcon, setSelectedIcon] = useState(ICONS[0]);
-    const [selectedColor, setSelectedColor] = useState(COLORS[0]);
-    const [tags, setTags] = useState<string[]>([]);
-    const [currentTag, setCurrentTag] = useState('');
-
-    const handleAddTag = () => {
-        if (currentTag.trim() && !tags.includes(currentTag.trim())) {
-            setTags([...tags, currentTag.trim()]);
-            setCurrentTag('');
-        }
-    };
-
-    const handleRemoveTag = (tagToRemove: string) => {
-        setTags(tags.filter(tag => tag !== tagToRemove));
-    };
-
-    const handleSave = () => {
-        if (!name.trim()) {
-            alertService.show(t('common.error'), t('addExpense.descriptionRequired')); // Reusing existing or generic error
-            return;
-        }
-        onSave({
-            name: name.trim(),
-            icon: selectedIcon,
-            color: selectedColor,
-            tags
-        });
-        setName('');
-        setTags([]);
-        onClose();
-    };
-
-    return (
-        <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={onClose}>
-                        <Text style={styles.cancelButton}>{t('common.cancel')}</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.title}>{t('categoryManager.newCategory')}</Text>
-                    <TouchableOpacity onPress={handleSave}>
-                        <Text style={styles.saveButton}>{t('common.save')}</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <ScrollView contentContainerStyle={styles.content}>
-                    <View style={styles.previewContainer}>
-                        <View style={[styles.iconPreview, { backgroundColor: selectedColor }]}>
-                            <Ionicons name={selectedIcon as any} size={40} color="white" />
-                        </View>
-                    </View>
-
-                    <Text style={styles.label}>{t('categoryManager.categoryName')}</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="e.g., Groceries"
-                        placeholderTextColor={theme.colors.mutedForeground}
-                        value={name}
-                        onChangeText={setName}
-                    />
-
-                    <Text style={styles.label}>{t('categoryManager.selectIcon')}</Text>
-                    <View style={styles.grid}>
-                        {ICONS.map(icon => (
-                            <TouchableOpacity
-                                key={icon}
-                                style={[styles.gridItem, selectedIcon === icon && styles.selectedGridItem]}
-                                onPress={() => setSelectedIcon(icon)}
-                            >
-                                <Ionicons name={icon as any} size={24} color={selectedIcon === icon ? theme.colors.primary : theme.colors.foreground} />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
-                    <Text style={styles.label}>{t('categoryManager.selectColor')}</Text>
-                    <View style={styles.grid}>
-                        {COLORS.map(color => (
-                            <TouchableOpacity
-                                key={color}
-                                style={[styles.colorItem, { backgroundColor: color }, selectedColor === color && styles.selectedColorItem]}
-                                onPress={() => setSelectedColor(color)}
-                            />
-                        ))}
-                    </View>
-
-                    <Text style={styles.label}>{t('categoryManager.tags')}</Text>
-                    <View style={styles.tagInputContainer}>
-                        <TextInput
-                            style={styles.tagInput}
-                            placeholder={t('categoryManager.addTag')}
-                            placeholderTextColor={theme.colors.mutedForeground}
-                            value={currentTag}
-                            onChangeText={setCurrentTag}
-                            onSubmitEditing={handleAddTag}
-                        />
-                        <TouchableOpacity onPress={handleAddTag} style={styles.addTagButton}>
-                            <Ionicons name="add" size={24} color={theme.colors.primary} />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.tagsContainer}>
-                        {tags.map(tag => (
-                            <View key={tag} style={styles.tag}>
-                                <Text style={styles.tagText}>{tag}</Text>
-                                <TouchableOpacity onPress={() => handleRemoveTag(tag)}>
-                                    <Ionicons name="close-circle" size={16} color={theme.colors.primaryForeground} />
-                                </TouchableOpacity>
-                            </View>
-                        ))}
-                    </View>
-                </ScrollView>
-            </View>
-        </Modal>
-    );
-};
-
 const styles = StyleSheet.create((theme) => ({
     container: {
         flex: 1,
@@ -213,24 +94,32 @@ const styles = StyleSheet.create((theme) => ({
         backgroundColor: theme.colors.card,
         borderWidth: 1,
         borderColor: theme.colors.border,
-    },
-    selectedGridItem: {
-        borderColor: theme.colors.primary,
-        backgroundColor: theme.colors.input,
+        variants: {
+            selected: {
+                true: {
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.input,
+                }
+            }
+        }
     },
     colorItem: {
         width: 40,
         height: 40,
         borderRadius: 20,
-    },
-    selectedColorItem: {
-        borderWidth: 3,
-        borderColor: theme.colors.background,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        variants: {
+            selected: {
+                true: {
+                    borderWidth: 3,
+                    borderColor: theme.colors.background,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 3.84,
+                    elevation: 5,
+                }
+            }
+        }
     },
     tagInputContainer: {
         flexDirection: 'row',
@@ -268,3 +157,151 @@ const styles = StyleSheet.create((theme) => ({
         fontSize: theme.fontSize.sm,
     },
 }));
+
+const IconItem = ({ icon, isSelected, onPress }: { icon: string, isSelected: boolean, onPress: () => void }) => {
+    const { theme } = useUnistyles();
+    styles.useVariants({
+        selected: isSelected
+    });
+
+    return (
+        <TouchableOpacity
+            style={styles.gridItem}
+            onPress={onPress}
+        >
+            <Ionicons name={icon as any} size={24} color={isSelected ? theme.colors.primary : theme.colors.foreground} />
+        </TouchableOpacity>
+    );
+};
+
+const ColorItem = ({ color, isSelected, onPress }: { color: string, isSelected: boolean, onPress: () => void }) => {
+    styles.useVariants({
+        selected: isSelected
+    });
+
+    return (
+        <TouchableOpacity
+            style={[styles.colorItem, { backgroundColor: color }]}
+            onPress={onPress}
+        />
+    );
+};
+
+export const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ visible, onClose, onSave }) => {
+    const { theme } = useUnistyles();
+    const { t } = useTranslation();
+    const [name, setName] = useState('');
+    const [selectedIcon, setSelectedIcon] = useState(ICONS[0]);
+    const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+    const [tags, setTags] = useState<string[]>([]);
+    const [currentTag, setCurrentTag] = useState('');
+
+    const handleAddTag = () => {
+        if (currentTag.trim() && !tags.includes(currentTag.trim())) {
+            setTags([...tags, currentTag.trim()]);
+            setCurrentTag('');
+        }
+    };
+
+    const handleRemoveTag = (tagToRemove: string) => {
+        setTags(tags.filter(tag => tag !== tagToRemove));
+    };
+
+    const handleSave = () => {
+        if (!name.trim()) {
+            alertService.show(t('common.error'), t('addExpense.descriptionRequired'));
+            return;
+        }
+        onSave({
+            name: name.trim(),
+            icon: selectedIcon,
+            color: selectedColor,
+            tags
+        });
+        setName('');
+        setTags([]);
+        onClose();
+    };
+
+    return (
+        <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={onClose}>
+                        <Text style={styles.cancelButton}>{t('common.cancel')}</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.title}>{t('categoryManager.newCategory')}</Text>
+                    <TouchableOpacity onPress={handleSave}>
+                        <Text style={styles.saveButton}>{t('common.save')}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <ScrollView contentContainerStyle={styles.content}>
+                    <View style={styles.previewContainer}>
+                        <View style={[styles.iconPreview, { backgroundColor: selectedColor }]}>
+                            <Ionicons name={selectedIcon as any} size={40} color="white" />
+                        </View>
+                    </View>
+
+                    <Text style={styles.label}>{t('categoryManager.categoryName')}</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="e.g., Groceries"
+                        placeholderTextColor={theme.colors.mutedForeground}
+                        value={name}
+                        onChangeText={setName}
+                    />
+
+                    <Text style={styles.label}>{t('categoryManager.selectIcon')}</Text>
+                    <View style={styles.grid}>
+                        {ICONS.map(icon => (
+                            <IconItem
+                                key={icon}
+                                icon={icon}
+                                isSelected={selectedIcon === icon}
+                                onPress={() => setSelectedIcon(icon)}
+                            />
+                        ))}
+                    </View>
+
+                    <Text style={styles.label}>{t('categoryManager.selectColor')}</Text>
+                    <View style={styles.grid}>
+                        {COLORS.map(color => (
+                            <ColorItem
+                                key={color}
+                                color={color}
+                                isSelected={selectedColor === color}
+                                onPress={() => setSelectedColor(color)}
+                            />
+                        ))}
+                    </View>
+
+                    <Text style={styles.label}>{t('categoryManager.tags')}</Text>
+                    <View style={styles.tagInputContainer}>
+                        <TextInput
+                            style={styles.tagInput}
+                            placeholder={t('categoryManager.addTag')}
+                            placeholderTextColor={theme.colors.mutedForeground}
+                            value={currentTag}
+                            onChangeText={setCurrentTag}
+                            onSubmitEditing={handleAddTag}
+                        />
+                        <TouchableOpacity onPress={handleAddTag} style={styles.addTagButton}>
+                            <Ionicons name="add" size={24} color={theme.colors.primary} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.tagsContainer}>
+                        {tags.map(tag => (
+                            <View key={tag} style={styles.tag}>
+                                <Text style={styles.tagText}>{tag}</Text>
+                                <TouchableOpacity onPress={() => handleRemoveTag(tag)}>
+                                    <Ionicons name="close-circle" size={16} color={theme.colors.primaryForeground} />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                    </View>
+                </ScrollView>
+            </View>
+        </Modal>
+    );
+};

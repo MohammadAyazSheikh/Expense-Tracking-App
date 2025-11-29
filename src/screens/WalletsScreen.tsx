@@ -171,7 +171,14 @@ const styles = StyleSheet.create(theme => ({
   balanceCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     padding: theme.paddings.lg,
-    borderRadius: theme.radius.lg
+    borderRadius: theme.radius.lg,
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: {
+      md: 'center'
+    },
+    width: '100%'
   },
   balanceLabel: {
     color: 'rgba(255, 255, 255, 0.8)',
@@ -185,7 +192,12 @@ const styles = StyleSheet.create(theme => ({
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
-    gap: theme.margins.md
+    gap: theme.margins.md,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   walletCard: {
     flexDirection: 'row',

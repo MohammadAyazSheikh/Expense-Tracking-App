@@ -20,90 +20,6 @@ type AlertConfig = {
     };
 };
 
-export const CustomAlert = () => {
-    const { theme } = useUnistyles();
-    const [visible, setVisible] = useState(false);
-    const [config, setConfig] = useState<AlertConfig | null>(null);
-
-    useEffect(() => {
-        alertService.setListener((newConfig) => {
-            if (newConfig) {
-                setConfig(newConfig);
-                setVisible(true);
-            } else {
-                setVisible(false);
-                setConfig(null);
-            }
-        });
-
-        return () => {
-            alertService.setListener(() => { });
-        };
-    }, []);
-
-    const handleClose = () => {
-        if (config?.options?.cancelable) {
-            setVisible(false);
-            config.options.onDismiss?.();
-        }
-    };
-
-    const handleButtonPress = (btn: AlertButton) => {
-        setVisible(false);
-        btn.onPress?.();
-    };
-
-    if (!config) return null;
-
-    const buttons = config.buttons || [{ text: 'OK', onPress: () => { } }];
-
-    return (
-        <Modal
-            transparent
-            visible={visible}
-            animationType="fade"
-            onRequestClose={handleClose}
-        >
-            <TouchableWithoutFeedback onPress={handleClose}>
-                <View style={styles.overlay}>
-                    <TouchableWithoutFeedback>
-                        <View style={styles.alertContainer}>
-                            <View style={styles.contentContainer}>
-                                <Text style={styles.title}>{config.title}</Text>
-                                {config.message && <Text style={styles.message}>{config.message}</Text>}
-                            </View>
-
-                            <View style={styles.buttonContainer}>
-                                {buttons.map((btn, index) => (
-                                    <TouchableOpacity
-                                        key={index}
-                                        style={[
-                                            styles.button,
-                                            index > 0 && config.buttons && config.buttons.length > 2 ? styles.buttonBorderTop : styles.buttonBorderLeft,
-                                            // If vertical layout is needed (many buttons), we might need to adjust styles.
-                                            // For now, assuming standard 1-2 buttons or vertical stack if > 2.
-                                            buttons.length > 2 ? { width: '100%', borderLeftWidth: 0, borderTopWidth: 1 } : {}
-                                        ]}
-                                        onPress={() => handleButtonPress(btn)}
-                                    >
-                                        <Text style={[
-                                            styles.buttonText,
-                                            btn.style === 'destructive' && { color: theme.colors.destructive },
-                                            btn.style === 'cancel' && { fontWeight: 'normal' },
-                                        ]}>
-                                            {btn.text}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
-                </View>
-            </TouchableWithoutFeedback>
-        </Modal>
-    );
-};
-
 const styles = StyleSheet.create((theme) => ({
     overlay: {
         flex: 1,
@@ -157,5 +73,123 @@ const styles = StyleSheet.create((theme) => ({
         fontSize: 17,
         color: theme.colors.primary, // Or system blue
         fontWeight: '600',
+        variants: {
+            variant: {
+                default: {},
+                destructive: {
+                    color: theme.colors.destructive
+                },
+                cancel: {
+                    fontWeight: 'normal'
+                }
+            }
+        }
     },
 }));
+
+const AlertButtonComponent = ({
+    btn,
+    index,
+    totalButtons,
+    onPress
+}: {
+    btn: AlertButton,
+    index: number,
+    totalButtons: number,
+    onPress: () => void
+}) => {
+    styles.useVariants({
+        variant: btn.style || 'default'
+    });
+
+    const isVertical = totalButtons > 2;
+    const hasBorderTop = index > 0 && isVertical;
+    const hasBorderLeft = index > 0 && !isVertical;
+
+    return (
+        <TouchableOpacity
+            style={[
+                styles.button,
+                hasBorderTop && styles.buttonBorderTop,
+                hasBorderLeft && styles.buttonBorderLeft,
+                isVertical ? { width: '100%', borderLeftWidth: 0, borderTopWidth: index === 0 ? 0 : 0.5 } : {}
+            ]}
+            onPress={onPress}
+        >
+            <Text style={styles.buttonText}>
+                {btn.text}
+            </Text>
+        </TouchableOpacity>
+    );
+};
+
+export const CustomAlert = () => {
+    const [visible, setVisible] = useState(false);
+    const [config, setConfig] = useState<AlertConfig | null>(null);
+
+    useEffect(() => {
+        alertService.setListener((newConfig) => {
+            if (newConfig) {
+                setConfig(newConfig);
+                setVisible(true);
+            } else {
+                setVisible(false);
+                setConfig(null);
+            }
+        });
+
+        return () => {
+            alertService.setListener(() => { });
+        };
+    }, []);
+
+    const handleClose = () => {
+        if (config?.options?.cancelable) {
+            setVisible(false);
+            config.options.onDismiss?.();
+        }
+    };
+
+    const handleButtonPress = (btn: AlertButton) => {
+        setVisible(false);
+        btn.onPress?.();
+    };
+
+    if (!config) return null;
+
+    const buttons = config.buttons || [{ text: 'OK', onPress: () => { } }];
+
+    return (
+        <Modal
+            transparent
+            visible={visible}
+            animationType="fade"
+            onRequestClose={handleClose}
+        >
+            <TouchableWithoutFeedback onPress={handleClose}>
+                <View style={styles.overlay}>
+                    <TouchableWithoutFeedback>
+                        <View style={styles.alertContainer}>
+                            <View style={styles.contentContainer}>
+                                <Text style={styles.title}>{config.title}</Text>
+                                {config.message && <Text style={styles.message}>{config.message}</Text>}
+                            </View>
+
+                            <View style={styles.buttonContainer}>
+                                {buttons.map((btn, index) => (
+                                    <AlertButtonComponent
+                                        key={index}
+                                        btn={btn}
+                                        index={index}
+                                        totalButtons={buttons.length}
+                                        onPress={() => handleButtonPress(btn)}
+                                    />
+                                ))}
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </View>
+            </TouchableWithoutFeedback>
+        </Modal>
+    );
+};

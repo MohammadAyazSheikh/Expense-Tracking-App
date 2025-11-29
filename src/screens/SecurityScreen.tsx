@@ -203,6 +203,13 @@ const styles = StyleSheet.create(theme => ({
     borderWidth: 0,
     padding: theme.paddings.md,
     marginTop: theme.margins.sm,
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: {
+      md: 'center'
+    },
+    width: '100%'
   },
   securityStatusContent: {
     flexDirection: 'row',
@@ -237,6 +244,11 @@ const styles = StyleSheet.create(theme => ({
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   section: {
     padding: theme.paddings.lg,

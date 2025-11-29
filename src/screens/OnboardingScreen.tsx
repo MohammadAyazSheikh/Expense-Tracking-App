@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, FlatList, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
+import { View, FlatList, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { StyleSheet, useUnistyles, UnistylesRuntime } from 'react-native-unistyles';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
@@ -18,8 +18,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTranslation } from '../hooks/useTranslation';
 
-const { width } = Dimensions.get('window');
-
 
 const styles = StyleSheet.create(theme => ({
   container: {
@@ -32,7 +30,7 @@ const styles = StyleSheet.create(theme => ({
     padding: theme.paddings.md,
   },
   slide: {
-    width,
+    width: UnistylesRuntime.screen.width,
     alignItems: 'center',
     justifyContent: 'center',
     padding: theme.paddings.xl,
@@ -178,7 +176,7 @@ export const OnboardingScreen = () => {
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(contentOffsetX / width);
+    const index = Math.round(contentOffsetX / UnistylesRuntime.screen.width);
     setCurrentIndex(index);
   };
 

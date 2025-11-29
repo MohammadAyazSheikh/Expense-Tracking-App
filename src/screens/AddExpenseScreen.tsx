@@ -13,7 +13,7 @@ import { Feather } from '@expo/vector-icons';
 import { useForm, Controller } from 'react-hook-form';
 import { useFinanceStore } from '../store';
 import { useFonts } from '../hooks/useFonts';
-
+import { useTranslation } from '../hooks/useTranslation';
 
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
@@ -64,6 +64,11 @@ const styles = StyleSheet.create(theme => ({
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
+    width: '100%',
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: 'center',
   },
   sectionLabel: {
     marginBottom: theme.margins.sm,
@@ -74,7 +79,11 @@ const styles = StyleSheet.create(theme => ({
     gap: theme.margins.sm,
   },
   categoryButton: {
-    width: '31%',
+    width: {
+      xs: '31%',
+      sm: '23%',
+      md: '18%'
+    },
     aspectRatio: 1,
     borderRadius: theme.radius.lg,
     borderWidth: 2,
@@ -82,10 +91,14 @@ const styles = StyleSheet.create(theme => ({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: theme.colors.card,
-  },
-  categoryButtonActive: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary + '15',
+    variants: {
+      selected: {
+        true: {
+          borderColor: theme.colors.primary,
+          backgroundColor: theme.colors.primary + '15',
+        }
+      }
+    }
   },
   categoryEmoji: {
     fontSize: 32,
@@ -119,7 +132,24 @@ const styles = StyleSheet.create(theme => ({
   }
 }));
 
-import { useTranslation } from '../hooks/useTranslation';
+const CategoryButton = ({ category, isSelected, onPress }: { category: any, isSelected: boolean, onPress: () => void }) => {
+  styles.useVariants({
+    selected: isSelected
+  });
+
+  return (
+    <TouchableOpacity
+      style={styles.categoryButton}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: category.color, justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
+        <Feather name={category.icon as any || 'help-circle'} size={20} color="white" />
+      </View>
+      <Text variant="caption" weight="medium">{category.name}</Text>
+    </TouchableOpacity>
+  );
+};
 
 export const AddExpenseScreen = () => {
   const { theme } = useUnistyles();
@@ -207,20 +237,12 @@ export const AddExpenseScreen = () => {
           </View>
           <View style={styles.categoryGrid}>
             {categories.map((category) => (
-              <TouchableOpacity
+              <CategoryButton
                 key={category.id}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === category.id && styles.categoryButtonActive
-                ]}
+                category={category}
+                isSelected={selectedCategory === category.id}
                 onPress={() => setValue('category', category.id)}
-                activeOpacity={0.7}
-              >
-                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: category.color, justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
-                  <Feather name={category.icon as any || 'help-circle'} size={20} color="white" />
-                </View>
-                <Text variant="caption" weight="medium">{category.name}</Text>
-              </TouchableOpacity>
+              />
             ))}
           </View>
         </Card>

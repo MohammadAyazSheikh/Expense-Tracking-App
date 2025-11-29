@@ -270,7 +270,11 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: theme.colors.background,
   },
   content: {
-    paddingHorizontal: theme.paddings.md
+    paddingHorizontal: {
+      xs: theme.paddings.md,
+      md: theme.paddings.xl,
+      lg: theme.paddings.xl * 2
+    }
   },
   header: {
     flexDirection: 'row',
@@ -290,7 +294,10 @@ const styles = StyleSheet.create(theme => ({
   },
   balanceValue: {
     color: 'white',
-    fontSize: theme.fontSize.xxxl,
+    fontSize: {
+      xs: theme.fontSize.xxxl,
+      md: 48 // Larger font on tablet
+    },
     marginBottom: theme.margins.lg,
   },
   statsRow: {
@@ -358,8 +365,15 @@ const styles = StyleSheet.create(theme => ({
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: "50%",
-    flex: 1,
+    width: {
+      xs: "50%",
+      sm: "33%",
+      md: "25%"
+    },
+    flex: {
+      xs: 1,
+      sm: 0 // Disable flex grow on larger screens if fixed width is desired
+    },
     paddingHorizontal: theme.paddings.md,
     paddingVertical: theme.paddings.sm,
   },

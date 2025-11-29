@@ -43,7 +43,14 @@ export const BudgetScreen = () => {
     summaryCard: {
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
       padding: theme.paddings.lg,
-      borderRadius: theme.radius.lg
+      borderRadius: theme.radius.lg,
+      maxWidth: {
+        md: 600
+      },
+      alignSelf: {
+        md: 'center'
+      },
+      width: '100%'
     },
     summaryRow: {
       flexDirection: 'row',
@@ -66,14 +73,20 @@ export const BudgetScreen = () => {
     content: {
       padding: theme.paddings.md,
       marginTop: -theme.margins.lg,
-      gap: theme.margins.md
+      gap: theme.margins.md,
+      maxWidth: {
+        md: 800
+      },
+      alignSelf: 'center',
+      width: '100%'
     },
     insightCard: {
       flexDirection: 'row',
       gap: theme.margins.md,
       backgroundColor: theme.colors.card,
       borderWidth: 1,
-      borderColor: theme.colors.primary + '30'
+      borderColor: theme.colors.primary + '30',
+      alignItems: 'center'
     },
     insightIcon: {
       width: 40,

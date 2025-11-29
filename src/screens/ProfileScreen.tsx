@@ -170,6 +170,11 @@ const styles = StyleSheet.create(theme => ({
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   sectionTitle: {
     marginBottom: theme.margins.md,

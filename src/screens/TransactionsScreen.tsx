@@ -18,9 +18,6 @@ import { useFinanceStore } from '../store';
 const getCategoryEmoji = (categoryName: string, categories: any[]) => {
   const category = categories.find(c => c.name === categoryName);
   if (category && category.icon) {
-    // If it's an ionicon name, we can't render it as text easily here without changing the structure.
-    // For now, let's return a default emoji or try to map common names.
-    // Or better, the UI below should render an Icon if it's not an emoji.
     return "📝";
   }
   const emojis: Record<string, string> = {
@@ -47,9 +44,7 @@ export const TransactionsScreen = () => {
 
   const groupedTransactions = useMemo(() => {
     return transactions.reduce((groups, transaction) => {
-      // Simplified date grouping logic for demo
       const date = transaction.date;
-      // In real app, use proper date formatting
       let dateLabel = date;
       if (date === "2024-06-15") dateLabel = t('transactions.today');
       else if (date === "2024-06-14") dateLabel = t('transactions.yesterday');
@@ -66,10 +61,6 @@ export const TransactionsScreen = () => {
     const filteredItems = items.filter(t => {
       const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesType = filters.type === 'all' || t.type === filters.type;
-      // For category matching, we need to match by name or ID. 
-      // Transaction stores category NAME currently (based on AddExpense logic).
-      // Filter stores category IDs.
-      // We need to find the category ID for the transaction category name.
       const category = categories.find(c => c.name === t.category);
       const matchesCategory = filters.categories.length === 0 || (category && filters.categories.includes(category.id));
 
@@ -216,7 +207,14 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: theme.radius.md,
     paddingHorizontal: theme.paddings.md,
-    height: 48
+    height: 48,
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: {
+      md: 'center'
+    },
+    width: '100%'
   },
   searchInput: {
     flex: 1,
@@ -227,12 +225,21 @@ const styles = StyleSheet.create(theme => ({
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
-    gap: theme.margins.md
+    gap: theme.margins.md,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   summaryGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: theme.paddings.md
+    padding: theme.paddings.md,
+    gap: {
+      xs: theme.margins.sm,
+      md: theme.margins.lg
+    }
   },
   summaryItem: {
     alignItems: 'center',

@@ -18,106 +18,6 @@ export interface FilterState {
     categories: string[];
 }
 
-export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onApply, initialFilters }) => {
-    const { theme } = useUnistyles();
-    const { t } = useTranslation();
-    const { categories } = useFinanceStore();
-    const [filters, setFilters] = useState<FilterState>(initialFilters);
-
-    const handleTypeSelect = (type: FilterState['type']) => {
-        setFilters(prev => ({ ...prev, type }));
-    };
-
-    const handleCategoryToggle = (categoryId: string) => {
-        setFilters(prev => {
-            const isSelected = prev.categories.includes(categoryId);
-            if (isSelected) {
-                return { ...prev, categories: prev.categories.filter(id => id !== categoryId) };
-            } else {
-                return { ...prev, categories: [...prev.categories, categoryId] };
-            }
-        });
-    };
-
-    const handleReset = () => {
-        setFilters({ type: 'all', categories: [] });
-    };
-
-    const handleApply = () => {
-        onApply(filters);
-        onClose();
-    };
-
-    return (
-        <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={onClose}>
-                        <Text style={styles.cancelButton}>{t('common.cancel')}</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.title}>{t('filter.title')}</Text>
-                    <TouchableOpacity onPress={handleReset}>
-                        <Text style={styles.resetButton}>{t('common.reset')}</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <ScrollView contentContainerStyle={styles.content}>
-                    <Text style={styles.sectionTitle}>{t('filter.transactionType')}</Text>
-                    <View style={styles.typeContainer}>
-                        {(['all', 'income', 'expense'] as const).map(type => (
-                            <TouchableOpacity
-                                key={type}
-                                style={[
-                                    styles.typeButton,
-                                    filters.type === type && styles.typeButtonActive
-                                ]}
-                                onPress={() => handleTypeSelect(type)}
-                            >
-                                <Text style={[
-                                    styles.typeText,
-                                    filters.type === type && styles.typeTextActive
-                                ]}>
-                                    {t(`transactions.${type === 'expense' ? 'expenses' : type}`)}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
-                    <Text style={styles.sectionTitle}>{t('categoryManager.title')}</Text>
-                    <View style={styles.categoriesContainer}>
-                        {categories.map(category => (
-                            <TouchableOpacity
-                                key={category.id}
-                                style={[
-                                    styles.categoryButton,
-                                    filters.categories.includes(category.id) && styles.categoryButtonActive
-                                ]}
-                                onPress={() => handleCategoryToggle(category.id)}
-                            >
-                                <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
-                                    <Ionicons name={category.icon as any} size={16} color="white" />
-                                </View>
-                                <Text style={[
-                                    styles.categoryText,
-                                    filters.categories.includes(category.id) && styles.categoryTextActive
-                                ]}>
-                                    {category.name}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </ScrollView>
-
-                <View style={styles.footer}>
-                    <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-                        <Text style={styles.applyButtonText}>{t('filter.applyFilters')}</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </Modal>
-    );
-};
-
 const styles = StyleSheet.create((theme) => ({
     container: {
         flex: 1,
@@ -165,22 +65,30 @@ const styles = StyleSheet.create((theme) => ({
         paddingVertical: 8,
         alignItems: 'center',
         borderRadius: theme.radius.sm,
-    },
-    typeButtonActive: {
-        backgroundColor: theme.colors.card,
-        shadowColor: theme.colors.foreground,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+        variants: {
+            active: {
+                true: {
+                    backgroundColor: theme.colors.card,
+                    shadowColor: theme.colors.foreground,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    elevation: 2,
+                }
+            }
+        }
     },
     typeText: {
         color: theme.colors.mutedForeground,
         fontWeight: '500',
-    },
-    typeTextActive: {
-        color: theme.colors.foreground,
-        fontWeight: '600',
+        variants: {
+            active: {
+                true: {
+                    color: theme.colors.foreground,
+                    fontWeight: '600',
+                }
+            }
+        }
     },
     categoriesContainer: {
         flexDirection: 'row',
@@ -195,10 +103,14 @@ const styles = StyleSheet.create((theme) => ({
         borderWidth: 1,
         borderColor: theme.colors.border,
         gap: 6,
-    },
-    categoryButtonActive: {
-        borderColor: theme.colors.primary,
-        backgroundColor: theme.colors.primary + '15',
+        variants: {
+            active: {
+                true: {
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.primary + '15',
+                }
+            }
+        }
     },
     categoryIcon: {
         width: 24,
@@ -210,10 +122,14 @@ const styles = StyleSheet.create((theme) => ({
     categoryText: {
         color: theme.colors.foreground,
         fontSize: theme.fontSize.sm,
-    },
-    categoryTextActive: {
-        color: theme.colors.primary,
-        fontWeight: '500',
+        variants: {
+            active: {
+                true: {
+                    color: theme.colors.primary,
+                    fontWeight: '500',
+                }
+            }
+        }
     },
     footer: {
         padding: theme.paddings.lg,
@@ -232,3 +148,119 @@ const styles = StyleSheet.create((theme) => ({
         fontSize: theme.fontSize.md,
     },
 }));
+
+const FilterTypeButton = ({ type, isActive, onPress, label }: { type: string, isActive: boolean, onPress: () => void, label: string }) => {
+    styles.useVariants({
+        active: isActive
+    });
+
+    return (
+        <TouchableOpacity
+            style={styles.typeButton}
+            onPress={onPress}
+        >
+            <Text style={styles.typeText}>
+                {label}
+            </Text>
+        </TouchableOpacity>
+    );
+};
+
+const CategoryFilterButton = ({ category, isActive, onPress }: { category: any, isActive: boolean, onPress: () => void }) => {
+    styles.useVariants({
+        active: isActive
+    });
+
+    return (
+        <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={onPress}
+        >
+            <View style={[styles.categoryIcon, { backgroundColor: category.color }]}>
+                <Ionicons name={category.icon as any} size={16} color="white" />
+            </View>
+            <Text style={styles.categoryText}>
+                {category.name}
+            </Text>
+        </TouchableOpacity>
+    );
+};
+
+export const FilterModal: React.FC<FilterModalProps> = ({ visible, onClose, onApply, initialFilters }) => {
+    const { t } = useTranslation();
+    const { categories } = useFinanceStore();
+    const [filters, setFilters] = useState<FilterState>(initialFilters);
+
+    const handleTypeSelect = (type: FilterState['type']) => {
+        setFilters(prev => ({ ...prev, type }));
+    };
+
+    const handleCategoryToggle = (categoryId: string) => {
+        setFilters(prev => {
+            const isSelected = prev.categories.includes(categoryId);
+            if (isSelected) {
+                return { ...prev, categories: prev.categories.filter(id => id !== categoryId) };
+            } else {
+                return { ...prev, categories: [...prev.categories, categoryId] };
+            }
+        });
+    };
+
+    const handleReset = () => {
+        setFilters({ type: 'all', categories: [] });
+    };
+
+    const handleApply = () => {
+        onApply(filters);
+        onClose();
+    };
+
+    return (
+        <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={onClose}>
+                        <Text style={styles.cancelButton}>{t('common.cancel')}</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.title}>{t('filter.title')}</Text>
+                    <TouchableOpacity onPress={handleReset}>
+                        <Text style={styles.resetButton}>{t('common.reset')}</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <ScrollView contentContainerStyle={styles.content}>
+                    <Text style={styles.sectionTitle}>{t('filter.transactionType')}</Text>
+                    <View style={styles.typeContainer}>
+                        {(['all', 'income', 'expense'] as const).map(type => (
+                            <FilterTypeButton
+                                key={type}
+                                type={type}
+                                isActive={filters.type === type}
+                                onPress={() => handleTypeSelect(type)}
+                                label={t(`transactions.${type === 'expense' ? 'expenses' : type}`)}
+                            />
+                        ))}
+                    </View>
+
+                    <Text style={styles.sectionTitle}>{t('categoryManager.title')}</Text>
+                    <View style={styles.categoriesContainer}>
+                        {categories.map(category => (
+                            <CategoryFilterButton
+                                key={category.id}
+                                category={category}
+                                isActive={filters.categories.includes(category.id)}
+                                onPress={() => handleCategoryToggle(category.id)}
+                            />
+                        ))}
+                    </View>
+                </ScrollView>
+
+                <View style={styles.footer}>
+                    <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
+                        <Text style={styles.applyButtonText}>{t('filter.applyFilters')}</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
+    );
+};

@@ -131,7 +131,7 @@ export const HelpSupportScreen = () => {
           <Text variant="h3" style={styles.sectionTitle}>Contact Support</Text>
           <View style={styles.contactOptions}>
             {contactOptions.map((option) => (
-              <TouchableOpacity key={option.title}>
+              <TouchableOpacity key={option.title} style={styles.contactOptionWrapper}>
                 <Card style={styles.contactCard}>
                   <View style={styles.contactCardContent}>
                     <View style={[styles.iconCircle, { backgroundColor: theme.colors.muted }]}>
@@ -223,6 +223,13 @@ const styles = StyleSheet.create(theme => ({
   searchContainer: {
     position: 'relative',
     marginTop: theme.margins.sm,
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: {
+      md: 'center'
+    },
+    width: '100%'
   },
   searchIcon: {
     position: 'absolute',
@@ -241,6 +248,11 @@ const styles = StyleSheet.create(theme => ({
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   quickActionsCard: {
     padding: theme.paddings.md,
@@ -261,9 +273,23 @@ const styles = StyleSheet.create(theme => ({
   },
   contactOptions: {
     gap: theme.margins.md,
+    flexDirection: {
+      xs: 'column',
+      md: 'row'
+    },
+    flexWrap: 'wrap'
+  },
+  contactOptionWrapper: {
+    flex: {
+      md: 1
+    },
+    minWidth: {
+      md: 200
+    }
   },
   contactCard: {
     padding: theme.paddings.md,
+    height: '100%'
   },
   contactCardContent: {
     flexDirection: 'row',

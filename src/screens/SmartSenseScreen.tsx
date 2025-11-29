@@ -192,12 +192,26 @@ const styles = StyleSheet.create(theme => ({
     color: 'white'
   },
   headerSubtitle: {
-    color: 'rgba(255, 255, 255, 0.9)'
+    color: 'rgba(255, 255, 255, 0.9)',
+    maxWidth: {
+      md: 600
+    },
+    alignSelf: {
+      md: 'center'
+    },
+    textAlign: {
+      md: 'center'
+    }
   },
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
-    gap: theme.margins.lg
+    gap: theme.margins.lg,
+    maxWidth: {
+      md: 800
+    },
+    alignSelf: 'center',
+    width: '100%'
   },
   sectionTitle: {
     marginBottom: theme.margins.sm
