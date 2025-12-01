@@ -38,6 +38,7 @@ export const ScreenWrapper = ({
         <ScrollView
           contentContainerStyle={[styles.content, contentContainerStyle]}
           showsVerticalScrollIndicator={false}
+          style={style}
         >
           {children}
         </ScrollView>

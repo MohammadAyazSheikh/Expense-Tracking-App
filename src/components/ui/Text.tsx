@@ -4,48 +4,6 @@ import { StyleSheet, UnistylesVariants } from 'react-native-unistyles';
 import { useFonts } from '../../hooks/useFonts';
 import { FontWeight } from '../../fonts/config';
 
-const styles = StyleSheet.create(theme => ({
-  text: {
-    color: theme.colors.foreground,
-    variants: {
-      variant: {
-        h1: {
-          fontSize: theme.fontSize.lg,
-          // lineHeight: theme.fontSize.md * 1.2,
-          // fontWeight: 'bold', // Handled by font family
-        },
-        h2: {
-          fontSize: theme.fontSize.md,
-          // lineHeight: theme.fontSize.md * 1.2,
-          // fontWeight: 'bold', // Handled by font family
-        },
-        h3: {
-          fontSize: theme.fontSize.sm,
-          // lineHeight: theme.fontSize.sm * 1.2,
-          // fontWeight: '600', // Handled by font family
-        },
-        body: {
-          fontSize: theme.fontSize.md,
-          // lineHeight: theme.fontSize.md * 1.5,
-        },
-        label: {
-          fontSize: theme.fontSize.lg,
-          // lineHeight: theme.fontSize.lg * 1.4,
-        },
-        caption: {
-          fontSize: theme.fontSize.md,
-          lineHeight: theme.fontSize.md * 1.4,
-          color: theme.colors.mutedForeground,
-        }
-      },
-      align: {
-        left: { textAlign: 'left' },
-        center: { textAlign: 'center' },
-        right: { textAlign: 'right' },
-      }
-    }
-  }
-}));
 
 type TextVariants = UnistylesVariants<typeof styles>;
 
@@ -89,3 +47,47 @@ export const Text = ({
     />
   );
 };
+
+
+const styles = StyleSheet.create(theme => ({
+  text: {
+    color: theme.colors.foreground,
+    variants: {
+      variant: {
+        h1: {
+          fontSize: theme.fontSize.lg,
+          // lineHeight: theme.fontSize.md * 1.2,
+          fontWeight: 'bold',
+        },
+        h2: {
+          fontSize: theme.fontSize.md,
+          // lineHeight: theme.fontSize.md * 1.2,
+          fontWeight: 'bold',
+        },
+        h3: {
+          fontSize: theme.fontSize.sm,
+          // lineHeight: theme.fontSize.sm * 1.2,
+          fontWeight: '600',
+        },
+        body: {
+          fontSize: theme.fontSize.md,
+          // lineHeight: theme.fontSize.md * 1.5,
+        },
+        label: {
+          fontSize: theme.fontSize.lg,
+          // lineHeight: theme.fontSize.lg * 1.4,
+        },
+        caption: {
+          fontSize: theme.fontSize.md,
+          // lineHeight: theme.fontSize.md * 1.4,
+          color: theme.colors.mutedForeground,
+        }
+      },
+      align: {
+        left: { textAlign: 'left' },
+        center: { textAlign: 'center' },
+        right: { textAlign: 'right' },
+      }
+    }
+  }
+}));

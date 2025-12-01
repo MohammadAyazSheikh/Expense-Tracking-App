@@ -1,42 +1,46 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
-import { Text } from '../components/ui/Text';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
-import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { Feather } from '@expo/vector-icons';
-import { useForm, Controller } from 'react-hook-form';
-import { useAuthStore } from '../store';
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  Layout
-} from 'react-native-reanimated';
-
+import React, { useState } from "react";
+import { useAuthStore } from "../store";
+import { Text } from "../components/ui/Text";
+import { Card } from "../components/ui/Card";
+import { Feather } from "@expo/vector-icons";
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
+import { View, TouchableOpacity } from "react-native";
+import { useForm, Controller } from "react-hook-form";
+import { RootStackParamList } from "../navigation/types";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
+import {
+  DAMPING,
+  EnteringAnimation,
+  ExitingAnimation,
+  LayoutAnimation,
+} from "../utils/Animmation";
 
 export const AuthScreen = () => {
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const { login, register, isLoading, error } = useAuthStore();
 
-  const { control, handleSubmit, formState: { errors } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-    }
+      name: "",
+      email: "",
+      password: "",
+    },
   });
 
   const onSubmit = async (data: any) => {
     try {
-      if (activeTab === 'login') {
+      if (activeTab === "login") {
         await login(data.email, data.password);
       } else {
         await register(data.email, data.password, data.name);
@@ -47,47 +51,85 @@ export const AuthScreen = () => {
   };
 
   return (
-    <ScreenWrapper style={styles.container} scrollable>
-      <Animated.View entering={FadeInDown.duration(600).springify()} style={styles.header}>
-        <Animated.View entering={FadeIn.delay(200).duration(600)} style={styles.logoContainer}>
+    <ScreenWrapper
+      style={styles.container}
+      contentContainerStyle={styles.contentContainerStyle}
+      scrollable
+    >
+      <Animated.View
+        entering={FadeInDown.springify()
+          .damping(DAMPING)
+          .duration(1000)
+          .delay(100)}
+        exiting={FadeOut.springify().damping(DAMPING).duration(500)}
+        style={styles.header}
+      >
+        <View style={styles.logoContainer}>
           <Feather name="credit-card" size={32} color="white" />
-        </Animated.View>
-        <Animated.View entering={FadeInUp.delay(400).duration(600)}>
+        </View>
+        <View>
           <Text variant="h2">HisaabBee</Text>
-        </Animated.View>
-        <Animated.View entering={FadeInUp.delay(500).duration(600)}>
+        </View>
+        <View>
           <Text variant="caption">Manage your finances smartly</Text>
-        </Animated.View>
+        </View>
       </Animated.View>
 
-      <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.contentContainer}>
+      <Animated.View
+        entering={FadeInDown.springify()
+          .damping(DAMPING)
+          .duration(1000)
+          .delay(200)}
+        exiting={FadeOut.springify().damping(DAMPING).duration(500)}
+        layout={LayoutAnimation}
+        style={styles.contentContainer}
+      >
         <Card>
           <View style={styles.tabs}>
             <AuthTab
               title="Login"
-              isActive={activeTab === 'login'}
-              onPress={() => setActiveTab('login')}
+              isActive={activeTab === "login"}
+              onPress={() => setActiveTab("login")}
             />
             <AuthTab
               title="Sign Up"
-              isActive={activeTab === 'signup'}
-              onPress={() => setActiveTab('signup')}
+              isActive={activeTab === "signup"}
+              onPress={() => setActiveTab("signup")}
             />
           </View>
 
-          <Animated.View layout={Layout.springify()} style={styles.form}>
+          <Animated.View
+            entering={EnteringAnimation}
+            exiting={ExitingAnimation}
+            layout={EnteringAnimation}
+            style={styles.form}
+          >
             {error && (
-              <Animated.View entering={FadeIn.duration(300)}>
-                <Text style={{ color: theme.colors.destructive, textAlign: 'center' }}>{error}</Text>
+              <Animated.View
+                entering={EnteringAnimation}
+                exiting={ExitingAnimation}
+                layout={EnteringAnimation}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.destructive,
+                    textAlign: "center",
+                  }}
+                >
+                  {error}
+                </Text>
               </Animated.View>
             )}
 
-            {activeTab === 'signup' && (
-              <Animated.View entering={FadeInDown.duration(400)} exiting={FadeInDown.duration(200)}>
+            {activeTab === "signup" && (
+              <Animated.View
+                entering={EnteringAnimation}
+                exiting={ExitingAnimation}
+              >
                 <Controller
                   control={control}
                   name="name"
-                  rules={{ required: 'Name is required' }}
+                  rules={{ required: "Name is required" }}
                   render={({ field: { onChange, value } }) => (
                     <Input
                       label="Full Name"
@@ -106,22 +148,24 @@ export const AuthScreen = () => {
               control={control}
               name="email"
               rules={{
-                required: 'Email is required',
+                required: "Email is required",
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address"
-                }
+                  message: "Invalid email address",
+                },
               }}
               render={({ field: { onChange, value } }) => (
-                <Input
-                  label="Email"
-                  placeholder="your@email.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.email?.message as string}
-                />
+                <Animated.View layout={LayoutAnimation}>
+                  <Input
+                    label="Email"
+                    placeholder="your@email.com"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={value}
+                    onChangeText={onChange}
+                    error={errors.email?.message as string}
+                  />
+                </Animated.View>
               )}
             />
 
@@ -129,43 +173,54 @@ export const AuthScreen = () => {
               control={control}
               name="password"
               rules={{
-                required: 'Password is required',
+                required: "Password is required",
                 minLength: {
                   value: 6,
-                  message: "Password must be at least 6 characters"
-                }
+                  message: "Password must be at least 6 characters",
+                },
               }}
               render={({ field: { onChange, value } }) => (
-                <Input
-                  label="Password"
-                  placeholder="••••••••"
-                  secureTextEntry
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.password?.message as string}
-                />
+                <Animated.View layout={LayoutAnimation}>
+                  <Input
+                    label="Password"
+                    placeholder="••••••••"
+                    secureTextEntry
+                    value={value}
+                    onChangeText={onChange}
+                    error={errors.password?.message as string}
+                  />
+                </Animated.View>
               )}
             />
 
-            {activeTab === 'login' && (
-              <Button
-                title="Forgot password?"
-                variant="ghost"
-                size="sm"
-                onPress={() => { }}
-                style={{ alignSelf: 'flex-end', paddingHorizontal: 0 }}
-              />
+            {activeTab === "login" && (
+              <Animated.View
+                entering={EnteringAnimation}
+                exiting={ExitingAnimation}
+                layout={LayoutAnimation}
+              >
+                <Button
+                  title="Forgot password?"
+                  variant="ghost"
+                  size="sm"
+                  textStyle={styles.txtForget}
+                  onPress={() => {}}
+                  style={{ alignSelf: "flex-end", paddingHorizontal: 0 }}
+                />
+              </Animated.View>
             )}
 
-            <Button
-              title={activeTab === 'login' ? "Login" : "Sign Up"}
-              onPress={handleSubmit(onSubmit)}
-              loading={isLoading}
-              size="lg"
-            />
+            <Animated.View layout={LayoutAnimation}>
+              <Button
+                title={activeTab === "login" ? "Login" : "Sign Up"}
+                onPress={handleSubmit(onSubmit)}
+                loading={isLoading}
+                size="lg"
+              />
+            </Animated.View>
           </Animated.View>
 
-          <View style={styles.socialSection}>
+          <Animated.View layout={LayoutAnimation} style={styles.socialSection}>
             <View style={styles.divider}>
               <View style={styles.line} />
               <Text variant="caption">Or continue with</Text>
@@ -177,71 +232,81 @@ export const AuthScreen = () => {
                 title="Google"
                 variant="outline"
                 style={styles.socialButton}
-                onPress={() => { }}
+                onPress={() => {}}
               />
               <Button
                 title="Apple"
                 variant="outline"
                 style={styles.socialButton}
-                onPress={() => { }}
+                onPress={() => {}}
               />
             </View>
-          </View>
+          </Animated.View>
         </Card>
       </Animated.View>
 
-      <View style={styles.footer}>
+      <Animated.View layout={LayoutAnimation} style={styles.footer}>
         <Text variant="caption" align="center">
           By continuing, you agree to our Terms & Privacy Policy
         </Text>
-      </View>
-    </ScreenWrapper >
+      </Animated.View>
+    </ScreenWrapper>
   );
 };
 
-const AuthTab = ({ title, isActive, onPress }: { title: string, isActive: boolean, onPress: () => void }) => {
+const AuthTab = ({
+  title,
+  isActive,
+  onPress,
+}: {
+  title: string;
+  isActive: boolean;
+  onPress: () => void;
+}) => {
   styles.useVariants({
-    active: isActive
+    active: isActive,
   });
 
   return (
-    <TouchableOpacity
-      style={styles.tab}
-      onPress={onPress}
-    >
+    <TouchableOpacity style={styles.tab} onPress={onPress}>
       <Text weight={isActive ? "bold" : "medium"}>{title}</Text>
     </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    justifyContent: 'center',
+  },
+  contentContainerStyle: {
+    paddingTop: theme.paddings.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.margins.xl,
   },
   contentContainer: {
-    width: '100%',
+    width: "100%",
+    padding: theme.paddings.md,
     maxWidth: {
-      md: 500
+      md: "70%",
+      lg: "60%",
+      xl: "50%",
     },
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   logoContainer: {
     width: 64,
     height: 64,
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: theme.margins.md,
   },
   tabs: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: theme.colors.muted,
     padding: 4,
     borderRadius: theme.radius.md,
@@ -250,7 +315,7 @@ const styles = StyleSheet.create(theme => ({
   tab: {
     flex: 1,
     paddingVertical: theme.paddings.sm,
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: theme.radius.sm,
     variants: {
       active: {
@@ -261,20 +326,23 @@ const styles = StyleSheet.create(theme => ({
           shadowOpacity: 0.1,
           shadowRadius: 2,
           elevation: 2,
-        }
-      }
-    }
+        },
+      },
+    },
   },
   form: {
     gap: theme.margins.md,
+  },
+  txtForget: {
+    fontSize: theme.fontSize.md,
   },
   socialSection: {
     marginTop: theme.margins.xl,
     gap: theme.margins.md,
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
   },
   line: {
@@ -283,7 +351,7 @@ const styles = StyleSheet.create(theme => ({
     backgroundColor: theme.colors.border,
   },
   socialGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.margins.md,
   },
   socialButton: {
@@ -291,6 +359,6 @@ const styles = StyleSheet.create(theme => ({
   },
   footer: {
     marginTop: theme.margins.lg,
-    alignItems: 'center',
-  }
+    alignItems: "center",
+  },
 }));

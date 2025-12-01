@@ -12,7 +12,6 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSpring,
   FadeIn,
   FadeInDown
 } from 'react-native-reanimated';
@@ -103,11 +102,11 @@ const AnimatedDot = ({ isActive }: { isActive: boolean }) => {
 
 const AnimatedSlide = ({ item, theme, t }: { item: { id: string; icon: string; title: string; description: string; color: string }, theme: any, t: (key: any) => string }) => {
   const scale = useSharedValue(0.8);
-  const opacity = useSharedValue(0);
+  const opacity = useSharedValue(0.5);
 
   useEffect(() => {
-    scale.value = withSpring(1, { damping: 15 });
-    opacity.value = withTiming(1, { duration: 400 });
+    scale.value = withTiming(1, { duration: 500 });
+    opacity.value = withTiming(1, { duration: 500 });
   }, []);
 
   const iconAnimatedStyle = useAnimatedStyle(() => {
@@ -126,10 +125,10 @@ const AnimatedSlide = ({ item, theme, t }: { item: { id: string; icon: string; t
           color={theme.colors[item.color as keyof typeof theme.colors] as string}
         />
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(200).duration(600)}>
+      <Animated.View entering={FadeInDown.delay(200).duration(500)}>
         <Text variant="h2" style={styles.title}>{t(item.title)}</Text>
       </Animated.View>
-      <Animated.View entering={FadeInDown.delay(400).duration(600)}>
+      <Animated.View entering={FadeInDown.delay(400).duration(500)}>
         <Text variant="body" style={styles.description}>{t(item.description)}</Text>
       </Animated.View>
     </View>
