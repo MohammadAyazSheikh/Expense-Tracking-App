@@ -1,7 +1,12 @@
-import React from 'react';
-import { TouchableOpacity, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
-import { StyleSheet, UnistylesVariants } from 'react-native-unistyles';
-import { Text } from './Text';
+import React from "react";
+import {
+  TouchableOpacity,
+  ActivityIndicator,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
+import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
+import { Text } from "./Text";
 
 type ButtonVariants = UnistylesVariants<typeof styles>;
 
@@ -12,37 +17,32 @@ type ButtonProps = ButtonVariants & {
   disabled?: boolean;
   icon?: React.ReactNode;
   style?: ViewStyle;
-  textStyle?: TextStyle;
-  size?: 'sm' | 'md' | 'lg';
-}
-
+  textStyle?: TextStyle | TextStyle[];
+  size?: "sm" | "md" | "lg";
+};
 
 export const Button = ({
   title,
   onPress,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   loading = false,
   disabled = false,
   icon,
   style,
-  textStyle
+  textStyle,
 }: ButtonProps) => {
-
   styles.useVariants({
     variant,
     size,
-    disabled
+    disabled,
   });
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      style={[
-        styles.container,
-        style
-      ]}
+      style={[styles.container, style]}
       activeOpacity={0.7}
     >
       {loading ? (
@@ -51,24 +51,26 @@ export const Button = ({
         <>
           {icon}
 
-          {title && <Text
-            variant="label"
-            style={[styles.text, textStyle]}
-            weight="semiBold"
-          >
-            {title}
-          </Text>}
+          {title && (
+            <Text
+              variant="label"
+              style={[styles.text, textStyle]}
+              weight="semiBold"
+            >
+              {title}
+            </Text>
+          )}
         </>
       )}
     </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: theme.radius.md,
     gap: theme.margins.sm,
     variants: {
@@ -77,12 +79,12 @@ const styles = StyleSheet.create(theme => ({
           backgroundColor: theme.colors.primary,
         },
         outline: {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderWidth: 1,
           borderColor: theme.colors.border,
         },
         ghost: {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
         },
         destructive: {
           backgroundColor: theme.colors.destructive,
@@ -108,9 +110,9 @@ const styles = StyleSheet.create(theme => ({
       disabled: {
         true: {
           opacity: 0.5,
-        }
-      }
-    }
+        },
+      },
+    },
   },
   text: {
     variants: {
@@ -130,7 +132,7 @@ const styles = StyleSheet.create(theme => ({
         secondary: {
           color: theme.colors.secondaryForeground,
         },
-      }
-    }
-  }
+      },
+    },
+  },
 }));

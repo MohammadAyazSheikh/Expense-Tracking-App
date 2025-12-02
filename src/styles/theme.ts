@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const lightTheme = {
   colors: {
     background: 'hsl(240, 20%, 98%)',
@@ -55,7 +57,65 @@ export const lightTheme = {
     lg: 16,
     xl: 24,
     full: 9999,
-  }
+  },
+  shadows: {
+    xs: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 0.5,
+      },
+      android: {
+        elevation: 0.5,
+      },
+      web: {
+        boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.03)',
+      },
+    }),
+    sm: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.18,
+        shadowRadius: 1.0,
+      },
+      android: {
+        elevation: 1,
+      },
+      web: {
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+      },
+    }),
+    md: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      },
+    }),
+    lg: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.30,
+        shadowRadius: 6.27,
+      },
+      android: {
+        elevation: 10,
+      },
+      web: {
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      },
+    }),
+  },
 } as const
 
 export const darkTheme = {
@@ -115,7 +175,65 @@ export const darkTheme = {
     lg: 16,
     xl: 24,
     full: 9999,
-  }
+  },
+  shadows: {
+    xs: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 0.5,
+      },
+      android: {
+        elevation: 0.5,
+      },
+      web: {
+        boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.03)',
+      },
+    }),
+    sm: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.18,
+        shadowRadius: 1.0,
+      },
+      android: {
+        elevation: 1,
+      },
+      web: {
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+      },
+    }),
+    md: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      },
+    }),
+    lg: Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.30,
+        shadowRadius: 6.27,
+      },
+      android: {
+        elevation: 10,
+      },
+      web: {
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      },
+    }),
+  },
 } as const
 
 type AppThemes = {
@@ -124,5 +242,5 @@ type AppThemes = {
 }
 
 declare module 'react-native-unistyles' {
-  export interface UnistylesThemes extends AppThemes {}
+  export interface UnistylesThemes extends AppThemes { }
 }

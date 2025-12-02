@@ -1,46 +1,50 @@
-import React from 'react';
-import { View, ViewProps, TouchableOpacity } from 'react-native';
-import { StyleSheet, UnistylesVariants } from 'react-native-unistyles';
+import React from "react";
+import { View, ViewProps, TouchableOpacity } from "react-native";
+import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   card: {
     backgroundColor: theme.colors.card,
     borderRadius: theme.radius.lg,
     padding: theme.paddings.lg,
     variants: {
       variant: {
-        primary: {},
+        primary: {
+          ...theme.shadows.xs,
+        },
         outlined: {
           borderWidth: 1,
           borderColor: theme.colors.border,
-        }
-      }
-    }
+        },
+      },
+    },
   },
 }));
 
 type CardVariants = UnistylesVariants<typeof styles>;
 
-type CardProps = ViewProps & CardVariants & {
-  onPress?: () => void;
-}
+type CardProps = ViewProps &
+  CardVariants & {
+    onPress?: () => void;
+  };
 
-export const Card = ({ children, variant = 'primary', onPress, style, ...props }: CardProps) => {
-  const Component = (onPress ? TouchableOpacity : View) as React.ComponentType<any>;
+export const Card = ({
+  children,
+  variant = "primary",
+  onPress,
+  style,
+  ...props
+}: CardProps) => {
+  const Component = (
+    onPress ? TouchableOpacity : View
+  ) as React.ComponentType<any>;
 
   styles.useVariants({
-    variant
+    variant,
   });
 
   return (
-    <Component
-      onPress={onPress}
-      style={[
-        styles.card,
-        style
-      ]}
-      {...props}
-    >
+    <Component onPress={onPress} style={[styles.card, style]} {...props}>
       {children}
     </Component>
   );

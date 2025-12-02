@@ -1,23 +1,23 @@
-import React, { useMemo } from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import React, { useMemo } from "react";
+import { useWindowDimensions, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../navigation/types';
-import { PieChart } from 'react-native-gifted-charts';
-import { Button } from '../components/ui/Button';
-import { Text } from '../components/ui/Text';
-import { Card } from '../components/ui/Card';
-import { Feather } from '@expo/vector-icons';
-import { useFinanceStore } from '../store';
-
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "../navigation/types";
+import { PieChart } from "react-native-gifted-charts";
+import { Button } from "../components/ui/Button";
+import { Text } from "../components/ui/Text";
+import { Card } from "../components/ui/Card";
+import { Feather } from "@expo/vector-icons";
+import { useFinanceStore } from "../store";
+import { useFonts } from "../hooks/useFonts";
 
 export const DashboardScreen = () => {
-
   const { width } = useWindowDimensions();
 
   const { theme } = useUnistyles();
+  const { fonts } = useFonts();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { transactions, wallets } = useFinanceStore();
 
@@ -28,7 +28,7 @@ export const DashboardScreen = () => {
   const { income, expenses } = useMemo(() => {
     return transactions.reduce(
       (acc, curr) => {
-        if (curr.type === 'income') {
+        if (curr.type === "income") {
           acc.income += curr.amount;
         } else {
           acc.expenses += Math.abs(curr.amount);
@@ -40,12 +40,12 @@ export const DashboardScreen = () => {
   }, [transactions]);
 
   const recentTransactions = useMemo(() => {
-    return transactions.slice(0, 3);
+    return transactions.slice(0, 2);
   }, [transactions]);
 
   const chartData = useMemo(() => {
     const categoryTotals = transactions
-      .filter(t => t.type === 'expense')
+      .filter((t) => t.type === "expense")
       .reduce((acc, t) => {
         acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
         return acc;
@@ -63,7 +63,7 @@ export const DashboardScreen = () => {
     return Object.entries(categoryTotals).map(([name, amount], index) => ({
       value: amount,
       text: name,
-      color: colors[index % colors.length]
+      color: colors[index % colors.length],
     }));
   }, [transactions, theme]);
 
@@ -85,23 +85,32 @@ export const DashboardScreen = () => {
     return (
       <>
         <View style={styles.legendContainer}>
-          {
-            chartData.map((item, index) => (
-              <View
-                key={index}
-                style={styles.legendItem}>
+          {chartData.map((item, index) => (
+            <View key={index} style={styles.legendItem}>
+              <View style={styles.legendLabelContainer}>
                 {renderDot(item.color)}
-                <Text style={styles.legendLabel}>{item.text}: {item.value}%</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.legendText}>{item.text}</Text>
+                </View>
               </View>
-            ))
-          }
+              <View style={styles.legendValueContainer}>
+                <Text weight="semiBold" style={styles.legendText}>
+                  {item.value}%
+                </Text>
+              </View>
+            </View>
+          ))}
         </View>
       </>
     );
   };
 
   return (
-    <ScreenWrapper style={styles.container} contentContainerStyle={styles.content} scrollable>
+    <ScreenWrapper
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      scrollable
+    >
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -112,95 +121,166 @@ export const DashboardScreen = () => {
           title=""
           icon={<Feather name="zap" size={20} color={theme.colors.primary} />}
           variant="outline"
-          onPress={() => { }}
-          style={{ width: 40, height: 40, borderRadius: 20, paddingHorizontal: 0, paddingVertical: 0, padding: 0, gap: 0, justifyContent: "center", alignItems: "center" }}
+          onPress={() => {}}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            paddingHorizontal: 0,
+            paddingVertical: 0,
+            padding: 0,
+            gap: 0,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         />
       </View>
 
       {/* Balance Card */}
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Total Balance</Text>
-        <Text style={styles.balanceValue} weight="bold">${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+        <Text style={styles.balanceValue} weight="bold">
+          $
+          {totalBalance.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </Text>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <View style={styles.statLabelRow}>
               <Feather name="arrow-up-right" size={16} color="white" />
               <Text style={styles.statLabel}>Income</Text>
             </View>
-            <Text style={styles.statValue} weight="semiBold">${income.toLocaleString()}</Text>
+            <Text style={styles.statValue} weight="semiBold">
+              ${income.toLocaleString()}
+            </Text>
           </View>
           <View style={styles.statItem}>
             <View style={styles.statLabelRow}>
               <Feather name="arrow-down-right" size={16} color="white" />
               <Text style={styles.statLabel}>Expenses</Text>
             </View>
-            <Text style={styles.statValue} weight="semiBold">${expenses.toLocaleString()}</Text>
+            <Text style={styles.statValue} weight="semiBold">
+              ${expenses.toLocaleString()}
+            </Text>
           </View>
         </View>
       </View>
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>
-        <Card style={styles.actionCard} onPress={() => navigation.navigate('MainTab', { screen: 'Analytics' })}>
-          <View style={[styles.actionIcon, { backgroundColor: theme.colors.primaryLight }]}>
+        <Card
+          style={styles.actionCard}
+          onPress={() =>
+            navigation.navigate("MainTab", { screen: "Analytics" })
+          }
+        >
+          <View
+            style={[
+              styles.actionIcon,
+              { backgroundColor: theme.colors.primaryLight },
+            ]}
+          >
             <Feather name="trending-up" size={24} color={theme.colors.muted} />
           </View>
-          <Text variant="caption" weight="medium">Analytics</Text>
+          <Text variant="caption" weight="medium">
+            Analytics
+          </Text>
         </Card>
-        <Card style={styles.actionCard} onPress={() => navigation.navigate('Wallets')}>
-          <View style={[styles.actionIcon, { backgroundColor: theme.colors.success }]}>
+        <Card
+          style={styles.actionCard}
+          onPress={() => navigation.navigate("Wallets")}
+        >
+          <View
+            style={[
+              styles.actionIcon,
+              { backgroundColor: theme.colors.success },
+            ]}
+          >
             <Feather name="credit-card" size={24} color={theme.colors.muted} />
           </View>
-          <Text variant="caption" weight="medium">Wallets</Text>
+          <Text variant="caption" weight="medium">
+            Wallets
+          </Text>
         </Card>
-        <Card style={styles.actionCard} onPress={() => navigation.navigate('MainTab', { screen: 'Budget' })}>
-          <View style={[styles.actionIcon, { backgroundColor: theme.colors.warning }]}>
+        <Card
+          style={styles.actionCard}
+          onPress={() => navigation.navigate("MainTab", { screen: "Budget" })}
+        >
+          <View
+            style={[
+              styles.actionIcon,
+              { backgroundColor: theme.colors.warning },
+            ]}
+          >
             <Feather name="target" size={24} color={theme.colors.muted} />
           </View>
-          <Text variant="caption" weight="medium">Budget</Text>
+          <Text variant="caption" weight="medium">
+            Budget
+          </Text>
         </Card>
       </View>
-
 
       {/* Spending Overview */}
       <Card style={{ marginBottom: theme.margins.lg }}>
         <View style={styles.sectionTitle}>
           <Text variant="h3">Spending Overview</Text>
-          <Button title="See All" variant="ghost" size="sm" onPress={() => navigation.navigate('MainTab', { screen: 'Analytics' })} />
+          <Button
+            title="See All"
+            variant="ghost"
+            size="sm"
+            textStyle={[styles.seeAllText, { fontFamily: fonts.bold }]}
+            onPress={() =>
+              navigation.navigate("MainTab", { screen: "Analytics" })
+            }
+          />
         </View>
         {chartData.length > 0 ? (
-          <View style={{ alignItems: 'center', marginTop: theme.margins.md }}>
-            <PieChart
-              data={chartData}
-              donut
-              radius={width * 0.3}
-              innerRadius={width * 0.2}
-              backgroundColor={theme.colors.popover}
-              centerLabelComponent={() => (
-                <View style={{ alignItems: 'center' }}>
-                  <Text variant="caption" style={{ color: theme.colors.mutedForeground }}>Total</Text>
-                  <Text variant="h3" weight="bold">${expenses.toFixed(0)}</Text>
-                </View>
-              )}
-              focusOnPress
-              sectionAutoFocus
-              // labelsPosition="outward"
-              // textColor={theme.colors.foreground}
-              // textSize={12}
-              // showValuesAsLabels
-              // showText
-              isAnimated
-              animationDuration={800}
-
-
-
-            />
+          <View style={styles.chartView}>
+            <View style={{ flex: 1 }}>
+              <PieChart
+                donut
+                data={chartData}
+                radius={width * 0.17}
+                innerRadius={width * 0.11}
+                backgroundColor={theme.colors.popover}
+                centerLabelComponent={() => (
+                  <View style={{ alignItems: "center" }}>
+                    <Text
+                      variant="caption"
+                      style={{ color: theme.colors.mutedForeground }}
+                    >
+                      Total
+                    </Text>
+                    <Text variant="h3" weight="bold">
+                      ${expenses.toFixed(0)}
+                    </Text>
+                  </View>
+                )}
+                // focusOnPress
+                sectionAutoFocus
+                // labelsPosition="outward"
+                // textColor={theme.colors.foreground}
+                // textSize={12}
+                // showValuesAsLabels
+                // showText
+                isAnimated
+                animationDuration={800}
+              />
+            </View>
             {renderLegendComponent()}
           </View>
         ) : (
           <View style={styles.chartPlaceholder}>
-            <Feather name="pie-chart" size={48} color={theme.colors.mutedForeground} />
-            <Text variant="caption" style={{ marginTop: 8 }}>No expenses yet</Text>
+            <Feather
+              name="pie-chart"
+              size={48}
+              color={theme.colors.mutedForeground}
+            />
+            <Text variant="caption" style={{ marginTop: 8 }}>
+              No expenses yet
+            </Text>
           </View>
         )}
       </Card>
@@ -212,17 +292,20 @@ export const DashboardScreen = () => {
             <Feather name="zap" size={20} color={theme.colors.primary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text weight="semiBold" style={{ marginBottom: 4 }}>SmartSense™ Insight</Text>
+            <Text weight="semiBold" style={{ marginBottom: 4 }}>
+              SmartSense™ Insight
+            </Text>
             <Text variant="caption" style={{ marginBottom: 8 }}>
-              You're spending 23% more on food this week. Consider meal prepping to save $50/week.
+              You're spending 23% more on food this week. Consider meal prepping
+              to save $50/week.
             </Text>
             <Button
               title="View Full Analysis →"
               variant="ghost"
               size="sm"
-              style={{ alignSelf: 'flex-start', paddingHorizontal: 0 }}
+              style={{ alignSelf: "flex-start", paddingHorizontal: 0 }}
               textStyle={{ color: theme.colors.primary }}
-              onPress={() => navigation.navigate('SmartSense')}
+              onPress={() => navigation.navigate("SmartSense")}
             />
           </View>
         </View>
@@ -232,7 +315,13 @@ export const DashboardScreen = () => {
       <View style={{ marginBottom: 80 }}>
         <View style={styles.sectionTitle}>
           <Text variant="h3">Recent Transactions</Text>
-          <Button title="See All" variant="ghost" size="sm" onPress={() => navigation.navigate("Transactions" as any)} />
+          <Button
+            title="See All"
+            variant="ghost"
+            size="sm"
+            textStyle={[styles.seeAllText, { fontFamily: fonts.bold }]}
+            onPress={() => navigation.navigate("Transactions" as any)}
+          />
         </View>
         <View style={styles.transactionList}>
           {recentTransactions.map((tx) => (
@@ -243,28 +332,25 @@ export const DashboardScreen = () => {
               </View>
               <Text
                 weight="semiBold"
-                style={{ color: tx.type === 'income' ? theme.colors.success : theme.colors.foreground }}
+                style={{
+                  color:
+                    tx.type === "income"
+                      ? theme.colors.success
+                      : theme.colors.foreground,
+                }}
               >
-                {tx.type === 'income' ? '+' : ''}{Math.abs(tx.amount).toFixed(2)}
+                {tx.type === "income" ? "+" : ""}
+                {Math.abs(tx.amount).toFixed(2)}
               </Text>
             </Card>
           ))}
         </View>
       </View>
-
-      {/* FAB */}
-      {/* Note: FAB should ideally be outside ScrollView or use absolute positioning relative to screen, 
-          but inside ScreenWrapper it might scroll if not careful. 
-          Here we put it inside ScrollView but with absolute position it might move.
-          Better to put it outside ScrollView in a fragment if ScreenWrapper supported it, 
-          or just use a fixed View overlay.
-      */}
     </ScreenWrapper>
   );
 };
 
-
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -273,13 +359,13 @@ const styles = StyleSheet.create(theme => ({
     paddingHorizontal: {
       xs: theme.paddings.md,
       md: theme.paddings.xl,
-      lg: theme.paddings.xl * 2
-    }
+      lg: theme.paddings.xl * 2,
+    },
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.margins.lg,
   },
   balanceCard: {
@@ -289,130 +375,136 @@ const styles = StyleSheet.create(theme => ({
     marginBottom: theme.margins.lg,
   },
   balanceLabel: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: "rgba(255, 255, 255, 0.9)",
     marginBottom: theme.margins.xs,
   },
   balanceValue: {
-    color: 'white',
+    color: "white",
     fontSize: {
       xs: theme.fontSize.xxxl,
-      md: 48 // Larger font on tablet
+      md: 48, // Larger font on tablet
     },
     marginBottom: theme.margins.lg,
   },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.margins.lg,
   },
   statItem: {
     flex: 1,
   },
   statLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     marginBottom: 4,
   },
   statLabel: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: "rgba(255, 255, 255, 0.9)",
     fontSize: theme.fontSize.sm,
   },
   statValue: {
-    color: 'white',
+    color: "white",
     fontSize: theme.fontSize.md,
   },
   quickActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.margins.md,
     marginBottom: theme.margins.lg,
   },
   actionCard: {
     flex: 1,
     padding: theme.paddings.md,
-    alignItems: 'center',
+    alignItems: "center",
     gap: theme.margins.sm,
   },
   actionIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   sectionTitle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.margins.md,
+  },
+  seeAllText: {
+    color: theme.colors.primary,
+    fontSize: theme.fontSize.md,
+  },
+  chartView: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: theme.margins.md,
   },
   chartPlaceholder: {
     height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: theme.colors.muted,
     borderRadius: theme.radius.md,
   },
-  legendLabel: {
-    color: theme.colors.accent,
-    fontSize: theme.fontSize.md,
-  },
   legendContainer: {
-    width: "100%",
-    flexDirection: 'row',
-    justifyContent: "space-around",
-    flexWrap: 'wrap',
+    flex: 1.1,
   },
   legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: {
-      xs: "50%",
-      sm: "33%",
-      md: "25%"
-    },
-    flex: {
-      xs: 1,
-      sm: 0 // Disable flex grow on larger screens if fixed width is desired
-    },
-    paddingHorizontal: theme.paddings.md,
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: theme.paddings.sm,
+  },
+  legendLabelContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  legendValueContainer: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  legendText: {
+    color: theme.colors.foreground,
+    fontSize: theme.fontSize.sm,
   },
   insightCard: {
     marginBottom: theme.margins.lg,
-    borderColor: 'rgba(255, 255, 255, 0.2)', // Approximate gradient border
+    borderColor: "rgba(255, 255, 255, 0.2)", // Approximate gradient border
   },
   insightContent: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.margins.md,
   },
   insightIcon: {
     padding: theme.paddings.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Approximate primary/10
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Approximate primary/10
     borderRadius: theme.radius.md,
   },
   transactionList: {
     gap: theme.margins.sm,
   },
   transactionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: theme.paddings.md,
   },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: theme.margins.lg,
     right: theme.margins.lg,
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: theme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
-  }
+  },
 }));

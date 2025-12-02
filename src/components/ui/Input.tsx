@@ -1,14 +1,52 @@
-import React from 'react';
-import { TextInput, TextInputProps, View } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { Text } from './Text';
+import React, { useState } from "react";
+import { TextInput, TextInputProps, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { Text } from "./Text";
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
 }
 
-const styles = StyleSheet.create(theme => ({
+export const Input = ({ label, error, style, ...props }: InputProps) => {
+  const { theme } = useUnistyles();
+  const [isFocused, setIsFocused] = useState(false);
+
+  styles.useVariants({
+    focused: isFocused,
+    error: !!error,
+  });
+
+  const handleFocus: TextInputProps["onFocus"] = (e) => {
+    setIsFocused(true);
+    props.onFocus?.(e);
+  };
+
+  const handleBlur: TextInputProps["onBlur"] = (e) => {
+    setIsFocused(false);
+    props.onBlur?.(e);
+  };
+
+  return (
+    <View style={styles.container}>
+      {label && (
+        <Text style={styles.label} weight="medium">
+          {label}
+        </Text>
+      )}
+      <TextInput
+        style={[styles.input, style]}
+        placeholderTextColor={theme.colors.mutedForeground}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        {...props}
+      />
+      {error && <Text style={styles.error}>{error}</Text>}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create((theme) => ({
   container: {
     marginBottom: theme.margins.sm,
   },
@@ -25,12 +63,17 @@ const styles = StyleSheet.create(theme => ({
     color: theme.colors.foreground,
     backgroundColor: theme.colors.background,
     variants: {
+      focused: {
+        true: {
+          borderColor: theme.colors.ring,
+        },
+      },
       error: {
         true: {
           borderColor: theme.colors.destructive,
-        }
-      }
-    }
+        },
+      },
+    },
   },
   error: {
     marginTop: theme.margins.xs,
@@ -38,23 +81,3 @@ const styles = StyleSheet.create(theme => ({
     fontSize: theme.fontSize.sm,
   },
 }));
-
-export const Input = ({ label, error, style, ...props }: InputProps) => {
-  const { theme } = useUnistyles();
-
-  styles.useVariants({
-    error: !!error
-  });
-
-  return (
-    <View style={styles.container}>
-      {label && <Text style={styles.label} weight="medium">{label}</Text>}
-      <TextInput
-        style={[styles.input, style]}
-        placeholderTextColor={theme.colors.mutedForeground}
-        {...props}
-      />
-      {error && <Text style={styles.error}>{error}</Text>}
-    </View>
-  );
-};
