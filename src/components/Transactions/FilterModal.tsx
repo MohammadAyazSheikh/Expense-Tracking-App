@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, ScrollView } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { Calendar } from "react-native-calendars";
 import { useFinanceStore } from "../../store";
 import { useTranslation } from "../../hooks/useTranslation";
 import { Text } from "../ui/Text";
 import ModalWrapper from "../ui/ModalWrapper";
 import { Icon } from "../ui/Icon";
-import { Category } from "../../types";
+import { Category, Tag } from "../../types";
 
 interface FilterModalProps {
   visible: boolean;
@@ -15,9 +16,15 @@ interface FilterModalProps {
   initialFilters: FilterState;
 }
 
+export type DateRange = "today" | "week" | "month" | "year" | "all" | "custom";
+
 export interface FilterState {
   type: "all" | "income" | "expense";
   categories: string[];
+  dateRange: DateRange;
+  customStartDate?: string;
+  customEndDate?: string;
+  tags: string[];
 }
 
 const FilterTypeButton = ({
@@ -70,6 +77,47 @@ const CategoryFilterButton = ({
   );
 };
 
+const TagFilterButton = ({
+  tag,
+  isActive,
+  onPress,
+}: {
+  tag: Tag;
+  isActive: boolean;
+  onPress: () => void;
+}) => {
+  styles.useVariants({
+    active: isActive,
+  });
+
+  return (
+    <TouchableOpacity style={styles.tagButton} onPress={onPress}>
+      <View style={[styles.tagDot, { backgroundColor: tag.color }]} />
+      <Text style={styles.tagText}>{tag.name}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const DateRangeButton = ({
+  label,
+  isActive,
+  onPress,
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+}) => {
+  styles.useVariants({
+    active: isActive,
+  });
+
+  return (
+    <TouchableOpacity style={styles.dateRangeButton} onPress={onPress}>
+      <Text style={styles.dateRangeText}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
 export const FilterModal: React.FC<FilterModalProps> = ({
   visible,
   onClose,
@@ -77,8 +125,19 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   initialFilters,
 }) => {
   const { t } = useTranslation();
-  const { categories } = useFinanceStore();
+  const { categories, tags } = useFinanceStore();
   const [filters, setFilters] = useState<FilterState>(initialFilters);
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
+
+  const dateRangeOptions: { value: DateRange; label: string }[] = [
+    { value: "today", label: t("filter.today", "Today") },
+    { value: "week", label: t("filter.thisWeek", "This Week") },
+    { value: "month", label: t("filter.thisMonth", "This Month") },
+    { value: "year", label: t("filter.thisYear", "This Year") },
+    { value: "all", label: t("filter.allTime", "All Time") },
+    { value: "custom", label: t("filter.custom", "Custom") },
+  ];
 
   const handleTypeSelect = (type: FilterState["type"]) => {
     setFilters((prev) => ({ ...prev, type }));
@@ -98,8 +157,36 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     });
   };
 
+  const handleTagToggle = (tagId: string) => {
+    setFilters((prev) => {
+      const isSelected = prev.tags.includes(tagId);
+      if (isSelected) {
+        return {
+          ...prev,
+          tags: prev.tags.filter((id) => id !== tagId),
+        };
+      } else {
+        return { ...prev, tags: [...prev.tags, tagId] };
+      }
+    });
+  };
+
+  const handleDateRangeSelect = (range: DateRange) => {
+    setFilters((prev) => ({
+      ...prev,
+      dateRange: range,
+      customStartDate: range !== "custom" ? undefined : prev.customStartDate,
+      customEndDate: range !== "custom" ? undefined : prev.customEndDate,
+    }));
+  };
+
   const handleReset = () => {
-    setFilters({ type: "all", categories: [] });
+    setFilters({
+      type: "all",
+      categories: [],
+      dateRange: "all",
+      tags: [],
+    });
   };
 
   const handleApply = () => {
@@ -107,10 +194,21 @@ export const FilterModal: React.FC<FilterModalProps> = ({
     onClose();
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Select Date";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
     <ModalWrapper
       visible={visible}
       containerStyles={{ justifyContent: "flex-end" }}
+      onBackdropPress={onClose}
     >
       <View style={styles.container}>
         <View style={styles.header}>
@@ -124,6 +222,103 @@ export const FilterModal: React.FC<FilterModalProps> = ({
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
+          {/* Date Range Filter */}
+          <Text weight="semiBold" style={styles.sectionTitle}>
+            {t("filter.dateRange", "Date Range")}
+          </Text>
+          <View style={styles.dateRangeContainer}>
+            {dateRangeOptions.map((option) => (
+              <DateRangeButton
+                key={option.value}
+                label={option.label}
+                isActive={filters.dateRange === option.value}
+                onPress={() => handleDateRangeSelect(option.value)}
+              />
+            ))}
+          </View>
+
+          {/* Custom Date Pickers */}
+          {filters.dateRange === "custom" && (
+            <View style={styles.customDateContainer}>
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowStartCalendar(!showStartCalendar)}
+              >
+                <Icon
+                  type="Ionicons"
+                  name="calendar-outline"
+                  size={20}
+                  color="#666"
+                />
+                <Text style={styles.datePickerText}>
+                  {formatDate(filters.customStartDate)}
+                </Text>
+              </TouchableOpacity>
+
+              {showStartCalendar && (
+                <Calendar
+                  onDayPress={(day: any) => {
+                    setFilters((prev) => ({
+                      ...prev,
+                      customStartDate: day.dateString,
+                    }));
+                    setShowStartCalendar(false);
+                  }}
+                  markedDates={
+                    filters.customStartDate
+                      ? {
+                          [filters.customStartDate]: { selected: true },
+                        }
+                      : {}
+                  }
+                  theme={{
+                    selectedDayBackgroundColor: "#6C63FF",
+                    todayTextColor: "#6C63FF",
+                  }}
+                />
+              )}
+
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowEndCalendar(!showEndCalendar)}
+              >
+                <Icon
+                  type="Ionicons"
+                  name="calendar-outline"
+                  size={20}
+                  color="#666"
+                />
+                <Text style={styles.datePickerText}>
+                  {formatDate(filters.customEndDate)}
+                </Text>
+              </TouchableOpacity>
+
+              {showEndCalendar && (
+                <Calendar
+                  onDayPress={(day: any) => {
+                    setFilters((prev) => ({
+                      ...prev,
+                      customEndDate: day.dateString,
+                    }));
+                    setShowEndCalendar(false);
+                  }}
+                  markedDates={
+                    filters.customEndDate
+                      ? {
+                          [filters.customEndDate]: { selected: true },
+                        }
+                      : {}
+                  }
+                  theme={{
+                    selectedDayBackgroundColor: "#6C63FF",
+                    todayTextColor: "#6C63FF",
+                  }}
+                />
+              )}
+            </View>
+          )}
+
+          {/* Transaction Type Filter */}
           <Text weight="semiBold" style={styles.sectionTitle}>
             {t("filter.transactionType")}
           </Text>
@@ -141,6 +336,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             ))}
           </View>
 
+          {/* Categories Filter */}
           <Text weight="semiBold" style={styles.sectionTitle}>
             {t("categoryManager.title")}
           </Text>
@@ -151,6 +347,21 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 category={category}
                 isActive={filters.categories.includes(category.id)}
                 onPress={() => handleCategoryToggle(category.id)}
+              />
+            ))}
+          </View>
+
+          {/* Tags Filter */}
+          <Text weight="semiBold" style={styles.sectionTitle}>
+            {t("filter.tags", "Tags")}
+          </Text>
+          <View style={styles.tagsContainer}>
+            {tags.map((tag) => (
+              <TagFilterButton
+                key={tag.id}
+                tag={tag}
+                isActive={filters.tags.includes(tag.id)}
+                onPress={() => handleTagToggle(tag.id)}
               />
             ))}
           </View>
@@ -171,7 +382,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 const styles = StyleSheet.create((theme, context) => ({
   container: {
     backgroundColor: theme.colors.background,
-    height: (context.screen.height / 100) * 80,
+    height: (context.screen.height / 100) * 85,
     borderTopEndRadius: theme.radius.xl,
     borderTopStartRadius: theme.radius.xl,
   },
@@ -198,12 +409,61 @@ const styles = StyleSheet.create((theme, context) => ({
   },
   content: {
     padding: theme.paddings.md,
+    paddingBottom: theme.paddings.xl,
   },
   sectionTitle: {
     fontSize: theme.fontSize.md,
     color: theme.colors.foreground,
     marginTop: theme.margins.lg,
     marginBottom: theme.margins.md,
+  },
+  dateRangeContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  dateRangeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    variants: {
+      active: {
+        true: {
+          backgroundColor: theme.colors.primary,
+          borderColor: theme.colors.primary,
+        },
+      },
+    },
+  },
+  dateRangeText: {
+    color: theme.colors.foreground,
+    fontSize: theme.fontSize.sm,
+    variants: {
+      active: {
+        true: {
+          color: theme.colors.primaryForeground,
+        },
+      },
+    },
+  },
+  customDateContainer: {
+    marginTop: theme.margins.md,
+    gap: 12,
+  },
+  datePickerButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.paddings.md,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: 8,
+  },
+  datePickerText: {
+    color: theme.colors.foreground,
+    fontSize: theme.fontSize.sm,
   },
   typeContainer: {
     flexDirection: "row",
@@ -276,7 +536,49 @@ const styles = StyleSheet.create((theme, context) => ({
     variants: {
       active: {
         true: {
-          color: theme.colors.primaryForeground,
+          color: theme.colors.primary,
+        },
+        false: {
+          color: theme.colors.foreground,
+        },
+      },
+    },
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  tagButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: theme.radius.full,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: 6,
+    variants: {
+      active: {
+        true: {
+          borderColor: theme.colors.primary,
+          backgroundColor: theme.colors.primary + "15",
+        },
+      },
+    },
+  },
+  tagDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  tagText: {
+    color: theme.colors.foreground,
+    fontSize: theme.fontSize.sm,
+    variants: {
+      active: {
+        true: {
+          color: theme.colors.primary,
         },
         false: {
           color: theme.colors.foreground,

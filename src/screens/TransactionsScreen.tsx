@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { View, TextInput } from "react-native";
+import { View, TextInput, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -15,6 +15,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import {
   FilterModal,
   FilterState,
+  DateRange,
 } from "../components/Transactions/FilterModal";
 
 import { useFinanceStore } from "../store";
@@ -23,12 +24,17 @@ import { Category, Transaction } from "../types";
 type TransactionCardProps = {
   transaction: Transaction;
   category?: Category;
+  onPress: () => void;
 };
 
-const TransactionCard = ({ transaction, category }: TransactionCardProps) => {
+const TransactionCard = ({
+  transaction,
+  category,
+  onPress,
+}: TransactionCardProps) => {
   const { theme } = useUnistyles();
   return (
-    <Card key={transaction.id} style={styles.transactionCard}>
+    <Card key={transaction.id} style={styles.transactionCard} onPress={onPress}>
       <View
         style={[
           styles.transactionIcon,
@@ -75,6 +81,48 @@ const TransactionCard = ({ transaction, category }: TransactionCardProps) => {
   );
 };
 
+// Helper function to filter by date range
+const isWithinDateRange = (
+  transactionDate: string,
+  dateRange: DateRange,
+  customStartDate?: string,
+  customEndDate?: string
+): boolean => {
+  const txDate = new Date(transactionDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  switch (dateRange) {
+    case "today":
+      return txDate.toDateString() === today.toDateString();
+
+    case "week":
+      const weekAgo = new Date(today);
+      weekAgo.setDate(today.getDate() - 7);
+      return txDate >= weekAgo && txDate <= today;
+
+    case "month":
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(today.getMonth() - 1);
+      return txDate >= monthAgo && txDate <= today;
+
+    case "year":
+      const yearAgo = new Date(today);
+      yearAgo.setFullYear(today.getFullYear() - 1);
+      return txDate >= yearAgo && txDate <= today;
+
+    case "custom":
+      if (!customStartDate && !customEndDate) return true;
+      const start = customStartDate ? new Date(customStartDate) : new Date(0);
+      const end = customEndDate ? new Date(customEndDate) : new Date();
+      return txDate >= start && txDate <= end;
+
+    case "all":
+    default:
+      return true;
+  }
+};
+
 export const TransactionsScreen = () => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
@@ -82,11 +130,14 @@ export const TransactionsScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const transactions = useFinanceStore((state) => state.transactions);
   const categories = useFinanceStore((state) => state.categories);
+  const tags = useFinanceStore((state) => state.tags);
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     type: "all",
     categories: [],
+    dateRange: "all",
+    tags: [],
   });
 
   const groupedTransactions = useMemo(() => {
@@ -107,16 +158,40 @@ export const TransactionsScreen = () => {
   const filteredGroups = Object.entries(groupedTransactions).reduce(
     (acc, [date, items]) => {
       const filteredItems = items.filter((t) => {
+        // Search filter
         const matchesSearch = t.name
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
+
+        // Type filter
         const matchesType = filters.type === "all" || t.type === filters.type;
+
+        // Category filter
         const category = categories.find((c) => c.name === t.category);
         const matchesCategory =
           filters.categories.length === 0 ||
           (category && filters.categories.includes(category.id));
 
-        return matchesSearch && matchesType && matchesCategory;
+        // Date range filter
+        const matchesDateRange = isWithinDateRange(
+          t.date,
+          filters.dateRange,
+          filters.customStartDate,
+          filters.customEndDate
+        );
+
+        // Tags filter
+        const matchesTags =
+          filters.tags.length === 0 ||
+          (t.tags && t.tags.some((tagId) => filters.tags.includes(tagId)));
+
+        return (
+          matchesSearch &&
+          matchesType &&
+          matchesCategory &&
+          matchesDateRange &&
+          matchesTags
+        );
       });
 
       if (filteredItems.length > 0) {
@@ -126,6 +201,13 @@ export const TransactionsScreen = () => {
     },
     [] as [string, typeof transactions][]
   );
+
+  // Count active filters
+  const activeFiltersCount =
+    (filters.type !== "all" ? 1 : 0) +
+    filters.categories.length +
+    (filters.dateRange !== "all" ? 1 : 0) +
+    filters.tags.length;
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
@@ -141,6 +223,12 @@ export const TransactionsScreen = () => {
           <Text variant="h2" style={styles.headerTitle}>
             {t("transactions.title")}
           </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Calendar" as any)}
+            style={styles.calendarButton}
+          >
+            <Ionicons name="calendar-outline" size={24} color="white" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.searchContainer}>
@@ -152,13 +240,17 @@ export const TransactionsScreen = () => {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <Button
-            title=""
-            icon={<Feather name="sliders" size={20} color="white" />}
-            variant="ghost"
+          <TouchableOpacity
             onPress={() => setIsFilterVisible(true)}
-            style={{ paddingHorizontal: 0, width: 32 }}
-          />
+            style={styles.filterButton}
+          >
+            <Feather name="sliders" size={20} color="white" />
+            {activeFiltersCount > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -220,6 +312,12 @@ export const TransactionsScreen = () => {
                       key={transaction.id}
                       transaction={transaction}
                       category={category}
+                      onPress={() =>
+                        navigation.navigate("TransactionDetail", {
+                          id: transaction.id,
+                          category: category!,
+                        })
+                      }
                     />
                   );
                 })}
@@ -257,6 +355,10 @@ const styles = StyleSheet.create((theme) => ({
   },
   headerTitle: {
     color: "white",
+    flex: 1,
+  },
+  calendarButton: {
+    padding: 4,
   },
   searchContainer: {
     flexDirection: "row",
@@ -278,6 +380,27 @@ const styles = StyleSheet.create((theme) => ({
     color: "white",
     marginLeft: theme.margins.sm,
     fontSize: theme.fontSize.md,
+  },
+  filterButton: {
+    padding: 4,
+    position: "relative",
+  },
+  filterBadge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    backgroundColor: theme.colors.accent,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  filterBadgeText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
   },
   content: {
     padding: theme.paddings.md,

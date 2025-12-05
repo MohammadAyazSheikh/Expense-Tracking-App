@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
-import { Transaction, Budget, Wallet, Category } from '../types';
+import { Transaction, Budget, Wallet, Category, Tag } from '../types';
 
 interface FinanceState {
   // State
@@ -9,6 +9,7 @@ interface FinanceState {
   budgets: Budget[];
   wallets: Wallet[];
   categories: Category[];
+  tags: Tag[];
   isLoading: boolean;
   error: string | null;
 
@@ -28,6 +29,10 @@ interface FinanceState {
   addCategory: (category: Omit<Category, 'id'>) => void;
   updateCategory: (id: string, category: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
+
+  addTag: (tag: Omit<Tag, 'id'>) => void;
+  updateTag: (id: string, tag: Partial<Tag>) => void;
+  deleteTag: (id: string) => void;
 }
 
 // Mock Data
@@ -65,6 +70,17 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: '8', name: 'Income', icon: 'attach-money', iconFamily: 'MaterialIcons', color: '#2ECC71', type: 'income' },
 ];
 
+const DEFAULT_TAGS: Tag[] = [
+  { id: 'work', name: 'Work', color: 'hsl(210, 80%, 55%)' },
+  { id: 'personal', name: 'Personal', color: 'hsl(280, 70%, 60%)' },
+  { id: 'urgent', name: 'Urgent', color: 'hsl(0, 75%, 60%)' },
+  { id: 'recurring', name: 'Recurring', color: 'hsl(145, 70%, 50%)' },
+  { id: 'one-time', name: 'One-time', color: 'hsl(35, 85%, 55%)' },
+  { id: 'business', name: 'Business', color: 'hsl(220, 70%, 55%)' },
+  { id: 'family', name: 'Family', color: 'hsl(340, 70%, 60%)' },
+  { id: 'essential', name: 'Essential', color: 'hsl(160, 70%, 50%)' },
+];
+
 export const useFinanceStore = create<FinanceState>()(
   persist(
     (set, get) => ({
@@ -73,6 +89,7 @@ export const useFinanceStore = create<FinanceState>()(
       budgets: MOCK_BUDGETS,
       wallets: MOCK_WALLETS,
       categories: DEFAULT_CATEGORIES,
+      tags: DEFAULT_TAGS,
       isLoading: false,
       error: null,
 
@@ -160,6 +177,27 @@ export const useFinanceStore = create<FinanceState>()(
           categories: state.categories.filter((c) => c.id !== id),
         }));
       },
+
+      addTag: (tag) => {
+        const newTag = { ...tag, id: Math.random().toString(36).substr(2, 9) };
+        set((state) => ({
+          tags: [...state.tags, newTag],
+        }));
+      },
+
+      updateTag: (id, updatedTag) => {
+        set((state) => ({
+          tags: state.tags.map((t) =>
+            t.id === id ? { ...t, ...updatedTag } : t
+          ),
+        }));
+      },
+
+      deleteTag: (id) => {
+        set((state) => ({
+          tags: state.tags.filter((t) => t.id !== id),
+        }));
+      },
     }),
     {
       name: 'finance-storage',
@@ -169,6 +207,7 @@ export const useFinanceStore = create<FinanceState>()(
         budgets: state.budgets,
         wallets: state.wallets,
         categories: state.categories,
+        tags: state.tags,
       }),
     }
   )

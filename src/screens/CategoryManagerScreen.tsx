@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, FlatList, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, FlatList, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useFinanceStore } from "../store/financeStore";
@@ -9,6 +9,8 @@ import { Category } from "../types";
 import { useTranslation } from "../hooks/useTranslation";
 import { Text } from "../components/ui/Text";
 import { Icon, IconType } from "../components/ui/Icon";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Button } from "../components/ui/Button";
 
 export const CategoryManagerScreen = ({ navigation }: any) => {
   const { theme } = useUnistyles();
@@ -75,7 +77,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ScreenWrapper style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -109,13 +111,17 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
           </View>
         }
       />
-
+      <Button
+        title="Manage Tags"
+        size="sm"
+        onPress={() => navigation.navigate("TagManager")}
+      />
       <AddCategoryModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         onSave={handleAddCategory}
       />
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 };
 

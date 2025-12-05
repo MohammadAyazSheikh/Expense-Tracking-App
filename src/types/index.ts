@@ -8,6 +8,9 @@ export interface Transaction {
   type: 'income' | 'expense';
   payment: string;
   note?: string;
+  tags?: string[];
+  location?: string;
+  recurring?: boolean;
 }
 
 export interface Budget {
@@ -40,4 +43,10 @@ export interface Category {
   color: string;
   type: 'income' | 'expense';
   tags?: string[];
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
 }

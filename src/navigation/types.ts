@@ -1,4 +1,5 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { Category } from '../types';
 
 export type RootStackParamList = {
   Index: undefined;
@@ -13,6 +14,9 @@ export type RootStackParamList = {
   Wallets: undefined;
   SmartSense: undefined;
   CategoryManager: undefined;
+  Calendar: undefined;
+  TagManager: undefined;
+  TransactionDetail: { id: string, category: Category };
 };
 
 export type MainTabParamList = {
