@@ -36,6 +36,7 @@ export interface Category {
   id: string;
   name: string;
   icon: string;
+  iconFamily?: string;
   color: string;
   type: 'income' | 'expense';
   tags?: string[];

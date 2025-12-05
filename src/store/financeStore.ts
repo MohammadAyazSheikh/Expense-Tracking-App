@@ -54,6 +54,17 @@ const MOCK_BUDGETS: Budget[] = [
   { id: '3', category: "Shopping", limit: 300, spent: 280, period: "monthly", color: "#E91E63", icon: "🛍️" },
 ];
 
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: '1', name: 'Food', icon: 'food', iconFamily: 'MaterialCommunityIcons', color: '#FF6B6B', type: 'expense' },
+  { id: '2', name: 'Transport', icon: 'directions-transit', iconFamily: 'MaterialIcons', color: '#4ECDC4', type: 'expense' },
+  { id: '3', name: 'Shopping', icon: 'shop', iconFamily: 'Entypo', color: '#45B7D1', type: 'expense' },
+  { id: '4', name: 'Bills', icon: 'file-document-outline', iconFamily: 'MaterialCommunityIcons', color: '#96CEB4', type: 'expense' },
+  { id: '5', name: 'Entertainment', icon: 'movie', iconFamily: 'MaterialIcons', color: '#FFEEAD', type: 'expense' },
+  { id: '6', name: 'Health', icon: 'heartbeat', iconFamily: 'FontAwesome5', color: '#D4A5A5', type: 'expense' },
+  { id: '7', name: 'Education', icon: 'school', iconFamily: 'Ionicons', color: '#9B59B6', type: 'expense' },
+  { id: '8', name: 'Income', icon: 'attach-money', iconFamily: 'MaterialIcons', color: '#2ECC71', type: 'income' },
+];
+
 export const useFinanceStore = create<FinanceState>()(
   persist(
     (set, get) => ({
@@ -61,7 +72,7 @@ export const useFinanceStore = create<FinanceState>()(
       transactions: MOCK_TRANSACTIONS,
       budgets: MOCK_BUDGETS,
       wallets: MOCK_WALLETS,
-      categories: [],
+      categories: DEFAULT_CATEGORIES,
       isLoading: false,
       error: null,
 

@@ -1,34 +1,78 @@
-import React, { useMemo, useState } from 'react';
-import { View, TextInput } from 'react-native';
+import React, { useMemo, useState } from "react";
+import { View, TextInput } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
-import { Text } from '../components/ui/Text';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { Feather, Ionicons } from '@expo/vector-icons';
-import { useTranslation } from '../hooks/useTranslation';
-import { FilterModal, FilterState } from '../components/Transactions/FilterModal';
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/types";
+import { Text } from "../components/ui/Text";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import { Icon, IconType } from "../components/ui/Icon";
+import { useTranslation } from "../hooks/useTranslation";
+import {
+  FilterModal,
+  FilterState,
+} from "../components/Transactions/FilterModal";
 
-import { useFinanceStore } from '../store';
+import { useFinanceStore } from "../store";
+import { Category, Transaction } from "../types";
 
-const getCategoryEmoji = (categoryName: string, categories: any[]) => {
-  const category = categories.find(c => c.name === categoryName);
-  if (category && category.icon) {
-    return "📝";
-  }
-  const emojis: Record<string, string> = {
-    "Food": "🍔",
-    "Transport": "🚗",
-    "Bills": "📱",
-    "Income": "💰",
-    "Shopping": "🛍️",
-    "Health": "💊"
-  };
-  return emojis[categoryName] || "📝";
+type TransactionCardProps = {
+  transaction: Transaction;
+  category?: Category;
+};
+
+const TransactionCard = ({ transaction, category }: TransactionCardProps) => {
+  const { theme } = useUnistyles();
+  return (
+    <Card key={transaction.id} style={styles.transactionCard}>
+      <View
+        style={[
+          styles.transactionIcon,
+          { backgroundColor: category?.color || theme.colors.muted },
+        ]}
+      >
+        <Icon
+          type={(category?.iconFamily as IconType) || "Ionicons"}
+          name={(category?.icon as any) || "help"}
+          size={20}
+          color="white"
+        />
+      </View>
+      <View style={styles.transactionInfo}>
+        <Text weight="medium" numberOfLines={1}>
+          {transaction.name}
+        </Text>
+        <View style={styles.transactionMeta}>
+          <Badge
+            variant="outline"
+            style={{ paddingVertical: 0, paddingHorizontal: 6 }}
+          >
+            {transaction.category}
+          </Badge>
+          <Text variant="caption">{transaction.time}</Text>
+        </View>
+      </View>
+      <View style={styles.transactionAmount}>
+        <Text
+          weight="semiBold"
+          style={{
+            color:
+              transaction.type === "income"
+                ? theme.colors.success
+                : theme.colors.foreground,
+          }}
+        >
+          {transaction.type === "income" ? "+" : ""}
+          {transaction.amount.toFixed(2)}
+        </Text>
+        <Text variant="caption">{transaction.payment}</Text>
+      </View>
+    </Card>
+  );
 };
 
 export const TransactionsScreen = () => {
@@ -40,14 +84,17 @@ export const TransactionsScreen = () => {
   const categories = useFinanceStore((state) => state.categories);
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const [filters, setFilters] = useState<FilterState>({ type: 'all', categories: [] });
+  const [filters, setFilters] = useState<FilterState>({
+    type: "all",
+    categories: [],
+  });
 
   const groupedTransactions = useMemo(() => {
     return transactions.reduce((groups, transaction) => {
       const date = transaction.date;
       let dateLabel = date;
-      if (date === "2024-06-15") dateLabel = t('transactions.today');
-      else if (date === "2024-06-14") dateLabel = t('transactions.yesterday');
+      if (date === "2024-06-15") dateLabel = t("transactions.today");
+      else if (date === "2024-06-14") dateLabel = t("transactions.yesterday");
 
       if (!groups[dateLabel]) {
         groups[dateLabel] = [];
@@ -57,21 +104,28 @@ export const TransactionsScreen = () => {
     }, {} as Record<string, typeof transactions>);
   }, [transactions, t]);
 
-  const filteredGroups = Object.entries(groupedTransactions).reduce((acc, [date, items]) => {
-    const filteredItems = items.filter(t => {
-      const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesType = filters.type === 'all' || t.type === filters.type;
-      const category = categories.find(c => c.name === t.category);
-      const matchesCategory = filters.categories.length === 0 || (category && filters.categories.includes(category.id));
+  const filteredGroups = Object.entries(groupedTransactions).reduce(
+    (acc, [date, items]) => {
+      const filteredItems = items.filter((t) => {
+        const matchesSearch = t.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+        const matchesType = filters.type === "all" || t.type === filters.type;
+        const category = categories.find((c) => c.name === t.category);
+        const matchesCategory =
+          filters.categories.length === 0 ||
+          (category && filters.categories.includes(category.id));
 
-      return matchesSearch && matchesType && matchesCategory;
-    });
+        return matchesSearch && matchesType && matchesCategory;
+      });
 
-    if (filteredItems.length > 0) {
-      acc.push([date, filteredItems]);
-    }
-    return acc;
-  }, [] as [string, typeof transactions][]);
+      if (filteredItems.length > 0) {
+        acc.push([date, filteredItems]);
+      }
+      return acc;
+    },
+    [] as [string, typeof transactions][]
+  );
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
@@ -84,14 +138,16 @@ export const TransactionsScreen = () => {
             onPress={() => navigation.goBack()}
             style={{ paddingHorizontal: 0, width: 40 }}
           />
-          <Text variant="h2" style={styles.headerTitle}>{t('transactions.title')}</Text>
+          <Text variant="h2" style={styles.headerTitle}>
+            {t("transactions.title")}
+          </Text>
         </View>
 
         <View style={styles.searchContainer}>
           <Feather name="search" size={20} color="rgba(255, 255, 255, 0.6)" />
           <TextInput
             style={styles.searchInput}
-            placeholder={t('transactions.searchTransactions')}
+            placeholder={t("transactions.searchTransactions")}
             placeholderTextColor="rgba(255, 255, 255, 0.6)"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -108,22 +164,36 @@ export const TransactionsScreen = () => {
 
       <View style={styles.content}>
         {/* Summary Card */}
-        <Card>
+        <Card style={styles.summaryCard}>
           <View style={styles.summaryGrid}>
             <View style={styles.summaryItem}>
-              <Text variant="caption" style={{ marginBottom: 4 }}>{t('transactions.all')}</Text>
+              <Text variant="caption" style={{ marginBottom: 4 }}>
+                {t("transactions.all")}
+              </Text>
               <Text weight="semiBold">{transactions.length}</Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text variant="caption" style={{ marginBottom: 4 }}>{t('transactions.income')}</Text>
+              <Text variant="caption" style={{ marginBottom: 4 }}>
+                {t("transactions.income")}
+              </Text>
               <Text weight="semiBold" style={{ color: theme.colors.success }}>
-                ${transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)}
+                $
+                {transactions
+                  .filter((t) => t.type === "income")
+                  .reduce((sum, t) => sum + t.amount, 0)}
               </Text>
             </View>
             <View style={styles.summaryItem}>
-              <Text variant="caption" style={{ marginBottom: 4 }}>{t('transactions.expenses')}</Text>
+              <Text variant="caption" style={{ marginBottom: 4 }}>
+                {t("transactions.expenses")}
+              </Text>
               <Text weight="semiBold" style={{ color: theme.colors.accent }}>
-                ${Math.abs(transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0))}
+                $
+                {Math.abs(
+                  transactions
+                    .filter((t) => t.type === "expense")
+                    .reduce((sum, t) => sum + t.amount, 0)
+                ).toFixed(2)}
               </Text>
             </View>
           </View>
@@ -133,37 +203,25 @@ export const TransactionsScreen = () => {
         <View>
           {filteredGroups.map(([date, dateTransactions]) => (
             <View key={date} style={styles.dateGroup}>
-              <Text variant="caption" weight="semiBold" style={styles.dateLabel}>{date}</Text>
+              <Text
+                variant="caption"
+                weight="semiBold"
+                style={styles.dateLabel}
+              >
+                {date}
+              </Text>
               <View style={styles.transactionList}>
                 {dateTransactions.map((transaction) => {
-                  const category = categories.find(c => c.name === transaction.category);
+                  const category = categories.find(
+                    (c) => c.name === transaction.category
+                  );
                   return (
-                    <Card key={transaction.id} style={styles.transactionCard}>
-                      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: category?.color || theme.colors.muted, justifyContent: 'center', alignItems: 'center' }}>
-                        <Ionicons name={category?.icon as any || 'help'} size={20} color="white" />
-                      </View>
-                      <View style={styles.transactionInfo}>
-                        <Text weight="medium" numberOfLines={1}>{transaction.name}</Text>
-                        <View style={styles.transactionMeta}>
-                          <Badge variant="outline" style={{ paddingVertical: 0, paddingHorizontal: 6 }}>
-                            {transaction.category}
-                          </Badge>
-                          <Text variant="caption">{transaction.time}</Text>
-                        </View>
-                      </View>
-                      <View style={styles.transactionAmount}>
-                        <Text
-                          weight="semiBold"
-                          style={{
-                            color: transaction.type === 'income' ? theme.colors.success : theme.colors.foreground
-                          }}
-                        >
-                          {transaction.type === 'income' ? '+' : ''}{transaction.amount.toFixed(2)}
-                        </Text>
-                        <Text variant="caption">{transaction.payment}</Text>
-                      </View>
-                    </Card>
-                  )
+                    <TransactionCard
+                      key={transaction.id}
+                      transaction={transaction}
+                      category={category}
+                    />
+                  );
                 })}
               </View>
             </View>
@@ -181,99 +239,110 @@ export const TransactionsScreen = () => {
   );
 };
 
-
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background
+    backgroundColor: theme.colors.background,
   },
   header: {
     backgroundColor: theme.colors.primary,
     padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl
+    paddingBottom: theme.paddings.xl,
   },
   headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
-    marginBottom: theme.margins.md
+    marginBottom: theme.margins.md,
   },
   headerTitle: {
-    color: 'white'
+    color: "white",
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: theme.radius.md,
     paddingHorizontal: theme.paddings.md,
     height: 48,
     maxWidth: {
-      md: 600
+      md: 600,
     },
     alignSelf: {
-      md: 'center'
+      md: "center",
     },
-    width: '100%'
+    width: "100%",
   },
   searchInput: {
     flex: 1,
-    color: 'white',
+    color: "white",
     marginLeft: theme.margins.sm,
-    fontSize: theme.fontSize.md
+    fontSize: theme.fontSize.md,
   },
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
     maxWidth: {
-      md: 800
+      md: 800,
     },
-    alignSelf: 'center',
-    width: '100%'
+    alignSelf: "center",
+    width: "100%",
+  },
+  summaryCard: {
+    paddingVertical: theme.paddings.md,
   },
   summaryGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: theme.paddings.md,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: theme.paddings.md,
     gap: {
       xs: theme.margins.sm,
-      md: theme.margins.lg
-    }
+      md: theme.margins.lg,
+    },
   },
   summaryItem: {
-    alignItems: 'center',
-    flex: 1
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
   },
   dateGroup: {
-    marginBottom: theme.margins.md
+    marginBottom: theme.margins.md,
   },
   dateLabel: {
     marginBottom: theme.margins.sm,
-    paddingHorizontal: theme.paddings.xs
+    paddingHorizontal: theme.paddings.xs,
   },
   transactionList: {
-    gap: theme.margins.sm
+    gap: theme.margins.sm,
   },
   transactionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
-    padding: theme.paddings.md
+    padding: theme.paddings.md,
+  },
+  transactionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.muted,
+    justifyContent: "center",
+    alignItems: "center",
   },
   transactionEmoji: {
-    fontSize: 24
+    fontSize: 24,
   },
   transactionInfo: {
-    flex: 1
+    flex: 1,
   },
   transactionMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.xs,
-    marginTop: 4
+    marginTop: 4,
   },
   transactionAmount: {
-    alignItems: 'flex-end'
-  }
+    alignItems: "flex-end",
+  },
 }));

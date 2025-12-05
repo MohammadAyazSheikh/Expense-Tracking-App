@@ -1,24 +1,24 @@
-import React from 'react';
-import { View, TextInput, TouchableOpacity, Switch } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
-import { Text } from '../components/ui/Text';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
-import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { Feather } from '@expo/vector-icons';
-import { useForm, Controller } from 'react-hook-form';
-import { useFinanceStore } from '../store';
-import { useFonts } from '../hooks/useFonts';
-import { useTranslation } from '../hooks/useTranslation';
-
+import React from "react";
+import { View, TextInput, TouchableOpacity, Switch } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/types";
+import { Text } from "../components/ui/Text";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Card } from "../components/ui/Card";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Feather } from "@expo/vector-icons";
+import { useForm, Controller } from "react-hook-form";
+import { useFinanceStore } from "../store";
+import { useFonts } from "../hooks/useFonts";
+import { useTranslation } from "../hooks/useTranslation";
+import { Icon, IconType } from "../components/ui/Icon";
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -31,81 +31,81 @@ const styles = StyleSheet.create(theme => ({
     borderBottomRightRadius: theme.radius.xl,
   },
   headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
     marginBottom: theme.margins.lg,
   },
   headerTitle: {
-    color: 'white',
+    color: "white",
   },
   amountContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   amountLabel: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: "rgba(255, 255, 255, 0.9)",
     marginBottom: theme.margins.xs,
   },
   currencySymbol: {
-    color: 'white',
+    color: "white",
     fontSize: 48,
   },
   amountInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   amountInput: {
-    color: 'white',
+    color: "white",
     fontSize: 48,
     minWidth: 100,
-    textAlign: 'center',
+    textAlign: "center",
   },
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
-    width: '100%',
+    width: "100%",
     maxWidth: {
-      md: 600
+      md: 600,
     },
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   sectionLabel: {
     marginBottom: theme.margins.sm,
   },
   categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.margins.sm,
   },
   categoryButton: {
     width: {
-      xs: '31%',
-      sm: '23%',
-      md: '18%'
+      xs: "31%",
+      sm: "23%",
+      md: "18%",
     },
     aspectRatio: 1,
     borderRadius: theme.radius.lg,
     borderWidth: 2,
     borderColor: theme.colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: theme.colors.card,
     variants: {
       selected: {
         true: {
           borderColor: theme.colors.primary,
-          backgroundColor: theme.colors.primary + '15',
-        }
-      }
-    }
+          backgroundColor: theme.colors.primary + "15",
+        },
+      },
+    },
   },
   categoryEmoji: {
     fontSize: 32,
     marginBottom: 4,
   },
   paymentRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.margins.sm,
   },
   paymentButton: {
@@ -114,27 +114,35 @@ const styles = StyleSheet.create(theme => ({
   uploadButton: {
     borderWidth: 2,
     borderColor: theme.colors.border,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderRadius: theme.radius.lg,
     padding: theme.paddings.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: theme.margins.sm,
   },
   recurringRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   submitButton: {
     marginTop: theme.margins.md,
     marginBottom: theme.margins.xl,
-  }
+  },
 }));
 
-const CategoryButton = ({ category, isSelected, onPress }: { category: any, isSelected: boolean, onPress: () => void }) => {
+const CategoryButton = ({
+  category,
+  isSelected,
+  onPress,
+}: {
+  category: any;
+  isSelected: boolean;
+  onPress: () => void;
+}) => {
   styles.useVariants({
-    selected: isSelected
+    selected: isSelected,
   });
 
   return (
@@ -143,10 +151,27 @@ const CategoryButton = ({ category, isSelected, onPress }: { category: any, isSe
       onPress={onPress}
       activeOpacity={0.7}
     >
-      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: category.color, justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
-        <Feather name={category.icon as any || 'help-circle'} size={20} color="white" />
+      <View
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          backgroundColor: category.color,
+          justifyContent: "center",
+          alignItems: "center",
+          marginBottom: 4,
+        }}
+      >
+        <Icon
+          type={(category.iconFamily as IconType) || "Ionicons"}
+          name={(category.icon as any) || "help-circle"}
+          size={20}
+          color="white"
+        />
       </View>
-      <Text variant="caption" weight="medium">{category.name}</Text>
+      <Text variant="caption" weight="medium">
+        {category.name}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -159,30 +184,39 @@ export const AddExpenseScreen = () => {
   const categories = useFinanceStore((state) => state.categories);
   const { getFont } = useFonts();
 
-  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
-      amount: '',
-      category: 'food',
-      payment: 'Card',
-      description: '',
-      notes: '',
-      tags: '',
+      amount: "",
+      category: "food",
+      payment: "Card",
+      description: "",
+      notes: "",
+      tags: "",
       isRecurring: false,
-    }
+    },
   });
 
-  const selectedCategory = watch('category');
-  const selectedPayment = watch('payment');
-  const isRecurring = watch('isRecurring');
+  const selectedCategory = watch("category");
+  const selectedPayment = watch("payment");
+  const isRecurring = watch("isRecurring");
 
   const onSubmit = (data: any) => {
     addTransaction({
       name: data.description || "Expense",
-      category: categories.find(c => c.id === data.category)?.name || "Other",
+      category: categories.find((c) => c.id === data.category)?.name || "Other",
       amount: -parseFloat(data.amount),
-      date: new Date().toISOString().split('T')[0],
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      type: 'expense',
+      date: new Date().toISOString().split("T")[0],
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      type: "expense",
       payment: data.payment,
       note: data.notes,
     });
@@ -200,13 +234,19 @@ export const AddExpenseScreen = () => {
             onPress={() => navigation.goBack()}
             style={{ paddingHorizontal: 0, width: 40 }}
           />
-          <Text variant="h2" style={styles.headerTitle}>Add Expense</Text>
+          <Text variant="h2" style={styles.headerTitle}>
+            Add Expense
+          </Text>
         </View>
 
         <View style={styles.amountContainer}>
-          <Text variant="caption" style={styles.amountLabel}>Amount</Text>
+          <Text variant="caption" style={styles.amountLabel}>
+            Amount
+          </Text>
           <View style={styles.amountInputContainer}>
-            <Text style={styles.currencySymbol} variant='h1' weight="bold">$</Text>
+            <Text style={styles.currencySymbol} variant="h1" weight="bold">
+              $
+            </Text>
             <Controller
               control={control}
               name="amount"
@@ -215,7 +255,7 @@ export const AddExpenseScreen = () => {
                 <TextInput
                   value={value}
                   onChangeText={onChange}
-                  style={[styles.amountInput, { fontFamily: getFont('bold') }]}
+                  style={[styles.amountInput, { fontFamily: getFont("bold") }]}
                   keyboardType="decimal-pad"
                   placeholder="0.00"
                   placeholderTextColor="rgba(255, 255, 255, 0.5)"
@@ -229,10 +269,21 @@ export const AddExpenseScreen = () => {
       <View style={styles.content}>
         {/* Category Selection */}
         <Card>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.margins.sm }}>
-            <Text weight="semiBold">{t('addExpense.category')}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('CategoryManager')}>
-              <Text variant="caption" style={{ color: theme.colors.primary }}>{t('categoryManager.manage')}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: theme.margins.sm,
+            }}
+          >
+            <Text weight="semiBold">{t("addExpense.category")}</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CategoryManager")}
+            >
+              <Text variant="caption" style={{ color: theme.colors.primary }}>
+                {t("categoryManager.manage")}
+              </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.categoryGrid}>
@@ -241,7 +292,7 @@ export const AddExpenseScreen = () => {
                 key={category.id}
                 category={category}
                 isSelected={selectedCategory === category.id}
-                onPress={() => setValue('category', category.id)}
+                onPress={() => setValue("category", category.id)}
               />
             ))}
           </View>
@@ -249,7 +300,9 @@ export const AddExpenseScreen = () => {
 
         {/* Payment Mode */}
         <Card>
-          <Text weight="semiBold" style={styles.sectionLabel}>Payment Mode</Text>
+          <Text weight="semiBold" style={styles.sectionLabel}>
+            Payment Mode
+          </Text>
           <View style={styles.paymentRow}>
             {paymentModes.map((mode) => (
               <Button
@@ -257,7 +310,7 @@ export const AddExpenseScreen = () => {
                 title={mode}
                 variant={selectedPayment === mode ? undefined : "outline"}
                 size="sm"
-                onPress={() => setValue('payment', mode)}
+                onPress={() => setValue("payment", mode)}
                 style={styles.paymentButton}
               />
             ))}
@@ -269,7 +322,7 @@ export const AddExpenseScreen = () => {
           <Controller
             control={control}
             name="description"
-            rules={{ required: 'Description is required' }}
+            rules={{ required: "Description is required" }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label="Description"
@@ -289,7 +342,7 @@ export const AddExpenseScreen = () => {
                 placeholder="Add any additional notes..."
                 multiline
                 numberOfLines={3}
-                style={{ height: 80, textAlignVertical: 'top', paddingTop: 12 }}
+                style={{ height: 80, textAlignVertical: "top", paddingTop: 12 }}
                 value={value}
                 onChangeText={onChange}
               />
@@ -311,9 +364,15 @@ export const AddExpenseScreen = () => {
 
         {/* Upload Receipt */}
         <Card>
-          <Text weight="semiBold" style={styles.sectionLabel}>Receipt (Optional)</Text>
+          <Text weight="semiBold" style={styles.sectionLabel}>
+            Receipt (Optional)
+          </Text>
           <TouchableOpacity style={styles.uploadButton}>
-            <Feather name="upload" size={24} color={theme.colors.mutedForeground} />
+            <Feather
+              name="upload"
+              size={24}
+              color={theme.colors.mutedForeground}
+            />
             <Text variant="caption">Upload Receipt</Text>
           </TouchableOpacity>
         </Card>
@@ -323,12 +382,17 @@ export const AddExpenseScreen = () => {
           <View style={styles.recurringRow}>
             <View>
               <Text weight="semiBold">Recurring Expense</Text>
-              <Text variant="caption">Set this expense to repeat automatically</Text>
+              <Text variant="caption">
+                Set this expense to repeat automatically
+              </Text>
             </View>
             <Switch
               value={isRecurring}
-              onValueChange={(val) => setValue('isRecurring', val)}
-              trackColor={{ false: theme.colors.muted, true: theme.colors.primary }}
+              onValueChange={(val) => setValue("isRecurring", val)}
+              trackColor={{
+                false: theme.colors.muted,
+                true: theme.colors.primary,
+              }}
               thumbColor="white"
             />
           </View>

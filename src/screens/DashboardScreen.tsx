@@ -40,11 +40,12 @@ export const DashboardScreen = () => {
   }, [transactions]);
 
   const recentTransactions = useMemo(() => {
-    return transactions.slice(0, 2);
+    return transactions.slice(0, 3);
   }, [transactions]);
 
   const chartData = useMemo(() => {
     const categoryTotals = transactions
+      .slice(0, 7)
       .filter((t) => t.type === "expense")
       .reduce((acc, t) => {
         acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
