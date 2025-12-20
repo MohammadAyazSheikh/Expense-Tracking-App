@@ -24,7 +24,7 @@ export const AuthScreen = () => {
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
-  const { login, register, isLoading, error } = useAuthStore();
+  const { login, sendOTP, isLoading, error } = useAuthStore();
 
   const {
     control,
@@ -43,7 +43,11 @@ export const AuthScreen = () => {
       if (activeTab === "login") {
         await login(data.email, data.password);
       } else {
-        await register(data.email, data.password, data.name);
+        await sendOTP(data.email, "signup");
+        navigation.navigate("OTPVerification", {
+          email: data.email,
+          type: "signup",
+        });
       }
     } catch (err) {
       console.error(err);
@@ -204,7 +208,7 @@ export const AuthScreen = () => {
                   variant="ghost"
                   size="sm"
                   textStyle={styles.txtForget}
-                  onPress={() => {}}
+                  onPress={() => navigation.navigate("ForgotPassword")}
                   style={{ alignSelf: "flex-end", paddingHorizontal: 0 }}
                 />
               </Animated.View>

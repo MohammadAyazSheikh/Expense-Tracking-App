@@ -19,6 +19,10 @@ import { CalendarScreen } from "../screens/CalendarScreen";
 import { TagsScreen } from "../screens/TagsScreen";
 import { AddExpenseScreen } from "../screens/AddExpenseScreen";
 
+import { OTPVerificationScreen } from "../screens/auth/OTPVerificationScreen";
+import { ForgotPasswordScreen } from "../screens/auth/ForgotPasswordScreen";
+import { ResetPasswordScreen } from "../screens/auth/ResetPasswordScreen";
+
 const Stack = createStackNavigator<RootStackParamList>();
 
 const authRoutes = () => {
@@ -27,6 +31,9 @@ const authRoutes = () => {
       <Stack.Screen name="Index" component={IndexScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </Stack.Navigator>
   );
 };

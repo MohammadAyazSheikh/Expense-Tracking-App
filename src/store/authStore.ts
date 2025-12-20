@@ -26,6 +26,9 @@ interface AuthState {
   updateUser: (userData: Partial<User>) => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
+  sendOTP: (email: string, type: 'signup' | 'forgot_password') => Promise<void>;
+  verifyOTP: (email: string, code: string, type: 'signup' | 'forgot_password') => Promise<boolean>;
+  resetPassword: (email: string, newPass: string, code: string) => Promise<void>;
 }
 
 
@@ -172,9 +175,72 @@ export const useAuthStore = create<AuthState>()(
         set({ error: null });
       },
 
+
       // Set loading
       setLoading: (loading: boolean) => {
         set({ isLoading: loading });
+      },
+
+      sendOTP: async (email: string, type: 'signup' | 'forgot_password') => {
+        set({ isLoading: true, error: null });
+        try {
+          await new Promise(resolve => setTimeout(resolve, 1500)); // Mock API delay
+          console.log(`[Mock OTP] Sent to ${email} for ${type}: 123456`);
+          set({ isLoading: false });
+        } catch (error) {
+          set({
+            error: "Failed to send OTP",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      verifyOTP: async (email: string, code: string, type: 'signup' | 'forgot_password') => {
+        set({ isLoading: true, error: null });
+        try {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          if (code === "123456") {
+            if (type === 'signup') {
+              // Mock successful signup login
+              const mockUser: User = {
+                id: "123",
+                email: email,
+                name: "New User",
+              };
+              set({
+                user: mockUser,
+                token: "mock-jwt-token",
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            } else {
+              set({ isLoading: false });
+            }
+            return true;
+          } else {
+            throw new Error("Invalid OTP");
+          }
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : "Invalid OTP",
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      resetPassword: async (email: string, newPass: string, code: string) => {
+        set({ isLoading: true, error: null });
+        try {
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          // Mock reset
+          console.log(`[Mock Reset] Password reset for ${email} to ${newPass} with code ${code}`);
+          set({ isLoading: false });
+        } catch (error) {
+          set({ error: "Failed to reset password", isLoading: false });
+          throw error;
+        }
       },
     }),
     {
