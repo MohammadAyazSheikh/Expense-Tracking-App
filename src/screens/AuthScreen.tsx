@@ -18,7 +18,7 @@ import {
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
-} from "../utils/Animmation";
+} from "../utils/Animation";
 
 export const AuthScreen = () => {
   const { theme } = useUnistyles();
