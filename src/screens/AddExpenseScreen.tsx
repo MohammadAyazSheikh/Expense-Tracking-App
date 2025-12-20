@@ -1,22 +1,597 @@
-import React from "react";
-import { View, TextInput, TouchableOpacity, Switch } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Switch,
+  ScrollView,
+  Dimensions,
+} from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
+import { MainTabParamList, RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useForm, Controller } from "react-hook-form";
 import { useFinanceStore } from "../store";
 import { useFonts } from "../hooks/useFonts";
 import { useTranslation } from "../hooks/useTranslation";
 import { Icon, IconType } from "../components/ui/Icon";
+import ModalWrapper from "../components/ui/ModalWrapper";
+import { Calendar } from "react-native-calendars";
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
+
+const CategoryItem = ({
+  item,
+  isSelected,
+  onPress,
+  isTag = false,
+}: {
+  item: any;
+  isSelected: boolean;
+  onPress: () => void;
+  isTag?: boolean;
+}) => {
+  const { theme } = useUnistyles();
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.selectionItem,
+        isTag && styles.tagItem,
+        isSelected && styles.selectionItemSelected,
+        isTag && isSelected && styles.tagItemSelected,
+      ]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      {!isTag ? (
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: item.color || theme.colors.primary },
+          ]}
+        >
+          <Icon
+            type={(item.iconFamily as IconType) || "Ionicons"}
+            name={(item.icon as any) || "help-circle"}
+            size={20}
+            color="white"
+          />
+        </View>
+      ) : (
+        <View
+          style={{
+            width: 12,
+            height: 12,
+            borderRadius: 6,
+            backgroundColor: isSelected ? "white" : item.color,
+          }}
+        />
+      )}
+      <Text
+        variant="caption"
+        weight="medium"
+        style={[
+          isTag ? { fontSize: 14 } : undefined,
+          isSelected && styles.tagTextSelected,
+        ]}
+      >
+        {item.name}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+export const AddExpenseScreen = () => {
+  const { theme } = useUnistyles();
+  const { t } = useTranslation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<MainTabParamList, "AddExpense">>(); // Adjusted type
+  const { getFont } = useFonts();
+
+  const transactions = useFinanceStore((state) => state.transactions);
+  const addTransaction = useFinanceStore((state) => state.addTransaction);
+  const updateTransaction = useFinanceStore((state) => state.updateTransaction);
+  const categories = useFinanceStore((state) => state.categories);
+  const tags = useFinanceStore((state) => state.tags);
+
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const editId = route.params?.transactionId;
+  const isEditMode = !!editId;
+  const existingTransaction = useMemo(
+    () => (editId ? transactions.find((t) => t.id === editId) : null),
+    [editId, transactions]
+  );
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      amount: "",
+      category: "", // Store ID
+      payment: "Card",
+      description: "",
+      notes: "",
+      tags: [] as string[], // Store IDs
+      isRecurring: false,
+      date: new Date().toISOString().split("T")[0],
+    },
+  });
+
+  const selectedCategory = watch("category");
+  const selectedPayment = watch("payment");
+  const isRecurring = watch("isRecurring");
+  const selectedTags = watch("tags") || [];
+  const selectedDate = watch("date");
+
+  // Populate form for Edit Mode
+  useEffect(() => {
+    if (route.params?.date) {
+      setValue("date", route.params.date);
+    }
+
+    if (isEditMode && existingTransaction) {
+      const cat = categories.find(
+        (c) => c.name === existingTransaction.category
+      );
+
+      reset({
+        amount: Math.abs(existingTransaction.amount).toString(),
+        category: cat?.id || "",
+        payment: existingTransaction.payment,
+        description: existingTransaction.name,
+        notes: existingTransaction.note || "",
+        tags: existingTransaction.tags || [],
+        isRecurring: existingTransaction.recurring || false,
+        date: existingTransaction.date,
+      });
+    } else if (!isEditMode && !route.params?.date) {
+      // Reset to default for Add Mode if navigating back/forth
+      reset({
+        amount: "",
+        category: categories[0]?.id || "",
+        payment: "Card",
+        description: "",
+        notes: "",
+        tags: [],
+        isRecurring: false,
+        date: new Date().toISOString().split("T")[0],
+      });
+    }
+  }, [isEditMode, existingTransaction, categories, reset, route.params?.date]);
+
+  // Sort Categories by Usage
+  const sortedCategories = useMemo(() => {
+    const usage: Record<string, number> = {};
+    transactions.forEach((t) => {
+      // t.category is Name
+      usage[t.category] = (usage[t.category] || 0) + 1;
+    });
+    return [...categories].sort((a, b) => {
+      const aCount = usage[a.name] || 0;
+      const bCount = usage[b.name] || 0;
+      return bCount - aCount;
+    });
+  }, [categories, transactions]);
+
+  // Sort Tags by Usage
+  const sortedTags = useMemo(() => {
+    const usage: Record<string, number> = {};
+    transactions.forEach((t) => {
+      if (t.tags) {
+        t.tags.forEach((tagId) => {
+          usage[tagId] = (usage[tagId] || 0) + 1;
+        });
+      }
+    });
+    return [...tags].sort((a, b) => {
+      const aCount = usage[a.id] || 0;
+      const bCount = usage[b.id] || 0;
+      return bCount - aCount;
+    });
+  }, [tags, transactions]);
+
+  const topCategories = sortedCategories.slice(0, 5);
+  const topTags = sortedTags.slice(0, 5);
+
+  const onSubmit = (data: any) => {
+    const catName =
+      categories.find((c) => c.id === data.category)?.name || "Other";
+
+    const transactionData = {
+      name: data.description || "Expense",
+      category: catName,
+      amount: -parseFloat(data.amount), // Ensure negative for expense
+      date: data.date,
+      time: existingTransaction
+        ? existingTransaction.time
+        : new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+      type: "expense" as const,
+      payment: data.payment,
+      note: data.notes,
+      tags: data.tags,
+      recurring: data.isRecurring,
+    };
+
+    if (isEditMode && editId) {
+      updateTransaction(editId, transactionData);
+    } else {
+      addTransaction(transactionData);
+    }
+    navigation.goBack();
+  };
+
+  const toggleTag = (tagId: string) => {
+    const current = selectedTags;
+    if (current.includes(tagId)) {
+      setValue(
+        "tags",
+        current.filter((id: string) => id !== tagId)
+      );
+    } else {
+      setValue("tags", [...current, tagId]);
+    }
+  };
+
+  return (
+    <ScreenWrapper style={styles.container} scrollable>
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <Button
+            title=""
+            icon={<Feather name="arrow-left" size={24} color="white" />}
+            variant="ghost"
+            onPress={() => navigation.goBack()}
+            style={{ paddingHorizontal: 0, width: 40 }}
+          />
+          <Text variant="h2" style={styles.headerTitle}>
+            {isEditMode ? "Edit Expense" : "Add Expense"}
+          </Text>
+        </View>
+
+        <View style={styles.amountContainer}>
+          <Text variant="caption" style={styles.amountLabel}>
+            Amount
+          </Text>
+          <View style={styles.amountInputContainer}>
+            <Text style={styles.currencySymbol} variant="h1" weight="bold">
+              $
+            </Text>
+            <Controller
+              control={control}
+              name="amount"
+              rules={{ required: true }}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  value={value}
+                  onChangeText={onChange}
+                  style={[styles.amountInput, { fontFamily: getFont("bold") }]}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                />
+              )}
+            />
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.content}>
+        {/* Category Selection */}
+        <Card>
+          <View style={styles.sectionHeader}>
+            <Text weight="semiBold">{t("addExpense.category")}</Text>
+          </View>
+          <View style={styles.grid}>
+            {topCategories.map((category) => (
+              <CategoryItem
+                key={category.id}
+                item={category}
+                isSelected={selectedCategory === category.id}
+                onPress={() => setValue("category", category.id)}
+              />
+            ))}
+            <TouchableOpacity
+              style={styles.moreButton}
+              onPress={() => setShowCategoryModal(true)}
+            >
+              <Feather
+                name="more-horizontal"
+                size={24}
+                color={theme.colors.foreground}
+              />
+              <Text variant="caption">More</Text>
+            </TouchableOpacity>
+          </View>
+        </Card>
+
+        {/* Tags Selection */}
+        <Card>
+          <View style={styles.sectionHeader}>
+            <Text weight="semiBold">Tags</Text>
+          </View>
+          <View style={styles.grid}>
+            {topTags.map((tag) => (
+              <CategoryItem
+                key={tag.id}
+                item={tag}
+                isSelected={selectedTags.includes(tag.id)}
+                onPress={() => toggleTag(tag.id)}
+                isTag
+              />
+            ))}
+            <TouchableOpacity
+              style={[styles.moreButton, styles.tagItem, { width: 60 }]}
+              onPress={() => setShowTagModal(true)}
+            >
+              <Feather
+                name="more-horizontal"
+                size={20}
+                color={theme.colors.foreground}
+              />
+            </TouchableOpacity>
+          </View>
+        </Card>
+
+        {/* Payment Mode */}
+        <Card>
+          <Text weight="semiBold" style={styles.sectionLabel}>
+            Payment Mode
+          </Text>
+          <View style={styles.paymentRow}>
+            {paymentModes.map((mode) => (
+              <Button
+                key={mode}
+                title={mode}
+                variant={selectedPayment === mode ? undefined : "outline"}
+                size="sm"
+                onPress={() => setValue("payment", mode)}
+                style={styles.paymentButton}
+              />
+            ))}
+          </View>
+        </Card>
+
+        {/* Date Selection */}
+        <Card>
+          <Text weight="semiBold" style={styles.sectionLabel}>
+            Date
+          </Text>
+          <TouchableOpacity
+            style={styles.dateSelector}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Feather
+              name="calendar"
+              size={20}
+              color={theme.colors.foreground}
+            />
+            <Text>{selectedDate}</Text>
+            <Feather
+              name="chevron-down"
+              size={20}
+              color={theme.colors.mutedForeground}
+              style={{ marginLeft: "auto" }}
+            />
+          </TouchableOpacity>
+        </Card>
+
+        {/* Details */}
+        <Card>
+          <Controller
+            control={control}
+            name="description"
+            rules={{ required: "Description is required" }}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Description"
+                placeholder="e.g., Lunch at Cafe"
+                value={value}
+                onChangeText={onChange}
+                error={errors.description?.message as string}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="notes"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Notes (Optional)"
+                placeholder="Add any additional notes..."
+                multiline
+                numberOfLines={3}
+                style={{ height: 80, textAlignVertical: "top", paddingTop: 12 }}
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+          />
+        </Card>
+
+        {/* Upload Receipt */}
+        <Card>
+          <Text weight="semiBold" style={styles.sectionLabel}>
+            Receipt (Optional)
+          </Text>
+          <TouchableOpacity style={styles.uploadButton}>
+            <Feather
+              name="upload"
+              size={24}
+              color={theme.colors.mutedForeground}
+            />
+            <Text variant="caption">Upload Receipt</Text>
+          </TouchableOpacity>
+        </Card>
+
+        {/* Recurring */}
+        <Card>
+          <View style={styles.recurringRow}>
+            <View>
+              <Text weight="semiBold">Recurring Expense</Text>
+              <Text variant="caption">
+                Set this expense to repeat automatically
+              </Text>
+            </View>
+            <Switch
+              value={isRecurring}
+              onValueChange={(val) => setValue("isRecurring", val)}
+              trackColor={{
+                false: theme.colors.muted,
+                true: theme.colors.primary,
+              }}
+              thumbColor="white"
+            />
+          </View>
+        </Card>
+
+        <Button
+          title={isEditMode ? "Update Expense" : "Add Expense"}
+          size="lg"
+          style={styles.submitButton}
+          onPress={handleSubmit(onSubmit)}
+        />
+      </View>
+
+      {/* Category Modal */}
+      <ModalWrapper
+        visible={showCategoryModal}
+        onBackdropPress={() => setShowCategoryModal(false)}
+        animationType="slide"
+        containerStyles={styles.modalContainer}
+      >
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text variant="h3">Select Category</Text>
+            <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+              <Ionicons
+                name="close"
+                size={24}
+                color={theme.colors.foreground}
+              />
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalGrid}>
+            {sortedCategories.map((category) => (
+              <CategoryItem
+                key={category.id}
+                item={category}
+                isSelected={selectedCategory === category.id}
+                onPress={() => {
+                  setValue("category", category.id);
+                  setShowCategoryModal(false);
+                }}
+              />
+            ))}
+          </ScrollView>
+          <Button
+            title="Manage Categories"
+            variant="outline"
+            style={styles.manageButton}
+            onPress={() => {
+              setShowCategoryModal(false);
+              navigation.navigate("CategoryManager");
+            }}
+          />
+        </View>
+      </ModalWrapper>
+
+      {/* Tag Modal */}
+      <ModalWrapper
+        visible={showTagModal}
+        onBackdropPress={() => setShowTagModal(false)}
+        animationType="slide"
+        containerStyles={styles.modalContainer}
+      >
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text variant="h3">Select Tags</Text>
+            <TouchableOpacity onPress={() => setShowTagModal(false)}>
+              <Ionicons
+                name="close"
+                size={24}
+                color={theme.colors.foreground}
+              />
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalGrid}>
+            {sortedTags.map((tag) => (
+              <CategoryItem
+                key={tag.id}
+                item={tag}
+                isSelected={selectedTags.includes(tag.id)}
+                onPress={() => toggleTag(tag.id)}
+                isTag
+              />
+            ))}
+          </ScrollView>
+          <Button
+            title="Manage Tags"
+            variant="outline"
+            style={styles.manageButton}
+            onPress={() => {
+              setShowTagModal(false);
+              navigation.navigate("TagManager");
+            }}
+          />
+        </View>
+      </ModalWrapper>
+
+      {/* Date Picker Modal */}
+      <ModalWrapper
+        visible={showDatePicker}
+        onBackdropPress={() => setShowDatePicker(false)}
+        animationType="fade"
+      >
+        <View
+          style={{
+            backgroundColor: theme.colors.card,
+            borderRadius: theme.radius.lg,
+            padding: 10,
+          }}
+        >
+          <Calendar
+            current={selectedDate}
+            onDayPress={(day: any) => {
+              setValue("date", day.dateString);
+              setShowDatePicker(false);
+            }}
+            theme={{
+              backgroundColor: theme.colors.card,
+              calendarBackground: theme.colors.card,
+              textSectionTitleColor: theme.colors.foreground,
+              selectedDayBackgroundColor: theme.colors.primary,
+              selectedDayTextColor: "#ffffff",
+              todayTextColor: theme.colors.primary,
+              dayTextColor: theme.colors.foreground,
+              textDisabledColor: theme.colors.muted,
+              arrowColor: theme.colors.primary,
+              monthTextColor: theme.colors.foreground,
+            }}
+          />
+        </View>
+      </ModalWrapper>
+    </ScreenWrapper>
+  );
+};
 
 const styles = StyleSheet.create((theme) => ({
   container: {
@@ -70,17 +645,23 @@ const styles = StyleSheet.create((theme) => ({
     },
     alignSelf: "center",
   },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.margins.sm,
+  },
   sectionLabel: {
     marginBottom: theme.margins.sm,
   },
-  categoryGrid: {
+  grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: theme.margins.sm,
   },
-  categoryButton: {
+  selectionItem: {
     width: {
-      xs: "31%",
+      xs: "30%",
       sm: "23%",
       md: "18%",
     },
@@ -91,25 +672,58 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: theme.colors.card,
-    variants: {
-      selected: {
-        true: {
-          borderColor: theme.colors.primary,
-          backgroundColor: theme.colors.primary + "15",
-        },
-      },
-    },
+    gap: 4,
   },
-  categoryEmoji: {
-    fontSize: 32,
+  tagItem: {
+    width: "auto",
+    aspectRatio: undefined,
+    height: 40,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    gap: 8,
+    borderRadius: 20,
+  },
+  selectionItemSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primary + "15",
+  },
+  tagItemSelected: {
+    backgroundColor: theme.colors.primary,
+  },
+  tagTextSelected: {
+    color: "white",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 4,
+  },
+  moreButton: {
+    width: {
+      xs: "30%",
+      sm: "23%",
+      md: "18%",
+    },
+    aspectRatio: 1,
+    borderRadius: theme.radius.lg,
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.background,
   },
   paymentRow: {
     flexDirection: "row",
     gap: theme.margins.sm,
+    flexWrap: "wrap",
   },
   paymentButton: {
     flex: 1,
+    minWidth: "45%",
   },
   uploadButton: {
     borderWidth: 2,
@@ -130,281 +744,42 @@ const styles = StyleSheet.create((theme) => ({
     marginTop: theme.margins.md,
     marginBottom: theme.margins.xl,
   },
+  // Date Selector
+  dateSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.paddings.md,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: theme.margins.sm,
+  },
+  // Modal Styles
+  modalContainer: {
+    justifyContent: "flex-end",
+    margin: 0,
+  },
+  modalContent: {
+    backgroundColor: theme.colors.card,
+    borderTopLeftRadius: theme.radius.xl,
+    borderTopRightRadius: theme.radius.xl,
+    padding: theme.paddings.lg,
+    maxHeight: "80%",
+    width: "100%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.margins.lg,
+  },
+  modalGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.margins.sm,
+    paddingBottom: theme.paddings.md,
+  },
+  manageButton: {
+    marginTop: theme.margins.md,
+  },
 }));
-
-const CategoryButton = ({
-  category,
-  isSelected,
-  onPress,
-}: {
-  category: any;
-  isSelected: boolean;
-  onPress: () => void;
-}) => {
-  styles.useVariants({
-    selected: isSelected,
-  });
-
-  return (
-    <TouchableOpacity
-      style={styles.categoryButton}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          backgroundColor: category.color,
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: 4,
-        }}
-      >
-        <Icon
-          type={(category.iconFamily as IconType) || "Ionicons"}
-          name={(category.icon as any) || "help-circle"}
-          size={20}
-          color="white"
-        />
-      </View>
-      <Text variant="caption" weight="medium">
-        {category.name}
-      </Text>
-    </TouchableOpacity>
-  );
-};
-
-export const AddExpenseScreen = () => {
-  const { theme } = useUnistyles();
-  const { t } = useTranslation();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const addTransaction = useFinanceStore((state) => state.addTransaction);
-  const categories = useFinanceStore((state) => state.categories);
-  const { getFont } = useFonts();
-
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      amount: "",
-      category: "food",
-      payment: "Card",
-      description: "",
-      notes: "",
-      tags: "",
-      isRecurring: false,
-    },
-  });
-
-  const selectedCategory = watch("category");
-  const selectedPayment = watch("payment");
-  const isRecurring = watch("isRecurring");
-
-  const onSubmit = (data: any) => {
-    addTransaction({
-      name: data.description || "Expense",
-      category: categories.find((c) => c.id === data.category)?.name || "Other",
-      amount: -parseFloat(data.amount),
-      date: new Date().toISOString().split("T")[0],
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      type: "expense",
-      payment: data.payment,
-      note: data.notes,
-    });
-    navigation.goBack();
-  };
-
-  return (
-    <ScreenWrapper style={styles.container} scrollable>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Feather name="arrow-left" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
-          <Text variant="h2" style={styles.headerTitle}>
-            Add Expense
-          </Text>
-        </View>
-
-        <View style={styles.amountContainer}>
-          <Text variant="caption" style={styles.amountLabel}>
-            Amount
-          </Text>
-          <View style={styles.amountInputContainer}>
-            <Text style={styles.currencySymbol} variant="h1" weight="bold">
-              $
-            </Text>
-            <Controller
-              control={control}
-              name="amount"
-              rules={{ required: true }}
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  value={value}
-                  onChangeText={onChange}
-                  style={[styles.amountInput, { fontFamily: getFont("bold") }]}
-                  keyboardType="decimal-pad"
-                  placeholder="0.00"
-                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                />
-              )}
-            />
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.content}>
-        {/* Category Selection */}
-        <Card>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: theme.margins.sm,
-            }}
-          >
-            <Text weight="semiBold">{t("addExpense.category")}</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("CategoryManager")}
-            >
-              <Text variant="caption" style={{ color: theme.colors.primary }}>
-                {t("categoryManager.manage")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.categoryGrid}>
-            {categories.map((category) => (
-              <CategoryButton
-                key={category.id}
-                category={category}
-                isSelected={selectedCategory === category.id}
-                onPress={() => setValue("category", category.id)}
-              />
-            ))}
-          </View>
-        </Card>
-
-        {/* Payment Mode */}
-        <Card>
-          <Text weight="semiBold" style={styles.sectionLabel}>
-            Payment Mode
-          </Text>
-          <View style={styles.paymentRow}>
-            {paymentModes.map((mode) => (
-              <Button
-                key={mode}
-                title={mode}
-                variant={selectedPayment === mode ? undefined : "outline"}
-                size="sm"
-                onPress={() => setValue("payment", mode)}
-                style={styles.paymentButton}
-              />
-            ))}
-          </View>
-        </Card>
-
-        {/* Details */}
-        <Card>
-          <Controller
-            control={control}
-            name="description"
-            rules={{ required: "Description is required" }}
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Description"
-                placeholder="e.g., Lunch at Cafe"
-                value={value}
-                onChangeText={onChange}
-                error={errors.description?.message as string}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="notes"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Notes (Optional)"
-                placeholder="Add any additional notes..."
-                multiline
-                numberOfLines={3}
-                style={{ height: 80, textAlignVertical: "top", paddingTop: 12 }}
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="tags"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Tags (Optional)"
-                placeholder="e.g., work, lunch, coffee"
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-        </Card>
-
-        {/* Upload Receipt */}
-        <Card>
-          <Text weight="semiBold" style={styles.sectionLabel}>
-            Receipt (Optional)
-          </Text>
-          <TouchableOpacity style={styles.uploadButton}>
-            <Feather
-              name="upload"
-              size={24}
-              color={theme.colors.mutedForeground}
-            />
-            <Text variant="caption">Upload Receipt</Text>
-          </TouchableOpacity>
-        </Card>
-
-        {/* Recurring */}
-        <Card>
-          <View style={styles.recurringRow}>
-            <View>
-              <Text weight="semiBold">Recurring Expense</Text>
-              <Text variant="caption">
-                Set this expense to repeat automatically
-              </Text>
-            </View>
-            <Switch
-              value={isRecurring}
-              onValueChange={(val) => setValue("isRecurring", val)}
-              trackColor={{
-                false: theme.colors.muted,
-                true: theme.colors.primary,
-              }}
-              thumbColor="white"
-            />
-          </View>
-        </Card>
-
-        <Button
-          title="Add Expense"
-          size="lg"
-          style={styles.submitButton}
-          onPress={handleSubmit(onSubmit)}
-        />
-      </View>
-    </ScreenWrapper>
-  );
-};

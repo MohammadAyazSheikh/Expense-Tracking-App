@@ -17,6 +17,7 @@ import { useAuthStore } from "../store";
 import { TransactionDetailScreen } from "../screens/TransactionDetailScreen";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { TagsScreen } from "../screens/TagsScreen";
+import { AddExpenseScreen } from "../screens/AddExpenseScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -44,6 +45,7 @@ const mainRoutes = () => {
       <Stack.Screen name="CategoryManager" component={CategoryManagerScreen} />
       <Stack.Screen name="Calendar" component={CalendarScreen} />
       <Stack.Screen name="TagManager" component={TagsScreen} />
+      <Stack.Screen name="EditExpense" component={AddExpenseScreen} />
       <Stack.Screen
         name="TransactionDetail"
         component={TransactionDetailScreen}

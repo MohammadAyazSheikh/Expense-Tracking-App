@@ -17,11 +17,12 @@ export type RootStackParamList = {
   Calendar: undefined;
   TagManager: undefined;
   TransactionDetail: { id: string, category: Category };
+  EditExpense: { transactionId?: string; date?: string } | undefined;
 };
 
 export type MainTabParamList = {
   Dashboard: undefined;
-  AddExpense: undefined;
+  AddExpense: { transactionId?: string; date?: string } | undefined;
   Analytics: undefined;
   Transactions: undefined;
   Budget: undefined;

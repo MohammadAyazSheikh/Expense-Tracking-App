@@ -111,11 +111,6 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
           </View>
         }
       />
-      <Button
-        title="Manage Tags"
-        size="sm"
-        onPress={() => navigation.navigate("TagManager")}
-      />
       <AddCategoryModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}

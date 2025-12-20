@@ -19,20 +19,6 @@ type TransactionDetailRouteProp = RouteProp<
   "TransactionDetail"
 >;
 
-const getCategoryEmoji = (categoryName: string): string => {
-  const emojis: Record<string, string> = {
-    Food: "🍔",
-    Transport: "🚗",
-    Bills: "📱",
-    Income: "💰",
-    Shopping: "🛍️",
-    Health: "💊",
-    Education: "📚",
-    Entertainment: "🎬",
-  };
-  return emojis[categoryName] || "📝";
-};
-
 export const TransactionDetailScreen = () => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
@@ -41,7 +27,6 @@ export const TransactionDetailScreen = () => {
 
   const { id, category } = route.params || {};
   const transactions = useFinanceStore((state) => state.transactions);
-  const categories = useFinanceStore((state) => state.categories);
   const tags = useFinanceStore((state) => state.tags);
   const deleteTransaction = useFinanceStore((state) => state.deleteTransaction);
 
@@ -284,7 +269,10 @@ export const TransactionDetailScreen = () => {
             variant="outline"
             style={{ flex: 1 }}
             onPress={() => {
-              // Navigate to edit
+              navigation.navigate("EditExpense", {
+                transactionId: transaction.id,
+                date: transaction.date,
+              });
             }}
           />
           <Button

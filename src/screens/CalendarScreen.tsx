@@ -156,7 +156,10 @@ export const CalendarScreen = () => {
   };
 
   const handleAddTransaction = () => {
-    navigation.navigate("AddExpense" as any, { prefilledDate: selectedDate });
+    navigation.navigate("MainTab", {
+      screen: "AddExpense",
+      params: { date: selectedDate },
+    });
   };
 
   const renderTransaction = useCallback(
