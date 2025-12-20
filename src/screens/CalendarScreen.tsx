@@ -8,24 +8,19 @@ import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
-import { Icon, IconType } from "../components/ui/Icon";
 import { useTranslation } from "../hooks/useTranslation";
 import { useFinanceStore } from "../store";
 import { Transaction } from "../types";
-import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
+import { TransactionCard } from "../components/Transactions/TransactionCard";
+import Animated from "react-native-reanimated";
 import {
-  DAMPING,
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
 } from "../utils/Animation";
 import { useFonts } from "../hooks/useFonts";
-
-export const EnteringListAnimation = FadeInDown.springify().damping(DAMPING);
-export const ExitingListAnimation = FadeOut.springify().damping(DAMPING);
 
 // Custom Day Component
 const CustomDay = ({
@@ -163,121 +158,69 @@ export const CalendarScreen = () => {
   };
 
   const renderTransaction = useCallback(
-    ({ item, index }: { item: Transaction; index: number }) => {
+    ({ item }: { item: Transaction; index: number }) => {
       const category = categories.find((c) => c.name === item.category);
       return (
-        <Animated.View
-          layout={LayoutAnimation}
-          entering={EnteringAnimation.delay(index * 100)}
-          exiting={ExitingAnimation.delay(index * 100)}
-        >
-          <Card
-            style={styles.transactionCard}
-            onPress={() =>
-              navigation.navigate("TransactionDetail" as any, { id: item.id })
-            }
-          >
-            <View
-              style={[
-                styles.transactionIcon,
-                {
-                  backgroundColor: category?.color || theme.colors.muted,
-                },
-              ]}
-            >
-              <Icon
-                type={(category?.iconFamily as IconType) || "Ionicons"}
-                name={(category?.icon as any) || "help"}
-                size={20}
-                color="white"
-              />
-            </View>
-            <View style={styles.transactionInfo}>
-              <Text weight="medium" numberOfLines={1}>
-                {item.name}
-              </Text>
-              <View style={styles.transactionMeta}>
-                <Badge
-                  variant="outline"
-                  style={styles.categoryBadge} // Extracted style
-                >
-                  {item.category}
-                </Badge>
-                <Text variant="caption">{item.time}</Text>
-              </View>
-            </View>
-            <View style={styles.transactionAmount}>
-              <Text
-                weight="semiBold"
-                style={
-                  item.type === "income"
-                    ? styles.incomeText
-                    : styles.expenseText
-                }
-              >
-                {item.type === "income" ? "+" : ""}
-                {item.amount.toFixed(2)}
-              </Text>
-            </View>
-          </Card>
-        </Animated.View>
+        <TransactionCard
+          containerStyle={{ marginVertical: theme.margins.xs }}
+          transaction={item}
+          category={category}
+          onPress={() =>
+            navigation.navigate("TransactionDetail" as any, { id: item.id })
+          }
+        />
       );
     },
-    [categories, navigation, theme]
+    [categories, navigation]
   );
 
   const renderSectionHeader = useCallback(() => {
     if (!selectedDate || !selectedDateTotals) return null;
 
     return (
-      <Animated.View
-        layout={LayoutAnimation}
-        style={styles.sectionHeaderContainer}
-      >
-        <Card style={styles.summaryCard}>
-          <Text weight="semiBold" style={styles.summaryTitle}>
-            {new Date(selectedDate).toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-          <View style={styles.summaryGrid}>
-            <View style={styles.summaryItem}>
-              <Text variant="caption" style={styles.summaryLabel}>
-                {t("calendar.income", "Income")}
-              </Text>
-              <Text weight="semiBold" style={styles.incomeText}>
-                ${selectedDateTotals.income.toFixed(2)}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text variant="caption" style={styles.summaryLabel}>
-                {t("calendar.expenses", "Expenses")}
-              </Text>
-              <Text weight="semiBold" style={styles.expenseText}>
-                ${Math.abs(selectedDateTotals.expense).toFixed(2)}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text variant="caption" style={styles.summaryLabel}>
-                {t("calendar.net", "Net")}
-              </Text>
-              <Text
-                weight="semiBold"
-                style={
-                  selectedDateTotals.net >= 0
-                    ? styles.incomeText
-                    : styles.expenseText
-                }
-              >
-                ${selectedDateTotals.net.toFixed(2)}
-              </Text>
-            </View>
+      <Card style={styles.summaryCard}>
+        <Text weight="semiBold" style={styles.summaryTitle}>
+          {new Date(selectedDate).toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </Text>
+        <View style={styles.summaryGrid}>
+          <View style={styles.summaryItem}>
+            <Text variant="caption" style={styles.summaryLabel}>
+              {t("calendar.income", "Income")}
+            </Text>
+            <Text weight="semiBold" style={styles.incomeText}>
+              ${selectedDateTotals.income.toFixed(2)}
+            </Text>
           </View>
-        </Card>
-      </Animated.View>
+          <View style={styles.summaryItem}>
+            <Text variant="caption" style={styles.summaryLabel}>
+              {t("calendar.expenses", "Expenses")}
+            </Text>
+            <Text weight="semiBold" style={styles.expenseText}>
+              ${Math.abs(selectedDateTotals.expense).toFixed(2)}
+            </Text>
+          </View>
+          <View style={styles.summaryItem}>
+            <Text variant="caption" style={styles.summaryLabel}>
+              {t("calendar.net", "Net")}
+            </Text>
+            <Text
+              weight="semiBold"
+              style={
+                selectedDateTotals.net >= 0
+                  ? styles.incomeText
+                  : styles.expenseText
+              }
+            >
+              ${selectedDateTotals.net.toFixed(2)}
+            </Text>
+          </View>
+        </View>
+      </Card>
     );
   }, [selectedDate, selectedDateTotals, t, theme]);
 
@@ -408,18 +351,13 @@ const styles = StyleSheet.create((theme) => ({
   },
   listContent: {
     paddingBottom: 100,
+    paddingHorizontal: theme.paddings.md,
   },
   calendarCard: {
-    margin: theme.margins.md,
-    marginTop: theme.margins.md,
-    marginBottom: theme.margins.sm,
+    marginVertical: theme.margins.md,
     padding: theme.paddings.xs,
   },
-  sectionHeaderContainer: {
-    backgroundColor: theme.colors.background,
-  },
   summaryCard: {
-    marginHorizontal: theme.margins.md,
     marginTop: theme.margins.sm,
     marginBottom: theme.margins.sm,
     padding: theme.paddings.lg,
@@ -445,44 +383,13 @@ const styles = StyleSheet.create((theme) => ({
   summaryLabel: {
     marginBottom: 4,
   },
-  transactionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-    padding: theme.paddings.md,
-    marginHorizontal: theme.margins.md,
-    marginBottom: theme.margins.sm,
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.muted,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  transactionInfo: {
-    flex: 1,
-  },
-  transactionMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.xs,
-    marginTop: 4,
-  },
-  categoryBadge: {
-    paddingVertical: 0,
-    paddingHorizontal: 6,
-  },
-  transactionAmount: {
-    alignItems: "flex-end",
-  },
   incomeText: {
     color: theme.colors.success,
   },
   expenseText: {
     color: theme.colors.destructive,
   },
+
   emptyState: {
     padding: theme.paddings.xl,
     alignItems: "center",

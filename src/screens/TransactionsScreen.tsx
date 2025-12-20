@@ -19,68 +19,7 @@ import {
 } from "../components/Transactions/FilterModal";
 
 import { useFinanceStore } from "../store";
-import { Category, Transaction } from "../types";
-
-type TransactionCardProps = {
-  transaction: Transaction;
-  category?: Category;
-  onPress: () => void;
-};
-
-const TransactionCard = ({
-  transaction,
-  category,
-  onPress,
-}: TransactionCardProps) => {
-  const { theme } = useUnistyles();
-  return (
-    <Card key={transaction.id} style={styles.transactionCard} onPress={onPress}>
-      <View
-        style={[
-          styles.transactionIcon,
-          { backgroundColor: category?.color || theme.colors.muted },
-        ]}
-      >
-        <Icon
-          type={(category?.iconFamily as IconType) || "Ionicons"}
-          name={(category?.icon as any) || "help"}
-          size={20}
-          color="white"
-        />
-      </View>
-      <View style={styles.transactionInfo}>
-        <Text weight="medium" numberOfLines={1}>
-          {transaction.name}
-        </Text>
-        <View style={styles.transactionMeta}>
-          <Badge
-            variant="outline"
-            style={{ paddingVertical: 0, paddingHorizontal: 6 }}
-          >
-            {transaction.category}
-          </Badge>
-          <Text variant="caption">{transaction.time}</Text>
-        </View>
-      </View>
-      <View style={styles.transactionAmount}>
-        <Text
-          weight="semiBold"
-          style={{
-            color:
-              transaction.type === "income"
-                ? theme.colors.success
-                : theme.colors.foreground,
-          }}
-        >
-          {transaction.type === "income" ? "+" : ""}
-          {transaction.amount.toFixed(2)}
-        </Text>
-        <Text variant="caption">{transaction.payment}</Text>
-      </View>
-    </Card>
-  );
-};
-
+import { TransactionCard } from "../components/Transactions/TransactionCard";
 // Helper function to filter by date range
 const isWithinDateRange = (
   transactionDate: string,
@@ -130,7 +69,6 @@ export const TransactionsScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const transactions = useFinanceStore((state) => state.transactions);
   const categories = useFinanceStore((state) => state.categories);
-  const tags = useFinanceStore((state) => state.tags);
 
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
@@ -438,34 +376,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   transactionList: {
     gap: theme.margins.sm,
-  },
-  transactionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-    padding: theme.paddings.md,
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.muted,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  transactionEmoji: {
-    fontSize: 24,
-  },
-  transactionInfo: {
-    flex: 1,
-  },
-  transactionMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.xs,
-    marginTop: 4,
-  },
-  transactionAmount: {
-    alignItems: "flex-end",
   },
 }));

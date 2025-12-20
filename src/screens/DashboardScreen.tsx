@@ -12,6 +12,7 @@ import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
 import { useFinanceStore } from "../store";
 import { useFonts } from "../hooks/useFonts";
+import { TransactionCard } from "../components/Transactions/TransactionCard";
 
 export const DashboardScreen = () => {
   const { width } = useWindowDimensions();
@@ -325,26 +326,22 @@ export const DashboardScreen = () => {
           />
         </View>
         <View style={styles.transactionList}>
-          {recentTransactions.map((tx) => (
-            <Card key={tx.id} style={styles.transactionItem}>
-              <View>
-                <Text weight="medium">{tx.name}</Text>
-                <Text variant="caption">{tx.date}</Text>
-              </View>
-              <Text
-                weight="semiBold"
-                style={{
-                  color:
-                    tx.type === "income"
-                      ? theme.colors.success
-                      : theme.colors.foreground,
-                }}
-              >
-                {tx.type === "income" ? "+" : ""}
-                {Math.abs(tx.amount).toFixed(2)}
-              </Text>
-            </Card>
-          ))}
+          {recentTransactions.map((tx) => {
+            const category = useFinanceStore
+              .getState()
+              .categories.find((c) => c.name === tx.category);
+            return (
+              <TransactionCard
+                key={tx.id}
+                transaction={tx}
+                category={category}
+                onPress={() =>
+                  navigation.navigate("TransactionDetail" as any, { id: tx.id })
+                }
+                showDate
+              />
+            );
+          })}
         </View>
       </View>
     </ScreenWrapper>
@@ -486,12 +483,7 @@ const styles = StyleSheet.create((theme) => ({
   transactionList: {
     gap: theme.margins.sm,
   },
-  transactionItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.paddings.md,
-  },
+
   fab: {
     position: "absolute",
     bottom: theme.margins.lg,

@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, ViewStyle } from 'react-native';
-import { StyleSheet, useUnistyles, UnistylesVariants } from 'react-native-unistyles';
-import { Text } from './Text';
+import React from "react";
+import { View, ViewStyle } from "react-native";
+import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
+import { Text } from "./Text";
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     paddingHorizontal: theme.paddings.sm,
     paddingVertical: 2,
     borderRadius: theme.radius.full,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     variants: {
       variant: {
         primary: {
@@ -20,7 +20,7 @@ const styles = StyleSheet.create(theme => ({
         outline: {
           borderWidth: 1,
           borderColor: theme.colors.border,
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
         },
         destructive: {
           backgroundColor: theme.colors.destructive,
@@ -34,23 +34,23 @@ const styles = StyleSheet.create(theme => ({
         info: {
           backgroundColor: theme.colors.accent,
         },
-      }
-    }
+      },
+    },
   },
   text: {
     fontSize: 10,
     variants: {
       variant: {
-        primary: { color: 'white' },
-        secondary: { color: 'white' },
+        primary: { color: "white" },
+        secondary: { color: "white" },
         outline: { color: theme.colors.foreground },
-        destructive: { color: 'white' },
-        success: { color: 'white' },
-        warning: { color: 'white' },
-        info: { color: 'white' },
-      }
-    }
-  }
+        destructive: { color: "white" },
+        success: { color: "white" },
+        warning: { color: "white" },
+        info: { color: "white" },
+      },
+    },
+  },
 }));
 
 type BadgeVariants = UnistylesVariants<typeof styles>;
@@ -58,16 +58,18 @@ type BadgeVariants = UnistylesVariants<typeof styles>;
 type BadgeProps = BadgeVariants & {
   children: React.ReactNode;
   style?: ViewStyle;
-}
+};
 
-export const Badge = ({ children, variant = 'primary', style }: BadgeProps) => {
+export const Badge = ({ children, variant = "primary", style }: BadgeProps) => {
   styles.useVariants({
-    variant
+    variant,
   });
 
   return (
     <View style={[styles.container, style]}>
-      <Text weight="semiBold" style={styles.text}>{children}</Text>
+      <Text weight="semiBold" style={styles.text}>
+        {children}
+      </Text>
     </View>
   );
 };
