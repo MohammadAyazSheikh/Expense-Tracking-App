@@ -1,69 +1,67 @@
-import React from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
-import { Text } from '../components/ui/Text';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Badge } from '../components/ui/Badge';
-import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { Feather } from '@expo/vector-icons';
+import React from "react";
+import { View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/types";
+import { Text } from "../components/ui/Text";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
+import { Badge } from "../components/ui/Badge";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Feather } from "@expo/vector-icons";
+import { SettingsGroup } from "../components/ui/SettingsGroup";
+import { SettingsRow } from "../components/ui/SettingsRow";
 
 const faqCategories = [
   {
-    title: 'Getting Started',
-    icon: 'book',
+    title: "Getting Started",
+    icon: "book",
     questions: [
-      'How do I add my first expense?',
-      'Setting up multiple wallets',
-      'Understanding budget categories'
-    ]
+      "How do I add my first expense?",
+      "Setting up multiple wallets",
+      "Understanding budget categories",
+    ],
   },
   {
-    title: 'SmartSense™ AI',
-    icon: 'help-circle',
+    title: "SmartSense™ AI",
+    icon: "help-circle",
     questions: [
-      'How does AI predict spending?',
-      'Understanding savings suggestions',
-      'Enabling AI insights'
-    ]
+      "How does AI predict spending?",
+      "Understanding savings suggestions",
+      "Enabling AI insights",
+    ],
   },
   {
-    title: 'Account & Security',
-    icon: 'shield',
-    questions: [
-      'Changing my password',
-      'Setting up 2FA',
-      'Managing devices'
-    ]
-  }
+    title: "Account & Security",
+    icon: "shield",
+    questions: ["Changing my password", "Setting up 2FA", "Managing devices"],
+  },
 ];
 
 const contactOptions = [
   {
-    icon: 'message-circle',
-    title: 'Live Chat',
-    description: 'Chat with our support team',
-    badge: 'Average response: 5 min',
-    color: 'primary'
+    icon: "message-circle",
+    title: "Live Chat",
+    description: "Chat with our support team",
+    badge: "Average response: 5 min",
+    color: "primary",
   },
   {
-    icon: 'mail',
-    title: 'Email Support',
-    description: 'support@expensetrack.com',
-    badge: 'Response within 24h',
-    color: 'accent'
+    icon: "mail",
+    title: "Email Support",
+    description: "support@expensetrack.com",
+    badge: "Response within 24h",
+    color: "accent",
   },
   {
-    icon: 'phone',
-    title: 'Phone Support',
-    description: '+1 (800) 123-4567',
-    badge: 'Mon-Fri, 9AM-6PM EST',
-    color: 'success'
-  }
+    icon: "phone",
+    title: "Phone Support",
+    description: "+1 (800) 123-4567",
+    badge: "Mon-Fri, 9AM-6PM EST",
+    color: "success",
+  },
 ];
 
 export const HelpSupportScreen = () => {
@@ -81,12 +79,19 @@ export const HelpSupportScreen = () => {
             onPress={() => navigation.goBack()}
             style={{ paddingHorizontal: 0, width: 40 }}
           />
-          <Text variant="h2" style={styles.headerTitle}>Help & Support</Text>
+          <Text variant="h2" style={styles.headerTitle}>
+            Help & Support
+          </Text>
         </View>
 
         {/* Search */}
         <View style={styles.searchContainer}>
-          <Feather name="search" size={20} color="rgba(255,255,255,0.7)" style={styles.searchIcon} />
+          <Feather
+            name="search"
+            size={20}
+            color="rgba(255,255,255,0.7)"
+            style={styles.searchIcon}
+          />
           <Input
             placeholder="Search for help..."
             style={styles.searchInput}
@@ -98,29 +103,51 @@ export const HelpSupportScreen = () => {
       <View style={styles.content}>
         {/* Quick Actions */}
         <Card style={styles.quickActionsCard}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickActions}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.quickActions}
+          >
             <Button
               title="Video Tutorials"
-              icon={<Feather name="video" size={16} color={theme.colors.foreground} />}
+              icon={
+                <Feather
+                  name="video"
+                  size={16}
+                  color={theme.colors.foreground}
+                />
+              }
               variant="outline"
               size="sm"
-              onPress={() => { }}
+              onPress={() => {}}
               style={styles.quickActionButton}
             />
             <Button
               title="User Guide"
-              icon={<Feather name="book" size={16} color={theme.colors.foreground} />}
+              icon={
+                <Feather
+                  name="book"
+                  size={16}
+                  color={theme.colors.foreground}
+                />
+              }
               variant="outline"
               size="sm"
-              onPress={() => { }}
+              onPress={() => {}}
               style={styles.quickActionButton}
             />
             <Button
               title="Community"
-              icon={<Feather name="external-link" size={16} color={theme.colors.foreground} />}
+              icon={
+                <Feather
+                  name="external-link"
+                  size={16}
+                  color={theme.colors.foreground}
+                />
+              }
               variant="outline"
               size="sm"
-              onPress={() => { }}
+              onPress={() => {}}
               style={styles.quickActionButton}
             />
           </ScrollView>
@@ -128,25 +155,51 @@ export const HelpSupportScreen = () => {
 
         {/* Contact Support */}
         <View style={styles.section}>
-          <Text variant="h3" style={styles.sectionTitle}>Contact Support</Text>
+          <Text variant="h3" style={styles.sectionTitle}>
+            Contact Support
+          </Text>
           <View style={styles.contactOptions}>
             {contactOptions.map((option) => (
-              <TouchableOpacity key={option.title} style={styles.contactOptionWrapper}>
+              <TouchableOpacity
+                key={option.title}
+                style={styles.contactOptionWrapper}
+              >
                 <Card style={styles.contactCard}>
                   <View style={styles.contactCardContent}>
-                    <View style={[styles.iconCircle, { backgroundColor: theme.colors.muted }]}>
-                      <Feather name={option.icon as any} size={24} color={theme.colors[option.color as keyof typeof theme.colors] as string} />
+                    <View
+                      style={[
+                        styles.iconCircle,
+                        { backgroundColor: theme.colors.muted },
+                      ]}
+                    >
+                      <Feather
+                        name={option.icon as any}
+                        size={24}
+                        color={
+                          theme.colors[
+                            option.color as keyof typeof theme.colors
+                          ] as string
+                        }
+                      />
                     </View>
                     <View style={styles.contactInfo}>
                       <Text weight="semiBold">{option.title}</Text>
-                      <Text variant="caption" style={styles.contactDescription} numberOfLines={1}>
+                      <Text
+                        variant="caption"
+                        style={styles.contactDescription}
+                        numberOfLines={1}
+                      >
                         {option.description}
                       </Text>
                       <Badge variant="secondary" style={styles.contactBadge}>
                         {option.badge}
                       </Badge>
                     </View>
-                    <Feather name="chevron-right" size={20} color={theme.colors.mutedForeground} />
+                    <Feather
+                      name="chevron-right"
+                      size={20}
+                      color={theme.colors.mutedForeground}
+                    />
                   </View>
                 </Card>
               </TouchableOpacity>
@@ -156,24 +209,31 @@ export const HelpSupportScreen = () => {
 
         {/* FAQ Categories */}
         <View style={styles.section}>
-          <Text variant="h3" style={styles.sectionTitle}>Frequently Asked</Text>
+          <Text variant="h3" style={styles.sectionTitle}>
+            Frequently Asked
+          </Text>
           <View style={styles.faqCategories}>
             {faqCategories.map((category) => (
               <Card key={category.title} style={styles.faqCard}>
                 <View style={styles.faqHeader}>
                   <View style={styles.faqIconCircle}>
-                    <Feather name={category.icon as any} size={20} color={theme.colors.primary} />
+                    <Feather
+                      name={category.icon as any}
+                      size={20}
+                      color={theme.colors.primary}
+                    />
                   </View>
                   <Text variant="h3">{category.title}</Text>
                 </View>
                 <View style={styles.faqQuestions}>
                   {category.questions.map((question, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={styles.faqQuestion}
-                    >
+                    <TouchableOpacity key={index} style={styles.faqQuestion}>
                       <Text style={styles.faqQuestionText}>{question}</Text>
-                      <Feather name="chevron-right" size={16} color={theme.colors.mutedForeground} />
+                      <Feather
+                        name="chevron-right"
+                        size={16}
+                        color={theme.colors.mutedForeground}
+                      />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -184,7 +244,9 @@ export const HelpSupportScreen = () => {
 
         {/* App Info */}
         <Card style={styles.appInfoCard}>
-          <Text variant="caption" style={styles.appVersion}>ExpenseTrack v2.1.0</Text>
+          <Text variant="caption" style={styles.appVersion}>
+            ExpenseTrack v2.1.0
+          </Text>
           <View style={styles.legalLinks}>
             <TouchableOpacity>
               <Text style={styles.legalLink}>Privacy Policy</Text>
@@ -200,8 +262,7 @@ export const HelpSupportScreen = () => {
   );
 };
 
-
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -212,47 +273,47 @@ const styles = StyleSheet.create(theme => ({
     paddingBottom: theme.paddings.xl,
   },
   headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
     marginBottom: theme.margins.lg,
   },
   headerTitle: {
-    color: 'white',
+    color: "white",
   },
   searchContainer: {
-    position: 'relative',
+    position: "relative",
     marginTop: theme.margins.sm,
     maxWidth: {
-      md: 600
+      md: 600,
     },
     alignSelf: {
-      md: 'center'
+      md: "center",
     },
-    width: '100%'
+    width: "100%",
   },
   searchIcon: {
-    position: 'absolute',
+    position: "absolute",
     left: theme.paddings.md,
-    top: '50%',
+    top: "50%",
     transform: [{ translateY: -10 }],
     zIndex: 1,
   },
   searchInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderWidth: 0,
     paddingLeft: theme.paddings.xl + theme.paddings.md,
-    color: 'white',
+    color: "white",
   },
   content: {
     padding: theme.paddings.md,
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
     maxWidth: {
-      md: 800
+      md: 800,
     },
-    alignSelf: 'center',
-    width: '100%'
+    alignSelf: "center",
+    width: "100%",
   },
   quickActionsCard: {
     padding: theme.paddings.md,
@@ -274,34 +335,34 @@ const styles = StyleSheet.create(theme => ({
   contactOptions: {
     gap: theme.margins.md,
     flexDirection: {
-      xs: 'column',
-      md: 'row'
+      xs: "column",
+      md: "row",
     },
-    flexWrap: 'wrap'
+    flexWrap: "wrap",
   },
   contactOptionWrapper: {
     flex: {
-      md: 1
+      md: 1,
     },
     minWidth: {
-      md: 200
-    }
+      md: 200,
+    },
   },
   contactCard: {
     padding: theme.paddings.md,
-    height: '100%'
+    height: "100%",
   },
   contactCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
   },
   iconCircle: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   contactInfo: {
@@ -321,8 +382,8 @@ const styles = StyleSheet.create(theme => ({
     padding: theme.paddings.lg,
   },
   faqHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
     marginBottom: theme.margins.md,
   },
@@ -331,19 +392,19 @@ const styles = StyleSheet.create(theme => ({
     height: 40,
     borderRadius: 20,
     backgroundColor: `${theme.colors.primary}15`,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   faqQuestions: {
     gap: theme.margins.xs,
   },
   faqQuestion: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: theme.paddings.md,
     borderRadius: theme.radius.md,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   faqQuestionText: {
     fontSize: theme.fontSize.sm,
@@ -352,7 +413,7 @@ const styles = StyleSheet.create(theme => ({
   },
   appInfoCard: {
     padding: theme.paddings.lg,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: theme.margins.md,
   },
   appVersion: {
@@ -360,8 +421,8 @@ const styles = StyleSheet.create(theme => ({
     marginBottom: theme.margins.sm,
   },
   legalLinks: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
   },
   legalLink: {
