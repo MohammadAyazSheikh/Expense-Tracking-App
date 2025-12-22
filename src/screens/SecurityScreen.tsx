@@ -246,7 +246,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   content: {
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
     gap: theme.margins.md,
     maxWidth: {
       md: 800,

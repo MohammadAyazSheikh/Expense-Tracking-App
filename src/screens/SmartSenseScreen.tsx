@@ -1,24 +1,27 @@
-import React, { } from 'react';
-import { View } from 'react-native';
+import React from "react";
+import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
-import { Text } from '../components/ui/Text';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { Feather } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/types";
+import { Text } from "../components/ui/Text";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Feather } from "@expo/vector-icons";
+import { SettingsGroup } from "../components/ui/SettingsGroup";
+import { SettingsRow } from "../components/ui/SettingsRow";
 
 const insights = [
   {
     type: "warning",
     icon: "trending-up",
     title: "Spending Alert",
-    description: "You're spending 23% more on food this week compared to last week.",
+    description:
+      "You're spending 23% more on food this week compared to last week.",
     suggestion: "Try meal prepping to save approximately $50/week",
-    impact: "High Impact"
+    impact: "High Impact",
   },
   {
     type: "success",
@@ -26,15 +29,16 @@ const insights = [
     title: "Great Progress!",
     description: "Your entertainment expenses are down 15% this month.",
     suggestion: "Keep it up! You're on track to save $80 this month.",
-    impact: "Positive"
+    impact: "Positive",
   },
   {
     type: "info",
     icon: "target",
     title: "Budget Recommendation",
-    description: "Based on your income, you could save an additional $200/month.",
+    description:
+      "Based on your income, you could save an additional $200/month.",
     suggestion: "Consider setting up automatic savings of $50/week",
-    impact: "Medium Impact"
+    impact: "Medium Impact",
   },
 ] as const;
 
@@ -46,18 +50,19 @@ const predictions = [
 ] as const;
 
 export const SmartSenseScreen = () => {
-
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'warning': return theme.colors.warning;
-      case 'success': return theme.colors.success;
-      case 'info': return theme.colors.accent;
-      default: return theme.colors.mutedForeground;
+      case "warning":
+        return theme.colors.warning;
+      case "success":
+        return theme.colors.success;
+      case "info":
+        return theme.colors.accent;
+      default:
+        return theme.colors.mutedForeground;
     }
   };
 
@@ -74,7 +79,9 @@ export const SmartSenseScreen = () => {
           />
           <View style={styles.headerTitleRow}>
             <Feather name="zap" size={24} color="white" />
-            <Text variant="h2" style={styles.headerTitle}>SmartSense™</Text>
+            <Text variant="h2" style={styles.headerTitle}>
+              SmartSense™
+            </Text>
           </View>
         </View>
         <Text variant="caption" style={styles.headerSubtitle}>
@@ -85,49 +92,98 @@ export const SmartSenseScreen = () => {
       <View style={styles.content}>
         {/* AI Insights */}
         <View>
-          <Text variant="h3" style={styles.sectionTitle}>Smart Insights</Text>
+          <Text variant="h3" style={styles.sectionTitle}>
+            Smart Insights
+          </Text>
           {insights.map((insight, index) => (
-            <Card key={index} style={styles.insightCard}>
-              <View style={styles.insightHeader}>
-                <View style={[styles.insightIcon, { backgroundColor: getStatusColor(insight.type) + '20' }]}>
-                  <Feather
-                    name={insight.icon as any}
-                    size={20}
-                    color={getStatusColor(insight.type)}
-                  />
-                </View>
-                <View style={styles.insightContent}>
-                  <View style={styles.insightTitleRow}>
-                    <Text weight="semiBold">{insight.title}</Text>
-                    <Badge variant={insight.type as any}>
-                      {insight.impact}
-                    </Badge>
-                  </View>
-                  <Text variant="caption" style={{ marginBottom: 8 }}>{insight.description}</Text>
-                  <View style={styles.suggestionBox}>
-                    <Feather name="sun" size={16} color={theme.colors.primary} />
-                    <Text variant="caption" style={{ flex: 1 }}>{insight.suggestion}</Text>
+            <SettingsGroup
+              key={index}
+              containerStyle={{ marginBottom: theme.margins.md }}
+            >
+              <View style={styles.insightCardContent}>
+                {/* Type-based Accent Bar */}
+                <View
+                  style={[
+                    styles.sideAccent,
+                    { backgroundColor: getStatusColor(insight.type) },
+                  ]}
+                />
+                <View style={styles.insightPadding}>
+                  <View style={styles.insightHeader}>
+                    <View
+                      style={[
+                        styles.insightIconContainer,
+                        {
+                          backgroundColor: getStatusColor(insight.type) + "15",
+                          borderColor: getStatusColor(insight.type) + "30",
+                        },
+                      ]}
+                    >
+                      <Feather
+                        name={insight.icon as any}
+                        size={22}
+                        color={getStatusColor(insight.type)}
+                      />
+                    </View>
+                    <View style={styles.insightContent}>
+                      <View style={styles.insightTitleRow}>
+                        <Text weight="bold" style={styles.insightTitleText}>
+                          {insight.title}
+                        </Text>
+                        <Badge variant={insight.type as any}>
+                          {insight.impact}
+                        </Badge>
+                      </View>
+                      <Text variant="caption" style={styles.insightDescription}>
+                        {insight.description}
+                      </Text>
+                      <View
+                        style={[
+                          styles.suggestionBox,
+                          {
+                            borderColor: getStatusColor(insight.type) + "20",
+                            backgroundColor:
+                              getStatusColor(insight.type) + "08",
+                          },
+                        ]}
+                      >
+                        <View style={styles.suggestionIconWrapper}>
+                          <Feather
+                            name="zap"
+                            size={14}
+                            color={getStatusColor(insight.type)}
+                          />
+                        </View>
+                        <Text
+                          variant="caption"
+                          weight="medium"
+                          style={{
+                            flex: 1,
+                            color: theme.colors.foreground,
+                            fontSize: 12,
+                          }}
+                        >
+                          {insight.suggestion}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
               </View>
-            </Card>
+            </SettingsGroup>
           ))}
         </View>
 
         {/* Predictions */}
-        <View>
-          <Text variant="h3" style={styles.sectionTitle}>Next Month Predictions</Text>
-          <Card>
-            {predictions.map((pred, index) => (
-              <View key={index} style={[
-                styles.predictionRow,
-                index === predictions.length - 1 && { borderBottomWidth: 0 }
-              ]}>
-                <View>
-                  <Text weight="medium">{pred.category}</Text>
-                  <Text variant="caption">Predicted</Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
+        <SettingsGroup title="Next Month Predictions">
+          {predictions.map((pred, index) => (
+            <SettingsRow
+              key={index}
+              label={pred.category}
+              description="Predicted"
+              showSeparator={index > 0}
+              rightElement={
+                <View style={{ alignItems: "flex-end" }}>
                   <Text weight="semiBold">{pred.predicted}</Text>
                   <Text
                     variant="caption"
@@ -136,27 +192,35 @@ export const SmartSenseScreen = () => {
                     {pred.trend}
                   </Text>
                 </View>
-              </View>
-            ))}
-          </Card>
-        </View>
+              }
+            />
+          ))}
+        </SettingsGroup>
 
         {/* Savings Goal */}
         <Card style={styles.savingsCard}>
           <View style={styles.savingsContent}>
             <Feather name="target" size={24} color="white" />
             <View style={styles.savingsTextContainer}>
-              <Text variant="h3" style={{ color: 'white' }}>Suggested Savings Goal</Text>
-              <Text variant="caption" style={{ color: 'rgba(255, 255, 255, 0.9)', marginBottom: 16 }}>
-                Based on your spending patterns, you could save $500 in the next 3 months
-                by optimizing your food and entertainment expenses.
+              <Text variant="h3" style={{ color: "white" }}>
+                Suggested Savings Goal
+              </Text>
+              <Text
+                variant="caption"
+                style={{ color: "rgba(255, 255, 255, 0.9)", marginBottom: 16 }}
+              >
+                Based on your spending patterns, you could save $500 in the next
+                3 months by optimizing your food and entertainment expenses.
               </Text>
               <Button
                 title="Set This Goal"
                 variant="secondary"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', alignSelf: 'flex-start' }}
-                textStyle={{ color: 'white' }}
-                onPress={() => { }}
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  alignSelf: "flex-start",
+                }}
+                textStyle={{ color: "white" }}
+                onPress={() => {}}
               />
             </View>
           </View>
@@ -166,101 +230,121 @@ export const SmartSenseScreen = () => {
   );
 };
 
-
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background
+    backgroundColor: theme.colors.background,
   },
   header: {
     backgroundColor: theme.colors.primary,
     padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl
+    paddingBottom: theme.paddings.xl,
   },
   headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
-    marginBottom: theme.margins.md
+    marginBottom: theme.margins.md,
   },
   headerTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.margins.sm
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.margins.sm,
   },
   headerTitle: {
-    color: 'white'
+    color: "white",
   },
   headerSubtitle: {
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: "rgba(255, 255, 255, 0.9)",
     maxWidth: {
-      md: 600
+      md: 600,
     },
     alignSelf: {
-      md: 'center'
+      md: "center",
     },
     textAlign: {
-      md: 'center'
-    }
+      md: "center",
+    },
   },
   content: {
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
     gap: theme.margins.lg,
     maxWidth: {
-      md: 800
+      md: 800,
     },
-    alignSelf: 'center',
-    width: '100%'
+    alignSelf: "center",
+    width: "100%",
   },
   sectionTitle: {
-    marginBottom: theme.margins.sm
+    marginBottom: theme.margins.sm,
   },
-  insightCard: {
-    marginBottom: theme.margins.md
+  insightCardContent: {
+    flexDirection: "row",
+    minHeight: 120,
+  },
+  sideAccent: {
+    width: 4,
+    height: "100%",
+  },
+  insightPadding: {
+    padding: theme.paddings.md,
+    flex: 1,
   },
   insightHeader: {
-    flexDirection: 'row',
-    gap: theme.margins.md
+    flexDirection: "row",
+    gap: theme.margins.md,
   },
-  insightIcon: {
-    padding: theme.paddings.sm,
-    borderRadius: theme.radius.md
+  insightIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
   },
   insightContent: {
-    flex: 1
+    flex: 1,
   },
   insightTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: theme.margins.xs
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  insightTitleText: {
+    fontSize: theme.fontSize.md,
+  },
+  insightDescription: {
+    marginBottom: theme.margins.md,
+    lineHeight: 18,
+    color: theme.colors.mutedForeground,
   },
   suggestionBox: {
-    flexDirection: 'row',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.sm,
-    backgroundColor: theme.colors.muted,
     padding: theme.paddings.sm,
     borderRadius: theme.radius.md,
-    marginTop: theme.margins.sm
+    borderWidth: 1,
+    borderStyle: "dashed",
   },
-  predictionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: theme.paddings.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.muted
+  suggestionIconWrapper: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
   },
   savingsCard: {
     backgroundColor: theme.colors.secondary,
-    borderWidth: 0
+    borderWidth: 0,
   },
   savingsContent: {
-    flexDirection: 'row',
-    gap: theme.margins.md
+    flexDirection: "row",
+    gap: theme.margins.md,
   },
   savingsTextContainer: {
-    flex: 1
-  }
+    flex: 1,
+  },
 }));

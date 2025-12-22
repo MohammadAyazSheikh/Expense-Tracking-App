@@ -154,92 +154,50 @@ export const HelpSupportScreen = () => {
         </Card>
 
         {/* Contact Support */}
-        <View style={styles.section}>
-          <Text variant="h3" style={styles.sectionTitle}>
-            Contact Support
-          </Text>
-          <View style={styles.contactOptions}>
-            {contactOptions.map((option) => (
-              <TouchableOpacity
-                key={option.title}
-                style={styles.contactOptionWrapper}
-              >
-                <Card style={styles.contactCard}>
-                  <View style={styles.contactCardContent}>
-                    <View
-                      style={[
-                        styles.iconCircle,
-                        { backgroundColor: theme.colors.muted },
-                      ]}
-                    >
-                      <Feather
-                        name={option.icon as any}
-                        size={24}
-                        color={
-                          theme.colors[
-                            option.color as keyof typeof theme.colors
-                          ] as string
-                        }
-                      />
-                    </View>
-                    <View style={styles.contactInfo}>
-                      <Text weight="semiBold">{option.title}</Text>
-                      <Text
-                        variant="caption"
-                        style={styles.contactDescription}
-                        numberOfLines={1}
-                      >
-                        {option.description}
-                      </Text>
-                      <Badge variant="secondary" style={styles.contactBadge}>
-                        {option.badge}
-                      </Badge>
-                    </View>
-                    <Feather
-                      name="chevron-right"
-                      size={20}
-                      color={theme.colors.mutedForeground}
-                    />
-                  </View>
-                </Card>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        <SettingsGroup title="Contact Support">
+          {contactOptions.map((option, index) => (
+            <SettingsRow
+              key={option.title}
+              label={option.title}
+              description={option.description}
+              icon={option.icon as any}
+              iconColor={
+                theme.colors[
+                  option.color as keyof typeof theme.colors
+                ] as string
+              }
+              onPress={() => {}}
+              showSeparator={index > 0}
+              rightElement={
+                <Badge variant="secondary" style={styles.contactBadge}>
+                  {option.badge}
+                </Badge>
+              }
+            />
+          ))}
+        </SettingsGroup>
 
         {/* FAQ Categories */}
         <View style={styles.section}>
           <Text variant="h3" style={styles.sectionTitle}>
             Frequently Asked
           </Text>
-          <View style={styles.faqCategories}>
-            {faqCategories.map((category) => (
-              <Card key={category.title} style={styles.faqCard}>
-                <View style={styles.faqHeader}>
-                  <View style={styles.faqIconCircle}>
-                    <Feather
-                      name={category.icon as any}
-                      size={20}
-                      color={theme.colors.primary}
-                    />
-                  </View>
-                  <Text variant="h3">{category.title}</Text>
-                </View>
-                <View style={styles.faqQuestions}>
-                  {category.questions.map((question, index) => (
-                    <TouchableOpacity key={index} style={styles.faqQuestion}>
-                      <Text style={styles.faqQuestionText}>{question}</Text>
-                      <Feather
-                        name="chevron-right"
-                        size={16}
-                        color={theme.colors.mutedForeground}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </Card>
-            ))}
-          </View>
+          {faqCategories.map((category) => (
+            <SettingsGroup
+              key={category.title}
+              title={category.title}
+              containerStyle={{ marginBottom: theme.margins.md }}
+            >
+              {category.questions.map((question, index) => (
+                <SettingsRow
+                  key={index}
+                  label={question}
+                  onPress={() => {}}
+                  showSeparator={index > 0}
+                />
+              ))}
+            </SettingsGroup>
+          ))}
         </View>
 
         {/* App Info */}
@@ -332,84 +290,11 @@ const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.paddings.xs,
     marginBottom: theme.margins.xs,
   },
-  contactOptions: {
-    gap: theme.margins.md,
-    flexDirection: {
-      xs: "column",
-      md: "row",
-    },
-    flexWrap: "wrap",
-  },
-  contactOptionWrapper: {
-    flex: {
-      md: 1,
-    },
-    minWidth: {
-      md: 200,
-    },
-  },
-  contactCard: {
-    padding: theme.paddings.md,
-    height: "100%",
-  },
-  contactCardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  contactInfo: {
-    flex: 1,
-    gap: theme.margins.xs,
-  },
-  contactDescription: {
-    color: theme.colors.mutedForeground,
-  },
   contactBadge: {
-    marginTop: theme.margins.xs,
+    marginTop: 0,
   },
   faqCategories: {
-    gap: theme.margins.md,
-  },
-  faqCard: {
-    padding: theme.paddings.lg,
-  },
-  faqHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-    marginBottom: theme.margins.md,
-  },
-  faqIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: `${theme.colors.primary}15`,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  faqQuestions: {
-    gap: theme.margins.xs,
-  },
-  faqQuestion: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.paddings.md,
-    borderRadius: theme.radius.md,
-    backgroundColor: "transparent",
-  },
-  faqQuestionText: {
-    fontSize: theme.fontSize.sm,
-    flex: 1,
-    marginRight: theme.margins.sm,
+    gap: 0,
   },
   appInfoCard: {
     padding: theme.paddings.lg,
