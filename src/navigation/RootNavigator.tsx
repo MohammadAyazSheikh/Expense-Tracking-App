@@ -22,6 +22,14 @@ import { AddExpenseScreen } from "../screens/AddExpenseScreen";
 import { OTPVerificationScreen } from "../screens/auth/OTPVerificationScreen";
 import { ForgotPasswordScreen } from "../screens/auth/ForgotPasswordScreen";
 import { ResetPasswordScreen } from "../screens/auth/ResetPasswordScreen";
+import { CreateBudgetScreen } from "../screens/CreateBudgetScreen";
+import { GroupsScreen } from "../screens/GroupsScreen";
+import { CreateGroupScreen } from "../screens/CreateGroupScreen";
+import { GroupDetailScreen } from "../screens/GroupDetailScreen";
+import { AddGroupExpenseScreen } from "../screens/AddGroupExpenseScreen";
+import { SettleUpScreen } from "../screens/SettleUpScreen";
+import { FriendsScreen } from "../screens/FriendsScreen";
+import { BudgetScreen } from "../screens/BudgetScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -57,6 +65,14 @@ const mainRoutes = () => {
         name="TransactionDetail"
         component={TransactionDetailScreen}
       />
+      <Stack.Screen name="Budget" component={BudgetScreen} />
+      <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
+      <Stack.Screen name="Groups" component={GroupsScreen} />
+      <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
+      <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+      <Stack.Screen name="AddGroupExpense" component={AddGroupExpenseScreen} />
+      <Stack.Screen name="SettleUp" component={SettleUpScreen} />
+      <Stack.Screen name="Friends" component={FriendsScreen} />
     </Stack.Navigator>
   );
 };

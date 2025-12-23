@@ -18,9 +18,48 @@ export interface Budget {
   category: string;
   limit: number;
   spent: number;
-  period: 'monthly' | 'weekly';
+  period: 'monthly' | 'weekly' | 'yearly';
   color: string;
   icon?: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  members: string[];
+  totalExpenses: number;
+  youOwe: number;
+  youAreOwed: number;
+  lastActivity: string;
+  avatar: string;
+}
+
+export interface GroupExpense {
+  id: string;
+  groupId: string;
+  paidBy: string;
+  amount: number;
+  description: string;
+  date: string;
+  splitType: 'equal' | 'exact' | 'percentage';
+  splits: { memberId: string; amount: number }[];
+}
+
+export interface Settlement {
+  id: string;
+  groupId: string;
+  from: string;
+  to: string;
+  amount: number;
+  date: string;
+  status: 'pending' | 'completed';
+}
+
+export interface Friend {
+  id: string;
+  name: string;
+  email?: string;
+  avatar?: string;
 }
 
 export interface Wallet {

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
-import { Transaction, Budget, Wallet, Category, Tag } from '../types';
+import { Transaction, Budget, Wallet, Category, Tag, Group, GroupExpense, Settlement, Friend } from '../types';
 
 interface FinanceState {
   // State
@@ -12,6 +12,10 @@ interface FinanceState {
   tags: Tag[];
   isLoading: boolean;
   error: string | null;
+  groups: Group[];
+  friends: Friend[];
+  groupExpenses: GroupExpense[];
+  settlements: Settlement[];
 
   // Actions
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
@@ -33,6 +37,19 @@ interface FinanceState {
   addTag: (tag: Omit<Tag, 'id'>) => void;
   updateTag: (id: string, tag: Partial<Tag>) => void;
   deleteTag: (id: string) => void;
+
+  // Split Bill Actions
+  addGroup: (group: Omit<Group, 'id'>) => void;
+  updateGroup: (id: string, group: Partial<Group>) => void;
+  deleteGroup: (id: string) => void;
+
+  addFriend: (friend: Omit<Friend, 'id'>) => void;
+  updateFriend: (id: string, friend: Partial<Friend>) => void;
+  deleteFriend: (id: string) => void;
+
+  addGroupExpense: (expense: Omit<GroupExpense, 'id'>) => void;
+  addSettlement: (settlement: Omit<Settlement, 'id'>) => void;
+  updateSettlement: (id: string, settlement: Partial<Settlement>) => void;
 }
 
 // Mock Data
@@ -65,6 +82,36 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   { id: '26', name: "Clothing Store", category: "Shopping", amount: -68.75, date: "2025-12-20", time: "15:45 PM", type: "expense", payment: "Card" },
   { id: '27', name: "Hair Salon", category: "Health", amount: -45.00, date: "2025-12-20", time: "14:30 PM", type: "expense", payment: "Card" },
   { id: '28', name: "Gift Purchase", category: "Shopping", amount: -55.99, date: "2025-12-20", time: "18:00 PM", type: "expense", payment: "Card" },
+];
+
+const MOCK_GROUPS: Group[] = [
+  {
+    id: "1",
+    name: "Apartment Roommates",
+    members: ["You", "Sarah", "Mike"],
+    totalExpenses: 1250.0,
+    youOwe: 45.5,
+    youAreOwed: 0,
+    lastActivity: "2 hours ago",
+    avatar: "🏠",
+  },
+  {
+    id: "2",
+    name: "Trip to Bali",
+    members: ["You", "Emma", "John", "Lisa"],
+    totalExpenses: 3420.0,
+    youOwe: 0,
+    youAreOwed: 125.0,
+    lastActivity: "Yesterday",
+    avatar: "✈️",
+  },
+];
+
+const MOCK_FRIENDS: Friend[] = [
+  { id: "1", name: "Sarah", avatar: "👩‍🦰" },
+  { id: "2", name: "Mike", avatar: "👨" },
+  { id: "3", name: "Emma", avatar: "👩" },
+  { id: "4", name: "John", avatar: "🧔" },
 ];
 
 const MOCK_WALLETS: Wallet[] = [
@@ -110,6 +157,10 @@ export const useFinanceStore = create<FinanceState>()(
       wallets: MOCK_WALLETS,
       categories: DEFAULT_CATEGORIES,
       tags: DEFAULT_TAGS,
+      groups: MOCK_GROUPS,
+      friends: MOCK_FRIENDS,
+      groupExpenses: [],
+      settlements: [],
       isLoading: false,
       error: null,
 
@@ -218,6 +269,70 @@ export const useFinanceStore = create<FinanceState>()(
           tags: state.tags.filter((t) => t.id !== id),
         }));
       },
+
+      addGroup: (group) => {
+        const newGroup = { ...group, id: Math.random().toString(36).substr(2, 9) };
+        set((state) => ({
+          groups: [...state.groups, newGroup],
+        }));
+      },
+
+      updateGroup: (id, updatedGroup) => {
+        set((state) => ({
+          groups: state.groups.map((g) =>
+            g.id === id ? { ...g, ...updatedGroup } : g
+          ),
+        }));
+      },
+
+      deleteGroup: (id) => {
+        set((state) => ({
+          groups: state.groups.filter((g) => g.id !== id),
+        }));
+      },
+
+      addFriend: (friend) => {
+        const newFriend = { ...friend, id: Math.random().toString(36).substr(2, 9) };
+        set((state) => ({
+          friends: [...state.friends, newFriend],
+        }));
+      },
+
+      updateFriend: (id, updatedFriend) => {
+        set((state) => ({
+          friends: state.friends.map((f) =>
+            f.id === id ? { ...f, ...updatedFriend } : f
+          ),
+        }));
+      },
+
+      deleteFriend: (id) => {
+        set((state) => ({
+          friends: state.friends.filter((f) => f.id !== id),
+        }));
+      },
+
+      addGroupExpense: (expense) => {
+        const newExpense = { ...expense, id: Math.random().toString(36).substr(2, 9) };
+        set((state) => ({
+          groupExpenses: [...state.groupExpenses, newExpense],
+        }));
+      },
+
+      addSettlement: (settlement) => {
+        const newSettlement = { ...settlement, id: Math.random().toString(36).substr(2, 9) };
+        set((state) => ({
+          settlements: [...state.settlements, newSettlement],
+        }));
+      },
+
+      updateSettlement: (id, updatedSettlement) => {
+        set((state) => ({
+          settlements: state.settlements.map((s) =>
+            s.id === id ? { ...s, ...updatedSettlement } : s
+          ),
+        }));
+      },
     }),
     {
       name: 'finance-storage',
@@ -228,6 +343,10 @@ export const useFinanceStore = create<FinanceState>()(
         wallets: state.wallets,
         categories: state.categories,
         tags: state.tags,
+        groups: state.groups,
+        friends: state.friends,
+        groupExpenses: state.groupExpenses,
+        settlements: state.settlements,
       }),
     }
   )

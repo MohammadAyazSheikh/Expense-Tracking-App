@@ -21,6 +21,14 @@ export type RootStackParamList = {
   OTPVerification: { email: string; type: 'signup' | 'forgot_password' };
   ForgotPassword: undefined;
   ResetPassword: { email: string; code: string };
+  Budget: undefined;
+  CreateBudget: undefined;
+  Groups: undefined;
+  CreateGroup: undefined;
+  GroupDetail: { id: string };
+  AddGroupExpense: { groupId: string };
+  SettleUp: { groupId?: string };
+  Friends: undefined;
 };
 
 export type MainTabParamList = {

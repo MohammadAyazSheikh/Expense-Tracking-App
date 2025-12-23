@@ -172,56 +172,84 @@ export const DashboardScreen = () => {
 
       {/* Quick Actions */}
       <View style={styles.quickActions}>
-        <Card
-          style={styles.actionCard}
-          onPress={() =>
-            navigation.navigate("MainTab", { screen: "Analytics" })
-          }
-        >
-          <View
-            style={[
-              styles.actionIcon,
-              { backgroundColor: theme.colors.primaryLight },
-            ]}
+        <View style={styles.actionRow}>
+          <Card
+            style={styles.actionCard}
+            onPress={() =>
+              navigation.navigate("MainTab", { screen: "Analytics" })
+            }
           >
-            <Feather name="trending-up" size={24} color={theme.colors.muted} />
-          </View>
-          <Text variant="caption" weight="medium">
-            Analytics
-          </Text>
-        </Card>
-        <Card
-          style={styles.actionCard}
-          onPress={() => navigation.navigate("Wallets")}
-        >
-          <View
-            style={[
-              styles.actionIcon,
-              { backgroundColor: theme.colors.success },
-            ]}
+            <View
+              style={[
+                styles.actionIcon,
+                { backgroundColor: theme.colors.primaryLight },
+              ]}
+            >
+              <Feather
+                name="trending-up"
+                size={24}
+                color={theme.colors.muted}
+              />
+            </View>
+            <Text variant="caption" weight="medium">
+              Analytics
+            </Text>
+          </Card>
+          <Card
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("Wallets")}
           >
-            <Feather name="credit-card" size={24} color={theme.colors.muted} />
-          </View>
-          <Text variant="caption" weight="medium">
-            Wallets
-          </Text>
-        </Card>
-        <Card
-          style={styles.actionCard}
-          onPress={() => navigation.navigate("MainTab", { screen: "Budget" })}
-        >
-          <View
-            style={[
-              styles.actionIcon,
-              { backgroundColor: theme.colors.warning },
-            ]}
+            <View
+              style={[
+                styles.actionIcon,
+                { backgroundColor: theme.colors.success },
+              ]}
+            >
+              <Feather
+                name="credit-card"
+                size={24}
+                color={theme.colors.muted}
+              />
+            </View>
+            <Text variant="caption" weight="medium">
+              Wallets
+            </Text>
+          </Card>
+        </View>
+        <View style={styles.actionRow}>
+          <Card
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("Budget")}
           >
-            <Feather name="target" size={24} color={theme.colors.muted} />
-          </View>
-          <Text variant="caption" weight="medium">
-            Budget
-          </Text>
-        </Card>
+            <View
+              style={[
+                styles.actionIcon,
+                { backgroundColor: theme.colors.warning },
+              ]}
+            >
+              <Feather name="target" size={24} color={theme.colors.muted} />
+            </View>
+            <Text variant="caption" weight="medium">
+              Budget
+            </Text>
+          </Card>
+          <Card
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("Groups")}
+          >
+            <View
+              style={[
+                styles.actionIcon,
+                { backgroundColor: theme.colors.accent },
+              ]}
+            >
+              <Feather name="users" size={24} color={theme.colors.muted} />
+            </View>
+            <Text variant="caption" weight="medium">
+              Split Bill
+            </Text>
+          </Card>
+        </View>
       </View>
 
       {/* Spending Overview */}
@@ -406,9 +434,12 @@ const styles = StyleSheet.create((theme) => ({
     fontSize: theme.fontSize.md,
   },
   quickActions: {
-    flexDirection: "row",
     gap: theme.margins.md,
     marginBottom: theme.margins.lg,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: theme.margins.md,
   },
   actionCard: {
     flex: 1,
