@@ -114,6 +114,11 @@ const MOCK_FRIENDS: Friend[] = [
   { id: "4", name: "John", avatar: "🧔" },
 ];
 
+const MOCK_GROUP_EXPENSES: GroupExpense[] = [
+  { id: '1', groupId: "1", paidBy: "You", amount: 1250.0, description: "Grocery Store", date: "2025-12-20", splitType: "equal", splits: [{ memberId: "1", amount: 1250.0 }] },
+  { id: '2', groupId: "2", paidBy: "You", amount: 3420.0, description: "Car Wash", date: "2025-12-20", splitType: "equal", splits: [{ memberId: "2", amount: 3420.0 }] },
+  { id: '3', groupId: "1", paidBy: "You", amount: 250.0, description: "Investment Dividend", date: "2025-12-20", splitType: "equal", splits: [{ memberId: "1", amount: 250.0 }] },
+];
 const MOCK_WALLETS: Wallet[] = [
   { id: '1', name: "Main Wallet", balance: 2450.50, type: "Cash", color: "#6C63FF", icon: "briefcase" },
   { id: '2', name: "Savings", balance: 12000.00, type: "Bank", color: "#4CAF50", last4: "4521", icon: "home" },
@@ -148,6 +153,7 @@ const DEFAULT_TAGS: Tag[] = [
   { id: 'essential', name: 'Essential', color: 'hsl(160, 70%, 50%)' },
 ];
 
+
 export const useFinanceStore = create<FinanceState>()(
   persist(
     (set, get) => ({
@@ -159,7 +165,7 @@ export const useFinanceStore = create<FinanceState>()(
       tags: DEFAULT_TAGS,
       groups: MOCK_GROUPS,
       friends: MOCK_FRIENDS,
-      groupExpenses: [],
+      groupExpenses: MOCK_GROUP_EXPENSES,
       settlements: [],
       isLoading: false,
       error: null,
