@@ -7,16 +7,11 @@ import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { Icon, IconType } from "../components/ui/Icon";
 import { useTranslation } from "../hooks/useTranslation";
-import {
-  FilterModal,
-  FilterState,
-  DateRange,
-} from "../components/Transactions/FilterModal";
+import { SheetManager } from "react-native-actions-sheet";
+import { FilterState, DateRange } from "../components/Transactions/FilterModal";
 
 import { useFinanceStore } from "../store";
 import { TransactionCard } from "../components/Transactions/TransactionCard";
@@ -179,7 +174,14 @@ export const TransactionsScreen = () => {
             onChangeText={setSearchQuery}
           />
           <TouchableOpacity
-            onPress={() => setIsFilterVisible(true)}
+            onPress={async () => {
+              const result = await SheetManager.show("filter-sheet", {
+                payload: { initialFilters: filters },
+              });
+              if (result) {
+                setFilters(result);
+              }
+            }}
             style={styles.filterButton}
           >
             <Feather name="sliders" size={20} color="white" />
@@ -265,12 +267,7 @@ export const TransactionsScreen = () => {
         </View>
       </View>
 
-      <FilterModal
-        visible={isFilterVisible}
-        onClose={() => setIsFilterVisible(false)}
-        onApply={setFilters}
-        initialFilters={filters}
-      />
+      {/* FilterModal is now handled by SheetManager */}
     </ScreenWrapper>
   );
 };

@@ -21,7 +21,8 @@
         "close": "Close",
         "submit": "Submit",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "others": "Others"
     },
     "auth": {
         "welcome": "Welcome to HisaabBee",
@@ -190,7 +191,9 @@
         "thisYear": "This Year",
         "allTime": "All Time",
         "custom": "Custom Range",
-        "tags": "Tags"
+        "tags": "Tags",
+        "allCategories": "All Categories",
+        "allTags": "All Tags"
     },
     "tags": {
         "title": "Tags",

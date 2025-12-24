@@ -55,16 +55,18 @@ interface FinanceState {
 // Mock Data
 const MOCK_TRANSACTIONS: Transaction[] = [
   { id: '1', name: "Starbucks Coffee", category: "Food", amount: -4.50, date: "2024-06-15", time: "10:30 AM", type: "expense", payment: "Card" },
-  { id: '2', name: "Salary Deposit", category: "Income", amount: 3500, date: "2024-06-15", time: "09:00 AM", type: "income", payment: "Bank" },
+  { id: '2', name: "Salary Deposit", category: "Salary", amount: 3500, date: "2024-06-15", time: "09:00 AM", type: "income", payment: "Bank" },
   { id: '3', name: "Uber Ride", category: "Transport", amount: -12.30, date: "2024-06-14", time: "18:45 PM", type: "expense", payment: "Card" },
   { id: '4', name: "Netflix Subscription", category: "Bills", amount: -15.99, date: "2024-06-14", time: "12:00 PM", type: "expense", payment: "Card" },
   { id: '5', name: "Grocery Shopping", category: "Food", amount: -85.20, date: "2024-06-13", time: "14:20 PM", type: "expense", payment: "Cash" },
-  { id: '6', name: "Freelance Project", category: "Income", amount: 850, date: "2024-06-12", time: "16:30 PM", type: "income", payment: "Bank" },
+  { id: '6', name: "Freelance Project", category: "Salary", amount: 850, date: "2024-06-12", time: "16:30 PM", type: "income", payment: "Bank" },
   { id: '7', name: "Gym Membership", category: "Health", amount: -45, date: "2024-06-11", time: "07:00 AM", type: "expense", payment: "Card" },
   { id: '8', name: "Amazon Purchase", category: "Shopping", amount: -32.99, date: "2024-06-10", time: "20:15 PM", type: "expense", payment: "Card" },
+
   { id: '9', name: "Morning Coffee", category: "Food", amount: -5.75, date: "2025-12-20", time: "08:15 AM", type: "expense", payment: "Card" },
   { id: '10', name: "Gas Station", category: "Transport", amount: -52.00, date: "2025-12-20", time: "08:45 AM", type: "expense", payment: "Card" },
-  { id: '11', name: "Client Payment", category: "Income", amount: 1200, date: "2025-12-20", time: "09:30 AM", type: "income", payment: "Bank" },
+  { id: '11', name: "Client Payment", category: "Salary", amount: 1200, date: "2025-12-20", time: "09:30 AM", type: "income", payment: "Bank" },
+
   { id: '12', name: "Lunch at Restaurant", category: "Food", amount: -28.50, date: "2025-12-20", time: "12:30 PM", type: "expense", payment: "Card" },
   { id: '13', name: "Pharmacy", category: "Health", amount: -18.99, date: "2025-12-20", time: "13:45 PM", type: "expense", payment: "Card" },
   { id: '14', name: "Online Course", category: "Education", amount: -79.99, date: "2025-12-20", time: "14:00 PM", type: "expense", payment: "Card" },
@@ -78,10 +80,11 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   { id: '22', name: "Internet Bill", category: "Bills", amount: -65.00, date: "2025-12-20", time: "10:00 AM", type: "expense", payment: "Bank" },
   { id: '23', name: "Grocery Store", category: "Food", amount: -92.35, date: "2025-12-20", time: "11:30 AM", type: "expense", payment: "Card" },
   { id: '24', name: "Car Wash", category: "Transport", amount: -15.00, date: "2025-12-20", time: "09:00 AM", type: "expense", payment: "Cash" },
-  { id: '25', name: "Investment Dividend", category: "Income", amount: 250, date: "2025-12-20", time: "10:15 AM", type: "income", payment: "Bank" },
+  { id: '25', name: "Investment Dividend", category: "Investment", amount: 250, date: "2025-12-20", time: "10:15 AM", type: "income", payment: "Bank" },
   { id: '26', name: "Clothing Store", category: "Shopping", amount: -68.75, date: "2025-12-20", time: "15:45 PM", type: "expense", payment: "Card" },
   { id: '27', name: "Hair Salon", category: "Health", amount: -45.00, date: "2025-12-20", time: "14:30 PM", type: "expense", payment: "Card" },
   { id: '28', name: "Gift Purchase", category: "Shopping", amount: -55.99, date: "2025-12-20", time: "18:00 PM", type: "expense", payment: "Card" },
+
 ];
 
 const MOCK_GROUPS: Group[] = [
@@ -139,8 +142,13 @@ const DEFAULT_CATEGORIES: Category[] = [
   { id: '5', name: 'Entertainment', icon: 'movie', iconFamily: 'MaterialIcons', color: '#FFEEAD', type: 'expense' },
   { id: '6', name: 'Health', icon: 'heartbeat', iconFamily: 'FontAwesome5', color: '#D4A5A5', type: 'expense' },
   { id: '7', name: 'Education', icon: 'school', iconFamily: 'Ionicons', color: '#9B59B6', type: 'expense' },
-  { id: '8', name: 'Income', icon: 'attach-money', iconFamily: 'MaterialIcons', color: '#2ECC71', type: 'income' },
+  { id: '8', name: 'Salary', icon: 'attach-money', iconFamily: 'MaterialIcons', color: '#2ECC71', type: 'income' },
+  { id: '9', name: 'Bonus', icon: 'card-giftcard', iconFamily: 'MaterialIcons', color: '#F1C40F', type: 'income' },
+  { id: '10', name: 'Investment', icon: 'trending-up', iconFamily: 'MaterialIcons', color: '#3498DB', type: 'income' },
+  { id: '11', name: 'Gift', icon: 'gift', iconFamily: 'FontAwesome', color: '#E74C3C', type: 'income' },
+  { id: '12', name: 'Other Income', icon: 'plus-circle', iconFamily: 'MaterialCommunityIcons', color: '#95A5A6', type: 'income' },
 ];
+
 
 const DEFAULT_TAGS: Tag[] = [
   { id: 'work', name: 'Work', color: 'hsl(210, 80%, 55%)' },

@@ -1,3 +1,31 @@
 {
-  
+    "common": {
+        "cancel": "إلغاء",
+        "done": "تم",
+        "search": "بحث",
+        "others": "أخرى",
+        "reset": "إعادة ضبط"
+    },
+    "transactions": {
+        "income": "دخل",
+        "expenses": "مصروفات"
+    },
+    "categoryManager": {
+        "title": "الفئات"
+    },
+    "filter": {
+        "title": "تصفية المعاملات",
+        "transactionType": "نوع المعاملة",
+        "applyFilters": "تطبيق الفلاتر",
+        "dateRange": "نطاق التاريخ",
+        "today": "اليوم",
+        "thisWeek": "هذا الأسبوع",
+        "thisMonth": "هذا الشهر",
+        "thisYear": "هذه السنة",
+        "allTime": "كل الوقت",
+        "custom": "نطاق مخصص",
+        "tags": "الأوسمة",
+        "allCategories": "كل الفئات",
+        "allTags": "كل الأوسمة"
+    }
 }
