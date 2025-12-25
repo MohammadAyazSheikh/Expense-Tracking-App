@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  Switch,
-  ScrollView,
-  Dimensions,
-} from "react-native";
+import { View, TextInput, TouchableOpacity, Switch } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -24,6 +17,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { Icon, IconType } from "../components/ui/Icon";
 import ModalWrapper from "../components/ui/ModalWrapper";
 import { Calendar } from "react-native-calendars";
+import { SheetManager } from "react-native-actions-sheet";
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
 
@@ -206,8 +200,31 @@ export const AddExpenseScreen = () => {
     });
   }, [tags, transactions]);
 
-  const topCategories = sortedCategories.slice(0, 5);
-  const topTags = sortedTags.slice(0, 5);
+  const topCategories = useMemo(() => {
+    let list = [...sortedCategories];
+    // If we have a selected category, ensure it's in the list
+    if (selectedCategory) {
+      const selectedCatObj = categories.find((c) => c.id === selectedCategory);
+      if (selectedCatObj) {
+        // Remove it if it exists to avoid duplicates, then unshift it to top
+        list = list.filter((c) => c.id !== selectedCategory);
+        list.unshift(selectedCatObj);
+      }
+    }
+    return list.slice(0, 5);
+  }, [sortedCategories, selectedCategory, categories]);
+
+  const topTags = useMemo(() => {
+    // Separate selected and unselected tags
+    const selectedTagObjs = tags.filter((t) => selectedTags.includes(t.id));
+    const unselectedTagObjs = sortedTags.filter(
+      (t) => !selectedTags.includes(t.id)
+    );
+
+    // Show all selected tags, plus fill up to 5 with unselected tags
+    const fillCount = Math.max(0, 5 - selectedTagObjs.length);
+    return [...selectedTagObjs, ...unselectedTagObjs.slice(0, fillCount)];
+  }, [sortedTags, selectedTags, tags]);
 
   const onSubmit = (data: any) => {
     const catName =
@@ -248,6 +265,24 @@ export const AddExpenseScreen = () => {
       );
     } else {
       setValue("tags", [...current, tagId]);
+    }
+  };
+
+  const openCategorySheet = async () => {
+    const result = await SheetManager.show("expense-category-sheet", {
+      payload: { selectedId: selectedCategory },
+    });
+    if (result) {
+      setValue("category", result);
+    }
+  };
+
+  const openTagSheet = async () => {
+    const result = await SheetManager.show("expense-tag-sheet", {
+      payload: { selectedIds: selectedTags },
+    });
+    if (result) {
+      setValue("tags", result);
     }
   };
 
@@ -311,7 +346,7 @@ export const AddExpenseScreen = () => {
             ))}
             <TouchableOpacity
               style={styles.moreButton}
-              onPress={() => setShowCategoryModal(true)}
+              onPress={openCategorySheet}
             >
               <Feather
                 name="more-horizontal"
@@ -340,7 +375,7 @@ export const AddExpenseScreen = () => {
             ))}
             <TouchableOpacity
               style={[styles.moreButton, styles.tagItem, { width: 60 }]}
-              onPress={() => setShowTagModal(true)}
+              onPress={openTagSheet}
             >
               <Feather
                 name="more-horizontal"
@@ -470,90 +505,6 @@ export const AddExpenseScreen = () => {
           onPress={handleSubmit(onSubmit)}
         />
       </View>
-
-      {/* Category Modal */}
-      <ModalWrapper
-        visible={showCategoryModal}
-        onBackdropPress={() => setShowCategoryModal(false)}
-        animationType="slide"
-        containerStyles={styles.modalContainer}
-      >
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text variant="h3">Select Category</Text>
-            <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
-              <Ionicons
-                name="close"
-                size={24}
-                color={theme.colors.foreground}
-              />
-            </TouchableOpacity>
-          </View>
-          <ScrollView contentContainerStyle={styles.modalGrid}>
-            {sortedCategories.map((category) => (
-              <CategoryItem
-                key={category.id}
-                item={category}
-                isSelected={selectedCategory === category.id}
-                onPress={() => {
-                  setValue("category", category.id);
-                  setShowCategoryModal(false);
-                }}
-              />
-            ))}
-          </ScrollView>
-          <Button
-            title="Manage Categories"
-            variant="outline"
-            style={styles.manageButton}
-            onPress={() => {
-              setShowCategoryModal(false);
-              navigation.navigate("CategoryManager");
-            }}
-          />
-        </View>
-      </ModalWrapper>
-
-      {/* Tag Modal */}
-      <ModalWrapper
-        visible={showTagModal}
-        onBackdropPress={() => setShowTagModal(false)}
-        animationType="slide"
-        containerStyles={styles.modalContainer}
-      >
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text variant="h3">Select Tags</Text>
-            <TouchableOpacity onPress={() => setShowTagModal(false)}>
-              <Ionicons
-                name="close"
-                size={24}
-                color={theme.colors.foreground}
-              />
-            </TouchableOpacity>
-          </View>
-          <ScrollView contentContainerStyle={styles.modalGrid}>
-            {sortedTags.map((tag) => (
-              <CategoryItem
-                key={tag.id}
-                item={tag}
-                isSelected={selectedTags.includes(tag.id)}
-                onPress={() => toggleTag(tag.id)}
-                isTag
-              />
-            ))}
-          </ScrollView>
-          <Button
-            title="Manage Tags"
-            variant="outline"
-            style={styles.manageButton}
-            onPress={() => {
-              setShowTagModal(false);
-              navigation.navigate("TagManager");
-            }}
-          />
-        </View>
-      </ModalWrapper>
 
       {/* Date Picker Modal */}
       <ModalWrapper

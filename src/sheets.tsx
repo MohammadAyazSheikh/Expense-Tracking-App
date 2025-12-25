@@ -7,6 +7,10 @@ import {
 import FilterSheetWithRouter, {
   FilterState,
 } from "./components/Transactions/filterSheet/FilterSheet";
+import {
+  ExpenseCategorySheet,
+  ExpenseTagSheet,
+} from "./components/Transactions/ExpenseActionSheets";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -28,6 +32,14 @@ declare module "react-native-actions-sheet" {
         }>;
       };
     }>;
+    "expense-category-sheet": SheetDefinition<{
+      payload: { selectedId?: string };
+      returnValue: string | undefined;
+    }>;
+    "expense-tag-sheet": SheetDefinition<{
+      payload: { selectedIds: string[] };
+      returnValue: string[] | undefined;
+    }>;
   }
 }
 
@@ -36,6 +48,8 @@ export const Sheets = () => {
     <SheetRegister
       sheets={{
         "filter-sheet": FilterSheetWithRouter,
+        "expense-category-sheet": ExpenseCategorySheet,
+        "expense-tag-sheet": ExpenseTagSheet,
       }}
     />
   );
