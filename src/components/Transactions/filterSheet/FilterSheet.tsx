@@ -1,40 +1,39 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, TouchableOpacity, ScrollView } from "react-native";
 import ActionSheet, {
-  ScrollView,
   SheetProps,
   SheetManager,
+  Route,
+  RouteScreenProps,
+  useSheetPayload,
 } from "react-native-actions-sheet";
-import { StyleSheet } from "react-native-unistyles";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Calendar } from "react-native-calendars";
-import { useFinanceStore } from "../../store";
-import { useTranslation } from "../../hooks/useTranslation";
-import { Text } from "../ui/Text";
-import { Icon } from "../ui/Icon";
-import { Category, Tag } from "../../types";
-import { FilterState, DateRange } from "./FilterModal";
+import { useFinanceStore } from "../../../store";
+import { useTranslation } from "../../../hooks/useTranslation";
+import { Text } from "../../ui/Text";
+import { Icon } from "../../ui/Icon";
+import { Category, Tag } from "../../../types";
+import { CategorySelectSheet, TagsSelectSheet } from "./MultiSelectSheet";
+import { Button } from "../../ui/Button";
 
-const FilterTypeButton = ({
-  type,
-  isActive,
-  onPress,
-  label,
-}: {
-  type: string;
-  isActive: boolean;
-  onPress: () => void;
-  label: string;
-}) => {
-  styles.useVariants({
-    active: isActive,
-  });
+interface FilterModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onApply: (filters: FilterState) => void;
+  initialFilters: FilterState;
+}
 
-  return (
-    <TouchableOpacity style={styles.typeButton} onPress={onPress}>
-      <Text style={styles.typeText}>{label}</Text>
-    </TouchableOpacity>
-  );
-};
+export type DateRange = "today" | "week" | "month" | "year" | "all" | "custom";
+
+export interface FilterState {
+  type: "all" | "income" | "expense";
+  categories: string[];
+  dateRange: DateRange;
+  customStartDate?: string;
+  customEndDate?: string;
+  tags: string[];
+}
 
 const SelectedItem = ({
   item,
@@ -66,12 +65,35 @@ const SelectedItem = ({
     </View>
   );
 };
-
-export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
+type SelectedTypeProp = {
+  title: string;
+  selected: boolean;
+  onPress: () => void;
+};
+const SelectedType = ({ title, selected, onPress }: SelectedTypeProp) => {
+  return (
+    <TouchableOpacity
+      style={[styles.dateRangeButton, selected && styles.dateRangeButtonActive]}
+      onPress={onPress}
+    >
+      <Text
+        style={[styles.dateRangeText, selected && styles.dateRangeTextActive]}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+const FilterSheet = ({
+  params,
+  router,
+}: RouteScreenProps<"filter-sheet", "main">) => {
   const { t } = useTranslation();
+  const { theme } = useUnistyles();
+  const payload = useSheetPayload("filter-sheet");
   const { categories, tags } = useFinanceStore();
   const [filters, setFilters] = useState<FilterState>(
-    props.payload?.initialFilters || {
+    payload?.initialFilters || {
       type: "all",
       categories: [],
       dateRange: "all",
@@ -100,36 +122,17 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
   };
 
   const openCategorySelector = () => {
-    SheetManager.show("multi-select-sheet", {
+    router.navigate("category-select-sheet", {
       payload: {
-        title: t("categoryManager.title"),
-        items: categories.map((c) => ({
-          id: c.id,
-          name: c.name,
-          color: c.color,
-          icon: c.icon,
-          iconFamily: c.iconFamily,
-          group: t(
-            `transactions.${c.type === "income" ? "income" : "expenses"}`
-          ),
-        })),
         selectedIds: filters.categories,
-        onSelect: (ids) => setFilters((prev) => ({ ...prev, categories: ids })),
       },
     });
   };
 
   const openTagSelector = () => {
-    SheetManager.show("multi-select-sheet", {
+    router.navigate("tags-select-sheet", {
       payload: {
-        title: t("filter.tags", "Tags"),
-        items: tags.map((tag) => ({
-          id: tag.id,
-          name: tag.name,
-          color: tag.color,
-        })),
         selectedIds: filters.tags,
-        onSelect: (ids) => setFilters((prev) => ({ ...prev, tags: ids })),
       },
     });
   };
@@ -153,7 +156,7 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
   };
 
   const handleApply = () => {
-    SheetManager.hide(props.sheetId, { payload: filters });
+    SheetManager.hide("filter-sheet", { payload: filters });
   };
 
   const formatDate = (dateString?: string) => {
@@ -166,15 +169,21 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
     });
   };
 
+  useEffect(() => {
+    const selectedTagIds = params?.selectedTagIds;
+    const selectedCatIds = params?.selectedCatIds;
+    const fromSheet = params?.fromSheet;
+    if (fromSheet === "category")
+      setFilters((prev) => ({ ...prev, categories: selectedCatIds }));
+
+    if (fromSheet === "tag")
+      setFilters((prev) => ({ ...prev, tags: selectedTagIds }));
+  }, [params]);
+
   return (
-    <ActionSheet
-      id={props.sheetId}
-      containerStyle={styles.container}
-      indicatorStyle={styles.indicator}
-      gestureEnabled
-    >
+    <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => SheetManager.hide(props.sheetId)}>
+        <TouchableOpacity onPress={() => SheetManager.hide("filter-sheet")}>
           <Text style={styles.cancelButton}>{t("common.cancel")}</Text>
         </TouchableOpacity>
         <Text style={styles.title}>{t("filter.title")}</Text>
@@ -186,29 +195,16 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
       <ScrollView contentContainerStyle={styles.content}>
         {/* Date Range Filter */}
         <Text weight="semiBold" style={styles.sectionTitle}>
-          {t("filter.dateRange", "Date Range")}
+          {t("filter.dateRange")}
         </Text>
         <View style={styles.dateRangeContainer}>
           {dateRangeOptions.map((option) => (
-            <TouchableOpacity
+            <SelectedType
               key={option.value}
-              style={[
-                styles.dateRangeButton,
-                filters.dateRange === option.value &&
-                  styles.dateRangeButtonActive,
-              ]}
+              title={option.label}
+              selected={filters.dateRange === option.value}
               onPress={() => handleDateRangeSelect(option.value)}
-            >
-              <Text
-                style={[
-                  styles.dateRangeText,
-                  filters.dateRange === option.value &&
-                    styles.dateRangeTextActive,
-                ]}
-              >
-                {option.label}
-              </Text>
-            </TouchableOpacity>
+            />
           ))}
         </View>
 
@@ -293,16 +289,15 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
         <Text weight="semiBold" style={styles.sectionTitle}>
           {t("filter.transactionType")}
         </Text>
-        <View style={styles.typeContainer}>
+        <View style={styles.dateRangeContainer}>
           {(["all", "income", "expense"] as const).map((type) => (
-            <FilterTypeButton
+            <SelectedType
               key={type}
-              type={type}
-              isActive={filters.type === type}
-              onPress={() => handleTypeSelect(type)}
-              label={t(
+              title={t(
                 `transactions.${type === "expense" ? "expenses" : type}`
               )}
+              selected={filters.type === type}
+              onPress={() => handleTypeSelect(type)}
             />
           ))}
         </View>
@@ -316,7 +311,12 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
             onPress={openCategorySelector}
             style={styles.addButton}
           >
-            <Icon type="Ionicons" name="add-circle" size={24} color="#6C63FF" />
+            <Icon
+              type="Ionicons"
+              name="add-circle"
+              size={24}
+              color={theme.colors.primary}
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.selectedItemsContainer}>
@@ -346,14 +346,17 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
             {t("filter.tags", "Tags")}
           </Text>
           <TouchableOpacity onPress={openTagSelector} style={styles.addButton}>
-            <Icon type="Ionicons" name="add-circle" size={24} color="#6C63FF" />
+            <Icon
+              type="Ionicons"
+              name="add-circle"
+              size={24}
+              color={theme.colors.primary}
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.selectedItemsContainer}>
           {selectedTags.length === 0 ? (
-            <Text style={styles.emptyText}>
-              {t("filter.allTags", "All Tags")}
-            </Text>
+            <Text style={styles.emptyText}>{t("filter.allTags")}</Text>
           ) : (
             selectedTags.map((tag) => (
               <SelectedItem
@@ -373,19 +376,45 @@ export const FilterSheet = (props: SheetProps<"filter-sheet">) => {
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.applyButton} onPress={handleApply}>
-          <Text style={styles.applyButtonText}>{t("filter.applyFilters")}</Text>
-        </TouchableOpacity>
+        <Button title={t("filter.applyFilters")} onPress={handleApply} />
       </View>
-    </ActionSheet>
+    </View>
   );
 };
+
+const routes: Route[] = [
+  {
+    name: "main",
+    component: FilterSheet,
+  },
+  {
+    name: "tags-select-sheet",
+    component: TagsSelectSheet,
+  },
+  {
+    name: "category-select-sheet",
+    component: CategorySelectSheet,
+  },
+];
+
+function FilterSheetWithRouter(props: SheetProps) {
+  return (
+    <ActionSheet
+      routes={routes}
+      initialRoute="main"
+      enableRouterBackNavigation={true}
+    />
+  );
+}
+
+export default FilterSheetWithRouter;
 
 const styles = StyleSheet.create((theme) => ({
   container: {
     backgroundColor: theme.colors.background,
     borderTopEndRadius: theme.radius.xl,
     borderTopStartRadius: theme.radius.xl,
+    paddingBottom: theme.paddings.md,
   },
   indicator: {
     backgroundColor: theme.colors.border,
@@ -560,16 +589,5 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.paddings.lg,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
-  },
-  applyButton: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.paddings.md,
-    borderRadius: theme.radius.md,
-    alignItems: "center",
-  },
-  applyButtonText: {
-    color: theme.colors.primaryForeground,
-    fontWeight: "bold",
-    fontSize: theme.fontSize.md,
   },
 }));

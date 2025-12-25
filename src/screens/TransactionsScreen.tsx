@@ -11,7 +11,10 @@ import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
-import { FilterState, DateRange } from "../components/Transactions/FilterModal";
+import {
+  FilterState,
+  DateRange,
+} from "../components/Transactions/filterSheet/FilterSheet";
 
 import { useFinanceStore } from "../store";
 import { TransactionCard } from "../components/Transactions/TransactionCard";
@@ -266,8 +269,6 @@ export const TransactionsScreen = () => {
           ))}
         </View>
       </View>
-
-      {/* FilterModal is now handled by SheetManager */}
     </ScreenWrapper>
   );
 };

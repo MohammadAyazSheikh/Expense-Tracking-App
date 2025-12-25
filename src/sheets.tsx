@@ -1,29 +1,31 @@
-import { SheetDefinition, SheetRegister } from "react-native-actions-sheet";
-import { FilterSheet } from "./components/Transactions/FilterSheet";
-import { FilterState } from "./components/Transactions/FilterModal";
-import { MultiSelectSheet } from "./components/ui/MultiSelectSheet";
+import {
+  RouteDefinition,
+  SheetDefinition,
+  SheetRegister,
+} from "react-native-actions-sheet";
+
+import FilterSheetWithRouter, {
+  FilterState,
+} from "./components/Transactions/filterSheet/FilterSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
     "filter-sheet": SheetDefinition<{
-      payload: {
-        initialFilters: FilterState;
-      };
+      payload: { initialFilters: FilterState };
       returnValue: FilterState | undefined;
-    }>;
-    "multi-select-sheet": SheetDefinition<{
-      payload: {
-        title: string;
-        items: Array<{
-          id: string;
-          name: string;
-          color: string;
-          icon?: string;
-          iconFamily?: string;
-          group?: string;
+      routes: {
+        main: RouteDefinition<{
+          initialFilters: FilterState;
+          fromSheet: "category" | "tag";
+          selectedTagIds: string[];
+          selectedCatIds: string[];
         }>;
-        selectedIds: string[];
-        onSelect: (ids: string[]) => void;
+        "tags-select-sheet": RouteDefinition<{
+          selectedIds: string[];
+        }>;
+        "category-select-sheet": RouteDefinition<{
+          selectedIds: string[];
+        }>;
       };
     }>;
   }
@@ -33,8 +35,7 @@ export const Sheets = () => {
   return (
     <SheetRegister
       sheets={{
-        "filter-sheet": FilterSheet,
-        "multi-select-sheet": MultiSelectSheet,
+        "filter-sheet": FilterSheetWithRouter,
       }}
     />
   );
