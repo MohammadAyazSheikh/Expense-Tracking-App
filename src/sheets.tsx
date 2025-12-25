@@ -11,6 +11,7 @@ import {
   ExpenseCategorySheet,
   ExpenseTagSheet,
 } from "./components/Transactions/ExpenseActionSheets";
+import { DatePickerSheet } from "./components/sheets/DatePickerSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -40,6 +41,10 @@ declare module "react-native-actions-sheet" {
       payload: { selectedIds: string[] };
       returnValue: string[] | undefined;
     }>;
+    "date-picker-sheet": SheetDefinition<{
+      payload: { date?: string };
+      returnValue: string | undefined;
+    }>;
   }
 }
 
@@ -50,6 +55,7 @@ export const Sheets = () => {
         "filter-sheet": FilterSheetWithRouter,
         "expense-category-sheet": ExpenseCategorySheet,
         "expense-tag-sheet": ExpenseTagSheet,
+        "date-picker-sheet": DatePickerSheet,
       }}
     />
   );

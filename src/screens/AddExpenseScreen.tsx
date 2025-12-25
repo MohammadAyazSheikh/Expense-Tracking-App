@@ -286,6 +286,15 @@ export const AddExpenseScreen = () => {
     }
   };
 
+  const openDateSheet = async () => {
+    const result = await SheetManager.show("date-picker-sheet", {
+      payload: { date: selectedDate },
+    });
+    if (result) {
+      setValue("date", result);
+    }
+  };
+
   return (
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
@@ -410,10 +419,7 @@ export const AddExpenseScreen = () => {
           <Text weight="semiBold" style={styles.sectionLabel}>
             Date
           </Text>
-          <TouchableOpacity
-            style={styles.dateSelector}
-            onPress={() => setShowDatePicker(true)}
-          >
+          <TouchableOpacity style={styles.dateSelector} onPress={openDateSheet}>
             <Feather
               name="calendar"
               size={20}

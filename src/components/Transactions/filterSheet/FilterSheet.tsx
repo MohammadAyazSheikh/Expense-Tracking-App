@@ -8,8 +8,9 @@ import ActionSheet, {
   useSheetPayload,
 } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Calendar } from "react-native-calendars";
+// Calendar import removed
 import { useFinanceStore } from "../../../store";
+
 import { useTranslation } from "../../../hooks/useTranslation";
 import { Text } from "../../ui/Text";
 import { Icon } from "../../ui/Icon";
@@ -100,8 +101,6 @@ const FilterSheet = ({
       tags: [],
     }
   );
-  const [showStartCalendar, setShowStartCalendar] = useState(false);
-  const [showEndCalendar, setShowEndCalendar] = useState(false);
 
   const selectedCategories = categories.filter((c) =>
     filters.categories.includes(c.id)
@@ -213,7 +212,17 @@ const FilterSheet = ({
           <View style={styles.customDateContainer}>
             <TouchableOpacity
               style={styles.datePickerButton}
-              onPress={() => setShowStartCalendar(!showStartCalendar)}
+              onPress={async () => {
+                const result = await SheetManager.show("date-picker-sheet", {
+                  payload: { date: filters.customStartDate },
+                });
+                if (result) {
+                  setFilters((prev) => ({
+                    ...prev,
+                    customStartDate: result,
+                  }));
+                }
+              }}
             >
               <Icon
                 type="Ionicons"
@@ -226,30 +235,19 @@ const FilterSheet = ({
               </Text>
             </TouchableOpacity>
 
-            {showStartCalendar && (
-              <Calendar
-                onDayPress={(day: any) => {
-                  setFilters((prev) => ({
-                    ...prev,
-                    customStartDate: day.dateString,
-                  }));
-                  setShowStartCalendar(false);
-                }}
-                markedDates={
-                  filters.customStartDate
-                    ? { [filters.customStartDate]: { selected: true } }
-                    : {}
-                }
-                theme={{
-                  selectedDayBackgroundColor: "#6C63FF",
-                  todayTextColor: "#6C63FF",
-                }}
-              />
-            )}
-
             <TouchableOpacity
               style={styles.datePickerButton}
-              onPress={() => setShowEndCalendar(!showEndCalendar)}
+              onPress={async () => {
+                const result = await SheetManager.show("date-picker-sheet", {
+                  payload: { date: filters.customEndDate },
+                });
+                if (result) {
+                  setFilters((prev) => ({
+                    ...prev,
+                    customEndDate: result,
+                  }));
+                }
+              }}
             >
               <Icon
                 type="Ionicons"
@@ -261,27 +259,6 @@ const FilterSheet = ({
                 {formatDate(filters.customEndDate)}
               </Text>
             </TouchableOpacity>
-
-            {showEndCalendar && (
-              <Calendar
-                onDayPress={(day: any) => {
-                  setFilters((prev) => ({
-                    ...prev,
-                    customEndDate: day.dateString,
-                  }));
-                  setShowEndCalendar(false);
-                }}
-                markedDates={
-                  filters.customEndDate
-                    ? { [filters.customEndDate]: { selected: true } }
-                    : {}
-                }
-                theme={{
-                  selectedDayBackgroundColor: "#6C63FF",
-                  todayTextColor: "#6C63FF",
-                }}
-              />
-            )}
           </View>
         )}
 
