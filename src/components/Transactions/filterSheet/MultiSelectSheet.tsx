@@ -7,6 +7,7 @@ import { useFinanceStore } from "../../../store";
 import { Category, Tag } from "../../../types";
 import { Text } from "../../ui/Text";
 import { Icon } from "../../ui/Icon";
+import { SearchBar } from "../../ui/searchbar";
 
 type ItemProps = {
   item: {
@@ -106,21 +107,14 @@ export const TagsSelectSheet = ({
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Icon
-          type="Feather"
-          name="search"
-          size={18}
-          color={theme.colors.mutedForeground}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t("common.search")}
-          placeholderTextColor={theme.colors.mutedForeground}
-          value={search}
-          onChangeText={setSearch}
-        />
-      </View>
+      <SearchBar
+        containerStyle={styles.searchOuterContainer}
+        style={styles.searchWrapper}
+        inputStyle={styles.searchInput}
+        placeholder={t("common.search")}
+        value={search}
+        onChangeText={setSearch}
+      />
 
       <FlatList
         data={filteredItems}
@@ -197,21 +191,14 @@ export const CategorySelectSheet = ({
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Icon
-          type="Feather"
-          name="search"
-          size={18}
-          color={theme.colors.mutedForeground}
-        />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t("common.search")}
-          placeholderTextColor={theme.colors.mutedForeground}
-          value={search}
-          onChangeText={setSearch}
-        />
-      </View>
+      <SearchBar
+        containerStyle={styles.searchOuterContainer}
+        style={styles.searchWrapper}
+        inputStyle={styles.searchInput}
+        placeholder={t("common.search")}
+        value={search}
+        onChangeText={setSearch}
+      />
 
       <SectionList
         sections={sections}
@@ -254,19 +241,15 @@ const styles = StyleSheet.create((theme) => ({
     fontWeight: "bold",
     fontSize: theme.fontSize.md,
   },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.input,
+  searchOuterContainer: {
     margin: theme.margins.md,
-    paddingHorizontal: theme.paddings.md,
-    borderRadius: theme.radius.md,
+  },
+  searchWrapper: {
+    backgroundColor: theme.colors.input,
+    borderWidth: 0,
     height: 44,
   },
   searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    color: theme.colors.foreground,
     fontSize: theme.fontSize.md,
   },
   listContent: {

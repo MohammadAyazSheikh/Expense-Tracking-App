@@ -43,6 +43,7 @@ export const lightTheme = {
     xl: 32,
   },
   fontSize: {
+    xxs: 10,
     xs: 12,
     sm: 14,
     md: 16,
@@ -161,6 +162,7 @@ export const darkTheme = {
     xl: 32,
   },
   fontSize: {
+    xxs: 10,
     xs: 12,
     sm: 14,
     md: 16,

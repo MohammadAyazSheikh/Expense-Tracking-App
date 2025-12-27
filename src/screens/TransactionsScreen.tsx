@@ -11,6 +11,7 @@ import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
+import { SearchBar } from "../components/ui/searchbar";
 import {
   FilterState,
   DateRange,
@@ -167,34 +168,26 @@ export const TransactionsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.searchContainer}>
-          <Feather name="search" size={20} color="rgba(255, 255, 255, 0.6)" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t("transactions.searchTransactions")}
-            placeholderTextColor="rgba(255, 255, 255, 0.6)"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <TouchableOpacity
-            onPress={async () => {
-              const result = await SheetManager.show("filter-sheet", {
-                payload: { initialFilters: filters },
-              });
-              if (result) {
-                setFilters(result);
-              }
-            }}
-            style={styles.filterButton}
-          >
-            <Feather name="sliders" size={20} color="white" />
-            {activeFiltersCount > 0 && (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
+        <SearchBar
+          containerStyle={styles.searchOuterContainer}
+          style={styles.searchWrapper}
+          inputStyle={styles.searchInput}
+          placeholder={t("transactions.searchTransactions")}
+          placeholderTextColor="rgba(255, 255, 255, 0.6)"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          leftIcon={
+            <Feather name="search" size={20} color="rgba(255, 255, 255, 0.6)" />
+          }
+          onPressFilter={async () => {
+            const result = await SheetManager.show("filter-sheet", {
+              payload: { initialFilters: filters },
+            });
+            if (result) {
+              setFilters(result);
+            }
+          }}
+        />
       </View>
 
       <View style={styles.content}>
@@ -296,13 +289,7 @@ const styles = StyleSheet.create((theme) => ({
   calendarButton: {
     padding: 4,
   },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: theme.radius.md,
-    paddingHorizontal: theme.paddings.md,
-    height: 48,
+  searchOuterContainer: {
     maxWidth: {
       md: 600,
     },
@@ -310,33 +297,17 @@ const styles = StyleSheet.create((theme) => ({
       md: "center",
     },
     width: "100%",
+    marginBottom: 0,
+  },
+  searchWrapper: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 0,
+    height: 48,
+    paddingHorizontal: theme.paddings.md,
   },
   searchInput: {
-    flex: 1,
     color: "white",
-    marginLeft: theme.margins.sm,
     fontSize: theme.fontSize.md,
-  },
-  filterButton: {
-    padding: 4,
-    position: "relative",
-  },
-  filterBadge: {
-    position: "absolute",
-    top: -2,
-    right: -2,
-    backgroundColor: theme.colors.accent,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 4,
-  },
-  filterBadgeText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
   },
   content: {
     padding: theme.paddings.md,
