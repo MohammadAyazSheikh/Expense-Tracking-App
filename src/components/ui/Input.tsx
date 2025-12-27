@@ -102,10 +102,10 @@ const styles = StyleSheet.create((theme) => ({
   },
   input: {
     flex: 1,
-    padding: theme.paddings.md,
+    paddingHorizontal: theme.paddings.md,
     fontSize: theme.fontSize.md,
     color: theme.colors.foreground,
-    paddingVertical: theme.paddings.md, // Ensure vertical padding matches
+    height: "100%",
   },
   leftIcon: {
     paddingLeft: theme.paddings.md,
