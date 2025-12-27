@@ -1,14 +1,10 @@
 import React, { useState, useMemo } from "react";
-import {
-  View,
-  TouchableOpacity,
-  TextInput,
-  SectionList,
-  FlatList,
-} from "react-native";
+import { View, TouchableOpacity, TextInput, SectionList } from "react-native";
 import ActionSheet, {
+  FlatList,
   SheetProps,
   SheetManager,
+  useScrollHandlers,
 } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useTranslation } from "../../hooks/useTranslation";
@@ -16,6 +12,8 @@ import { useFinanceStore } from "../../store";
 import { Category, Tag } from "../../types";
 import { Text } from "../ui/Text";
 import { Icon } from "../ui/Icon";
+import { NativeViewGestureHandler } from "react-native-gesture-handler";
+import { SearchBar } from "../ui/searchbar";
 
 type ItemProps = {
   item: {
@@ -31,6 +29,7 @@ type ItemProps = {
   multiSelect?: boolean;
 };
 
+// Item Component
 const Item = ({ item, isSelected, onPress, multiSelect }: ItemProps) => {
   const { theme } = useUnistyles();
 
@@ -76,12 +75,13 @@ const Item = ({ item, isSelected, onPress, multiSelect }: ItemProps) => {
   );
 };
 
+// Category Sheet
 export const ExpenseCategorySheet = (
   props: SheetProps<"expense-category-sheet">
 ) => {
+  const handlers = useScrollHandlers();
   const { categories } = useFinanceStore();
   const { selectedId } = props.payload || {};
-  const { theme } = useUnistyles();
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
@@ -120,57 +120,52 @@ export const ExpenseCategorySheet = (
   return (
     <ActionSheet
       id={props.sheetId}
-      containerStyle={styles.container}
       indicatorStyle={styles.indicator}
       gestureEnabled
     >
-      <View style={styles.contentContainer}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text variant="h3">{t("categoryManager.title")}</Text>
           <TouchableOpacity onPress={() => SheetManager.hide(props.sheetId)}>
             <Text style={styles.cancelText}>{t("common.cancel")}</Text>
           </TouchableOpacity>
         </View>
-
-        <View style={styles.searchContainer}>
-          <Icon
-            type="Feather"
-            name="search"
-            size={18}
-            color={theme.colors.mutedForeground}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t("common.search")}
-            placeholderTextColor={theme.colors.mutedForeground}
-            value={search}
-            onChangeText={setSearch}
-          />
-        </View>
-
-        <SectionList
-          sections={sections}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          renderItem={renderItem}
-          renderSectionHeader={({ section }) => (
-            <View style={styles.groupHeader}>
-              <Text
-                variant="caption"
-                weight="semiBold"
-                style={styles.groupTitle}
-              >
-                {section.title}
-              </Text>
-            </View>
-          )}
-          style={{ maxHeight: 500 }}
+        <SearchBar
+          containerStyle={styles.searchOuterContainer}
+          style={styles.searchWrapper}
+          inputStyle={styles.searchInput}
+          placeholder={t("common.search")}
+          value={search}
+          onChangeText={setSearch}
         />
+        <NativeViewGestureHandler
+          simultaneousHandlers={handlers.simultaneousHandlers}
+        >
+          <SectionList
+            {...handlers.simultaneousHandlers}
+            sections={sections}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            renderItem={renderItem}
+            renderSectionHeader={({ section }) => (
+              <View style={styles.groupHeader}>
+                <Text
+                  variant="caption"
+                  weight="semiBold"
+                  style={styles.groupTitle}
+                >
+                  {section.title}
+                </Text>
+              </View>
+            )}
+          />
+        </NativeViewGestureHandler>
       </View>
     </ActionSheet>
   );
 };
 
+// Tag Sheet
 export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
   const { tags } = useFinanceStore();
   const { selectedIds: initialSelectedIds } = props.payload || {
@@ -215,11 +210,10 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
   return (
     <ActionSheet
       id={props.sheetId}
-      containerStyle={styles.container}
       indicatorStyle={styles.indicator}
       gestureEnabled
     >
-      <View style={styles.contentContainer}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text variant="h3">{t("filter.tags")}</Text>
           <TouchableOpacity onPress={handleDone}>
@@ -227,21 +221,14 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.searchContainer}>
-          <Icon
-            type="Feather"
-            name="search"
-            size={18}
-            color={theme.colors.mutedForeground}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t("common.search")}
-            placeholderTextColor={theme.colors.mutedForeground}
-            value={search}
-            onChangeText={setSearch}
-          />
-        </View>
+        <SearchBar
+          containerStyle={styles.searchOuterContainer}
+          style={styles.searchWrapper}
+          inputStyle={styles.searchInput}
+          placeholder={t("common.search")}
+          value={search}
+          onChangeText={setSearch}
+        />
 
         <FlatList
           data={filteredItems}
@@ -255,15 +242,13 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
   );
 };
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
+    height: (rt.screen.height / 100) * 80,
     backgroundColor: theme.colors.background,
     borderTopEndRadius: theme.radius.xl,
     borderTopStartRadius: theme.radius.xl,
     paddingBottom: theme.paddings.md,
-  },
-  contentContainer: {
-    paddingBottom: 20,
   },
   indicator: {
     backgroundColor: theme.colors.border,
@@ -286,23 +271,20 @@ const styles = StyleSheet.create((theme) => ({
     color: theme.colors.mutedForeground,
     fontSize: theme.fontSize.md,
   },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.input,
+  searchOuterContainer: {
     margin: theme.margins.md,
-    paddingHorizontal: theme.paddings.md,
-    borderRadius: theme.radius.md,
+  },
+  searchWrapper: {
+    backgroundColor: theme.colors.input,
+    borderWidth: 0,
     height: 44,
   },
   searchInput: {
-    flex: 1,
-    marginLeft: 8,
-    color: theme.colors.foreground,
     fontSize: theme.fontSize.md,
   },
   listContent: {
     paddingHorizontal: theme.paddings.md,
+    paddingBottom: 40,
   },
   groupHeader: {
     width: "100%",

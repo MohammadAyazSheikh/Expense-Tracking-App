@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, ScrollView, Pressable } from "react-native";
+import { View, TouchableOpacity, Pressable } from "react-native";
 import ActionSheet, {
-  SheetProps,
-  SheetManager,
   Route,
-  RouteScreenProps,
+  SheetProps,
+  ScrollView,
+  SheetManager,
   useSheetPayload,
+  RouteScreenProps,
 } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "../../ui/Text";
@@ -381,8 +382,9 @@ function FilterSheetWithRouter(props: SheetProps) {
 
 export default FilterSheetWithRouter;
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
+    height: (rt.screen.height / 100) * 70,
     backgroundColor: theme.colors.background,
     borderTopEndRadius: theme.radius.xl,
     borderTopStartRadius: theme.radius.xl,

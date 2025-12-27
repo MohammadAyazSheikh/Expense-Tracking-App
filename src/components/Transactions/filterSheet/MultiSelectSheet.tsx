@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { View, TouchableOpacity, TextInput, SectionList } from "react-native";
-import { FlatList, RouteScreenProps } from "react-native-actions-sheet";
+import { View, TouchableOpacity, SectionList } from "react-native";
+import {
+  FlatList,
+  RouteScreenProps,
+  useScrollHandlers,
+} from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useTranslation } from "../../../hooks/useTranslation";
 import { useFinanceStore } from "../../../store";
@@ -8,6 +12,7 @@ import { Category, Tag } from "../../../types";
 import { Text } from "../../ui/Text";
 import { Icon } from "../../ui/Icon";
 import { SearchBar } from "../../ui/searchbar";
+import { NativeViewGestureHandler } from "react-native-gesture-handler";
 
 type ItemProps = {
   item: {
@@ -129,6 +134,7 @@ export const CategorySelectSheet = ({
   router,
   params,
 }: RouteScreenProps<"filter-sheet", "category-select-sheet">) => {
+  const handlers = useScrollHandlers();
   const { categories } = useFinanceStore();
   const { selectedIds: selectedIds_ } = params;
   const { t } = useTranslation();
@@ -145,8 +151,8 @@ export const CategorySelectSheet = ({
   const sections = useMemo(() => {
     if (!categories.length) return [];
 
-    const income = categories.filter((item) => item.type === "income");
-    const expense = categories.filter((item) => item.type === "expense");
+    const income = filteredItems.filter((item) => item.type === "income");
+    const expense = filteredItems.filter((item) => item.type === "expense");
     return [
       {
         title: "Income",
@@ -197,26 +203,35 @@ export const CategorySelectSheet = ({
         value={search}
         onChangeText={setSearch}
       />
-
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        renderItem={renderItem}
-        renderSectionHeader={({ section }) => (
-          <View style={styles.groupHeader}>
-            <Text variant="caption" weight="semiBold" style={styles.groupTitle}>
-              {section.title}
-            </Text>
-          </View>
-        )}
-      />
+      <NativeViewGestureHandler
+        simultaneousHandlers={handlers.simultaneousHandlers}
+      >
+        <SectionList
+          {...handlers.simultaneousHandlers}
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          renderItem={renderItem}
+          renderSectionHeader={({ section }) => (
+            <View style={styles.groupHeader}>
+              <Text
+                variant="caption"
+                weight="semiBold"
+                style={styles.groupTitle}
+              >
+                {section.title}
+              </Text>
+            </View>
+          )}
+        />
+      </NativeViewGestureHandler>
     </View>
   );
 };
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
+    height: (rt.screen.height / 100) * 80,
     backgroundColor: theme.colors.background,
     borderTopEndRadius: theme.radius.xl,
     borderTopStartRadius: theme.radius.xl,
