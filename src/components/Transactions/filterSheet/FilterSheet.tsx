@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import ActionSheet, {
   SheetProps,
   SheetManager,
@@ -8,22 +8,15 @@ import ActionSheet, {
   useSheetPayload,
 } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-// Calendar import removed
-import { useFinanceStore } from "../../../store";
-
-import { useTranslation } from "../../../hooks/useTranslation";
 import { Text } from "../../ui/Text";
 import { Icon } from "../../ui/Icon";
-import { Category, Tag } from "../../../types";
-import { CategorySelectSheet, TagsSelectSheet } from "./MultiSelectSheet";
 import { Button } from "../../ui/Button";
-
-interface FilterModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onApply: (filters: FilterState) => void;
-  initialFilters: FilterState;
-}
+import { Category, Tag } from "../../../types";
+import { useFinanceStore } from "../../../store";
+import { useTranslation } from "../../../hooks/useTranslation";
+import { CategorySelectSheet, TagsSelectSheet } from "./MultiSelectSheet";
+import Animated from "react-native-reanimated";
+import { LayoutAnimation } from "../../../utils/Animation";
 
 export type DateRange = "today" | "week" | "month" | "year" | "all" | "custom";
 
@@ -46,7 +39,7 @@ const SelectedItem = ({
   type?: "category" | "tag";
 }) => {
   return (
-    <View style={styles.selectedItem}>
+    <Animated.View layout={LayoutAnimation} style={styles.selectedItem}>
       {type === "category" ? (
         <View style={[styles.categoryIcon, { backgroundColor: item.color }]}>
           <Icon
@@ -60,10 +53,10 @@ const SelectedItem = ({
         <View style={[styles.tagDot, { backgroundColor: item.color }]} />
       )}
       <Text style={styles.selectedItemText}>{item.name}</Text>
-      <TouchableOpacity onPress={onRemove} style={styles.removeButton}>
+      <Pressable onPress={onRemove} style={styles.removeButton}>
         <Icon type="Ionicons" name="close-circle" size={16} color="#666" />
-      </TouchableOpacity>
-    </View>
+      </Pressable>
+    </Animated.View>
   );
 };
 type SelectedTypeProp = {
@@ -185,7 +178,9 @@ const FilterSheet = ({
         <TouchableOpacity onPress={() => SheetManager.hide("filter-sheet")}>
           <Text style={styles.cancelButton}>{t("common.cancel")}</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>{t("filter.title")}</Text>
+        <Text variant="h1" style={styles.title}>
+          {t("filter.title")}
+        </Text>
         <TouchableOpacity onPress={handleReset}>
           <Text style={styles.resetButton}>{t("common.reset")}</Text>
         </TouchableOpacity>
@@ -407,7 +402,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   title: {
     fontSize: theme.fontSize.lg,
-    fontWeight: "bold",
     color: theme.colors.foreground,
   },
   cancelButton: {

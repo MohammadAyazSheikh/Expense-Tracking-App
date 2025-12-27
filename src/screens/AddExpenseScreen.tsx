@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, TextInput, TouchableOpacity, Switch } from "react-native";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Switch,
+  Pressable,
+} from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -9,7 +15,7 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { useForm, Controller } from "react-hook-form";
 import { useFinanceStore } from "../store";
 import { useFonts } from "../hooks/useFonts";
@@ -18,6 +24,10 @@ import { Icon, IconType } from "../components/ui/Icon";
 import ModalWrapper from "../components/ui/ModalWrapper";
 import { Calendar } from "react-native-calendars";
 import { SheetManager } from "react-native-actions-sheet";
+import Animated from "react-native-reanimated";
+import { LayoutAnimation } from "../utils/Animation";
+
+const PressAbleAnimated = Animated.createAnimatedComponent(Pressable);
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
 
@@ -35,7 +45,8 @@ const CategoryItem = ({
   const { theme } = useUnistyles();
 
   return (
-    <TouchableOpacity
+    <PressAbleAnimated
+      layout={LayoutAnimation}
       style={[
         styles.selectionItem,
         isTag && styles.tagItem,
@@ -43,7 +54,6 @@ const CategoryItem = ({
         isTag && isSelected && styles.tagItemSelected,
       ]}
       onPress={onPress}
-      activeOpacity={0.7}
     >
       {!isTag ? (
         <View
@@ -79,7 +89,7 @@ const CategoryItem = ({
       >
         {item.name}
       </Text>
-    </TouchableOpacity>
+    </PressAbleAnimated>
   );
 };
 
@@ -372,7 +382,7 @@ export const AddExpenseScreen = () => {
           <View style={styles.sectionHeader}>
             <Text weight="semiBold">Tags</Text>
           </View>
-          <View style={styles.grid}>
+          <View style={styles.gridTag}>
             {topTags.map((tag) => (
               <CategoryItem
                 key={tag.id}
@@ -613,8 +623,15 @@ const styles = StyleSheet.create((theme) => ({
   },
   grid: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     flexWrap: "wrap",
-    gap: theme.margins.sm,
+    gap: theme.margins.md,
+  },
+  gridTag: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: theme.margins.md,
   },
   selectionItem: {
     width: {
