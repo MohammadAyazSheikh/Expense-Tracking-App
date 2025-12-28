@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, TouchableOpacity, TextInput, SectionList } from "react-native";
+import { View, TouchableOpacity, SectionList } from "react-native";
 import ActionSheet, {
   FlatList,
   SheetProps,
@@ -171,7 +171,6 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
   const { selectedIds: initialSelectedIds } = props.payload || {
     selectedIds: [],
   };
-  const { theme } = useUnistyles();
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>(
@@ -235,7 +234,6 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           renderItem={renderItem}
-          style={{ maxHeight: 500 }}
         />
       </View>
     </ActionSheet>
@@ -244,7 +242,7 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
 
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
-    height: (rt.screen.height / 100) * 80,
+    height: (rt.screen.height / 100) * 70,
     backgroundColor: theme.colors.background,
     borderTopEndRadius: theme.radius.xl,
     borderTopStartRadius: theme.radius.xl,
