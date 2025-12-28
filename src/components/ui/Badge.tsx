@@ -5,11 +5,32 @@ import { Text } from "./Text";
 
 const styles = StyleSheet.create((theme) => ({
   container: {
-    paddingHorizontal: theme.paddings.sm,
-    paddingVertical: 2,
     borderRadius: theme.radius.full,
     alignSelf: "flex-start",
     variants: {
+      dot: {
+        true: {
+          aspectRatio: 1,
+        },
+      },
+      size: {
+        xl: {
+          paddingHorizontal: theme.paddings.xl,
+          paddingVertical: 6,
+        },
+        md: {
+          paddingHorizontal: theme.paddings.md,
+          paddingVertical: 4,
+        },
+        sm: {
+          paddingHorizontal: theme.paddings.sm,
+          paddingVertical: 2,
+        },
+        xs: {
+          paddingHorizontal: theme.paddings.xs,
+          paddingVertical: 2,
+        },
+      },
       variant: {
         primary: {
           backgroundColor: theme.colors.primary,
@@ -38,7 +59,7 @@ const styles = StyleSheet.create((theme) => ({
     },
   },
   text: {
-    fontSize: 10,
+    fontSize: theme.fontSize.xxs,
     variants: {
       variant: {
         primary: { color: "white" },
@@ -56,20 +77,32 @@ const styles = StyleSheet.create((theme) => ({
 type BadgeVariants = UnistylesVariants<typeof styles>;
 
 type BadgeProps = BadgeVariants & {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   style?: ViewStyle;
+  dot?: boolean;
+  size?: "xl" | "md" | "sm" | "xs";
 };
 
-export const Badge = ({ children, variant = "primary", style }: BadgeProps) => {
+export const Badge = ({
+  children,
+  variant = "primary",
+  style,
+  dot = false,
+  size = "md",
+}: BadgeProps) => {
   styles.useVariants({
     variant,
+    dot,
+    size,
   });
 
   return (
     <View style={[styles.container, style]}>
-      <Text weight="semiBold" style={styles.text}>
-        {children}
-      </Text>
+      {children ? (
+        <Text weight="semiBold" style={styles.text}>
+          {children}
+        </Text>
+      ) : null}
     </View>
   );
 };

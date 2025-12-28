@@ -1,19 +1,19 @@
 import React, { useState, useMemo } from "react";
-import { View, TouchableOpacity, SectionList } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import ActionSheet, {
   FlatList,
   SheetProps,
   SheetManager,
-  useScrollHandlers,
 } from "react-native-actions-sheet";
+import { SceneMap } from "react-native-tab-view";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useFinanceStore } from "../../store";
 import { Category, Tag } from "../../types";
+import { SearchBar } from "../ui/searchbar";
 import { Text } from "../ui/Text";
 import { Icon } from "../ui/Icon";
-import { NativeViewGestureHandler } from "react-native-gesture-handler";
-import { SearchBar } from "../ui/searchbar";
+import { TabView } from "../ui/TabView";
 
 type ItemProps = {
   item: {
@@ -79,27 +79,28 @@ const Item = ({ item, isSelected, onPress, multiSelect }: ItemProps) => {
 export const ExpenseCategorySheet = (
   props: SheetProps<"expense-category-sheet">
 ) => {
-  const handlers = useScrollHandlers();
   const { categories } = useFinanceStore();
   const { selectedId } = props.payload || {};
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
 
   const filteredItems = useMemo(() => {
-    if (!categories.length) return [];
-    return categories.filter((item) =>
+    if (!categories.length) return { income: [], expense: [] };
+    const filtered = categories.filter((item) =>
       item.name.toLowerCase().includes(search.toLowerCase())
     );
+    return {
+      income: filtered.filter((item) => item.type === "income"),
+      expense: filtered.filter((item) => item.type === "expense"),
+    };
   }, [categories, search]);
 
-  const sections = useMemo(() => {
-    const income = filteredItems.filter((item) => item.type === "income");
-    const expense = filteredItems.filter((item) => item.type === "expense");
-    return [
-      { title: "Income", data: income },
-      { title: "Expense", data: expense },
-    ].filter((section) => section.data.length > 0);
-  }, [filteredItems]);
+  // Determine which tab has the selected category
+  const selectedCategoryType = useMemo(() => {
+    if (!selectedId) return null;
+    const selected = categories.find((cat) => cat.id === selectedId);
+    return selected?.type || null;
+  }, [selectedId, categories]);
 
   const handleSelect = (id: string) => {
     SheetManager.hide(props.sheetId, { payload: id });
@@ -116,6 +117,39 @@ export const ExpenseCategorySheet = (
       />
     );
   };
+
+  // Define routes
+  const routes = [
+    {
+      key: "income",
+      title: "Income",
+      badge: selectedCategoryType === "income",
+    },
+    {
+      key: "expense",
+      title: "Expense",
+      badge: selectedCategoryType === "expense",
+    },
+  ];
+
+  // Define scenes
+  const IncomeScene = () => (
+    <FlatList
+      data={filteredItems.income}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={styles.listContent}
+      renderItem={renderItem}
+    />
+  );
+
+  const ExpenseScene = () => (
+    <FlatList
+      data={filteredItems.expense}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={styles.listContent}
+      renderItem={renderItem}
+    />
+  );
 
   return (
     <ActionSheet
@@ -138,28 +172,13 @@ export const ExpenseCategorySheet = (
           value={search}
           onChangeText={setSearch}
         />
-        <NativeViewGestureHandler
-          simultaneousHandlers={handlers.simultaneousHandlers}
-        >
-          <SectionList
-            {...handlers.simultaneousHandlers}
-            sections={sections}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.listContent}
-            renderItem={renderItem}
-            renderSectionHeader={({ section }) => (
-              <View style={styles.groupHeader}>
-                <Text
-                  variant="caption"
-                  weight="semiBold"
-                  style={styles.groupTitle}
-                >
-                  {section.title}
-                </Text>
-              </View>
-            )}
-          />
-        </NativeViewGestureHandler>
+        <TabView
+          routes={routes}
+          renderScene={SceneMap({
+            income: IncomeScene,
+            expense: ExpenseScene,
+          })}
+        />
       </View>
     </ActionSheet>
   );
@@ -282,7 +301,7 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   listContent: {
     paddingHorizontal: theme.paddings.md,
-    paddingBottom: 40,
+    paddingVertical: theme.paddings.sm,
   },
   groupHeader: {
     width: "100%",
