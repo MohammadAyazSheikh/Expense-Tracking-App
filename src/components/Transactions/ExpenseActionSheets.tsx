@@ -5,7 +5,6 @@ import ActionSheet, {
   SheetProps,
   SheetManager,
 } from "react-native-actions-sheet";
-import { SceneMap } from "react-native-tab-view";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useFinanceStore } from "../../store";
@@ -174,10 +173,10 @@ export const ExpenseCategorySheet = (
         />
         <TabView
           routes={routes}
-          renderScene={SceneMap({
+          screens={{
             income: IncomeScene,
             expense: ExpenseScene,
-          })}
+          }}
         />
       </View>
     </ActionSheet>

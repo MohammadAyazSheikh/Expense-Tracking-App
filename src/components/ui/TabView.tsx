@@ -1,13 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, ComponentType } from "react";
 import { View, useWindowDimensions } from "react-native";
 import {
   TabView as RNTabView,
   TabBar,
   TabBarProps,
-  SceneRendererProps,
-  //   TabViewProps,
-  //   TabBarItemProps,
-  //   TabBarIndicatorProps,
   Route,
   SceneMap,
 } from "react-native-tab-view";
@@ -16,7 +12,6 @@ import { Text } from "./Text";
 import { Badge } from "./Badge";
 
 export type TabRoute = Route & {
-  title: string;
   badge?: boolean;
   badgeVariant?:
     | "primary"
@@ -28,60 +23,18 @@ export type TabRoute = Route & {
     | "outline";
 };
 
-export type TabViewProps = {
-  /**
-   * Array of routes for tabs
-   */
+export type TabViewProps_ = {
   routes: TabRoute[];
-  /**
-   * Scene map or renderer
-   */
-  renderScene:
-    | ((
-        props: SceneRendererProps & {
-          route: TabRoute;
-        }
-      ) => React.ReactNode)
-    | ReturnType<typeof SceneMap>;
-  /**
-   * Initial tab index
-   */
+  screens: Record<string, ComponentType<unknown>>;
   initialIndex?: number;
-  /**
-   * On index change callback
-   */
   onIndexChange?: (index: number) => void;
-  /**
-   * Custom tab bar renderer
-   */
   renderTabBar?: (props: TabBarProps<TabRoute>) => React.ReactElement;
-  /**
-   * Tab bar style
-   */
   tabBarStyle?: any;
-  /**
-   * Indicator style
-   */
   indicatorStyle?: any;
-  /**
-   * Active tab color
-   */
   activeColor?: string;
-  /**
-   * Inactive tab color
-   */
   inactiveColor?: string;
-  /**
-   * Lazy load tabs
-   */
   lazy?: boolean;
-  /**
-   * Enable swipe gestures
-   */
   swipeEnabled?: boolean;
-  /**
-   * Any other TabView props
-   */
   [key: string]: any;
 };
 
@@ -98,8 +51,9 @@ export const TabView = ({
   inactiveColor,
   lazy = false,
   swipeEnabled = true,
+  screens,
   ...otherProps
-}: TabViewProps) => {
+}: TabViewProps_) => {
   const layout = useWindowDimensions();
   const { theme } = useUnistyles();
   const [index, setIndex] = useState(initialIndex);
@@ -124,7 +78,7 @@ export const TabView = ({
   return (
     <RNTabView
       navigationState={{ index, routes }}
-      renderScene={renderScene as any}
+      renderScene={SceneMap(screens)}
       onIndexChange={handleIndexChange}
       initialLayout={{ width: layout.width }}
       renderTabBar={customRenderTabBar || defaultRenderTabBar}

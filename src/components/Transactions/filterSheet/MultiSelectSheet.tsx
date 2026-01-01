@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { View, TouchableOpacity } from "react-native";
 import { FlatList, RouteScreenProps } from "react-native-actions-sheet";
-import { SceneMap } from "react-native-tab-view";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useTranslation } from "../../../hooks/useTranslation";
 import { useFinanceStore } from "../../../store";
@@ -169,10 +168,10 @@ export const CategorySelectSheet = ({
       />
       <TabView
         routes={routes}
-        renderScene={SceneMap({
+        screens={{
           income: IncomeScene,
           expense: ExpenseScene,
-        })}
+        }}
       />
     </View>
   );
