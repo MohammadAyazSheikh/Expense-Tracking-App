@@ -158,7 +158,7 @@ export const ExpenseCategorySheet = (
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text variant="h3">{t("categoryManager.title")}</Text>
+          <Text variant="h2">{t("categoryManager.title")}</Text>
           <TouchableOpacity onPress={() => SheetManager.hide(props.sheetId)}>
             <Text style={styles.cancelText}>{t("common.cancel")}</Text>
           </TouchableOpacity>
@@ -232,7 +232,7 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text variant="h3">{t("filter.tags")}</Text>
+          <Text variant="h2">{t("filter.tags")}</Text>
           <TouchableOpacity onPress={handleDone}>
             <Text style={styles.applyText}>{t("common.done")}</Text>
           </TouchableOpacity>

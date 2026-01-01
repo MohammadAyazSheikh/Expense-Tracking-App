@@ -179,7 +179,7 @@ const FilterSheet = ({
         <TouchableOpacity onPress={() => SheetManager.hide("filter-sheet")}>
           <Text style={styles.cancelButton}>{t("common.cancel")}</Text>
         </TouchableOpacity>
-        <Text variant="h1" style={styles.title}>
+        <Text variant="h2" style={styles.title}>
           {t("filter.title")}
         </Text>
         <TouchableOpacity onPress={handleReset}>
@@ -403,7 +403,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     borderBottomColor: theme.colors.border,
   },
   title: {
-    fontSize: theme.fontSize.lg,
     color: theme.colors.foreground,
   },
   cancelButton: {

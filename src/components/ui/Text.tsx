@@ -4,9 +4,9 @@ import {
   TextProps as RNTextProps,
   TextStyle,
 } from "react-native";
-import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { useFonts } from "../../hooks/useFonts";
 import { FontWeight } from "../../fonts/config";
+import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 
 type TextVariants = UnistylesVariants<typeof styles>;
 
@@ -28,28 +28,12 @@ export const Text = ({
     align,
   });
 
-  // Get the correct font family
   const fontFamily = getFont(weight);
 
-  // Flatten styles to check for conflicting fontWeight if needed,
-  // but primarily we want to override any fontWeight with our fontFamily logic
-  // or just ensure fontFamily is set.
-
-  // We explicitly remove fontWeight from the applied style to avoid RN trying to synthesize bold
-  // which might look wrong with a custom font that is already bold.
   const { fontWeight, ...restStyle } = (StyleSheet.flatten(style) ||
     {}) as TextStyle;
 
-  return (
-    <RNText
-      style={[
-        styles.text,
-        { fontFamily }, // Apply the calculated font family
-        restStyle, // Apply rest of the styles, excluding fontWeight,
-      ]}
-      {...props}
-    />
-  );
+  return <RNText style={[styles.text, { fontFamily }, restStyle]} {...props} />;
 };
 
 const styles = StyleSheet.create((theme) => ({

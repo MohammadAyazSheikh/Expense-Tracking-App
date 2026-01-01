@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { View } from "react-native";
 import {
   StyleSheet,
@@ -88,18 +88,16 @@ export const AnalyticsScreen = () => {
     ];
   }, [transactions, theme]);
 
+  const barChartMaxValue = useMemo(() => {
+    const maxVal = Math.max(...barChartData.map((d) => d.value));
+    return (maxVal || 100) * 1.25;
+  }, [barChartData]);
+
   return (
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
-            <Button
-              title=""
-              icon={<Feather name="arrow-left" size={24} color="white" />}
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={{ paddingHorizontal: 0, width: 40 }}
-            />
             <Text variant="h2" style={styles.headerTitle}>
               Analytics
             </Text>
@@ -201,6 +199,7 @@ export const AnalyticsScreen = () => {
             <BarChart
               data={barChartData}
               width={chartWidth}
+              maxValue={barChartMaxValue}
               height={200}
               barWidth={60}
               spacing={40}
@@ -214,9 +213,14 @@ export const AnalyticsScreen = () => {
               frontColor={theme.colors.primary}
               isAnimated
               animationDuration={800}
+              xAxisLabelTextStyle={{
+                fontSize: theme.fontSize.md,
+                color: theme.colors.mutedForeground,
+                fontFamily: fonts.regular,
+              }}
             />
           </View>
-          <View style={styles.legend}>
+          {/* <View style={styles.legend}>
             <View style={styles.legendItem}>
               <View
                 style={[
@@ -235,7 +239,7 @@ export const AnalyticsScreen = () => {
               />
               <Text variant="caption">Expenses</Text>
             </View>
-          </View>
+          </View> */}
         </Card>
 
         {/* Category Breakdown */}

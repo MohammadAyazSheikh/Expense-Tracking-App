@@ -152,7 +152,7 @@ export const CategorySelectSheet = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text variant="h1">{t("categoryManager.title")}</Text>
+        <Text variant="h2">{t("categoryManager.title")}</Text>
         <TouchableOpacity onPress={handleApply}>
           <Text style={styles.applyText}>{t("common.done")}</Text>
         </TouchableOpacity>
@@ -218,7 +218,7 @@ export const TagsSelectSheet = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text variant="h1">{t("tags.title")}</Text>
+        <Text variant="h2">{t("tags.title")}</Text>
         <TouchableOpacity onPress={handleApply}>
           <Text style={styles.applyText}>{t("common.done")}</Text>
         </TouchableOpacity>

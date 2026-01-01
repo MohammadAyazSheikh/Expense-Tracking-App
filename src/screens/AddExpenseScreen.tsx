@@ -106,8 +106,6 @@ export const AddExpenseScreen = () => {
   const categories = useFinanceStore((state) => state.categories);
   const tags = useFinanceStore((state) => state.tags);
 
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [showTagModal, setShowTagModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const editId = route.params?.transactionId;
@@ -309,13 +307,6 @@ export const AddExpenseScreen = () => {
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Feather name="arrow-left" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
           <Text variant="h2" style={styles.headerTitle}>
             {isEditMode ? "Edit Expense" : "Add Expense"}
           </Text>

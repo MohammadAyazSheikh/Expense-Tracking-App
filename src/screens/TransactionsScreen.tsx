@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { View, TextInput, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -69,7 +68,6 @@ export const TransactionsScreen = () => {
   const transactions = useFinanceStore((state) => state.transactions);
   const categories = useFinanceStore((state) => state.categories);
 
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     type: "all",
     categories: [],
@@ -150,13 +148,6 @@ export const TransactionsScreen = () => {
     <ScreenWrapper style={styles.container} scrollable>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Feather name="arrow-left" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
           <Text variant="h2" style={styles.headerTitle}>
             {t("transactions.title")}
           </Text>
