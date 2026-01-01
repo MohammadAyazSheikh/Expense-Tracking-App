@@ -362,11 +362,6 @@ const styles = StyleSheet.create((theme) => ({
     marginBottom: theme.margins.sm,
     padding: theme.paddings.lg,
     backgroundColor: theme.colors.card,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   summaryTitle: {
     fontSize: theme.fontSize.md,
