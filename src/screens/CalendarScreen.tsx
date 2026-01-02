@@ -15,12 +15,9 @@ import { useFinanceStore } from "../store";
 import { Transaction } from "../types";
 import { TransactionCard } from "../components/Transactions/TransactionCard";
 import Animated from "react-native-reanimated";
-import {
-  EnteringAnimation,
-  ExitingAnimation,
-  LayoutAnimation,
-} from "../utils/Animation";
+import { EnteringAnimation, ExitingAnimation } from "../utils/Animation";
 import { useFonts } from "../hooks/useFonts";
+import Fab from "../components/ui/Fab";
 
 // Custom Day Component
 const CustomDay = ({
@@ -28,7 +25,6 @@ const CustomDay = ({
   state,
   marking,
   onPress,
-  theme,
   isSelected,
 }: {
   date: DateData;
@@ -314,14 +310,7 @@ export const CalendarScreen = () => {
       />
 
       {/* Floating Add Button */}
-      <Animated.View entering={EnteringAnimation} style={styles.fabContainer}>
-        <Button
-          title={t("calendar.addTransaction", "Add Transaction")}
-          icon={<Ionicons name="add" size={20} color="white" />}
-          onPress={handleAddTransaction}
-          style={styles.fab}
-        />
-      </Animated.View>
+      <Fab onPress={handleAddTransaction} />
     </ScreenWrapper>
   );
 };
@@ -438,18 +427,5 @@ const styles = StyleSheet.create((theme) => ({
   },
   expenseAmountText: {
     color: theme.colors.destructive,
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: theme.paddings.xl,
-    left: theme.paddings.md,
-    right: theme.paddings.md,
-  },
-  fab: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
   },
 }));
