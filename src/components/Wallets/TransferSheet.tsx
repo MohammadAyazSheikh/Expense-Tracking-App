@@ -76,45 +76,47 @@ const WalletSelectorScreen = ({
       <ScrollView contentContainerStyle={styles.content}>
         <View style={{ gap: theme.margins.md }}>
           {availableWallets.map((wallet) => (
-            <Card
+            <TouchableOpacity
               key={wallet.id}
-              style={styles.walletCard}
+              activeOpacity={0.7}
               onPress={() => handleSelect(wallet.id)}
             >
-              <View style={styles.walletInfo}>
-                <View
-                  style={[
-                    styles.walletIcon,
-                    {
-                      backgroundColor:
-                        (wallet.color || theme.colors.primary) + "20",
-                    },
-                  ]}
-                >
+              <Card style={styles.walletCard}>
+                <View style={styles.walletInfo}>
+                  <View
+                    style={[
+                      styles.walletIcon,
+                      {
+                        backgroundColor:
+                          (wallet.color || theme.colors.primary) + "20",
+                      },
+                    ]}
+                  >
+                    <Icon
+                      type="MaterialCommunityIcons"
+                      name={getWalletIcon(wallet) as any}
+                      size={24}
+                      color={wallet.color || theme.colors.primary}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text weight="semiBold">{wallet.name}</Text>
+                    <Text
+                      variant="caption"
+                      style={{ color: theme.colors.mutedForeground }}
+                    >
+                      ${wallet.balance.toFixed(2)}
+                    </Text>
+                  </View>
                   <Icon
-                    type="Ionicons"
-                    name={getWalletIcon(wallet) as any}
-                    size={24}
-                    color={wallet.color || theme.colors.primary}
+                    type="Feather"
+                    name="chevron-right"
+                    size={20}
+                    color={theme.colors.mutedForeground}
                   />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text weight="semiBold">{wallet.name}</Text>
-                  <Text
-                    variant="caption"
-                    style={{ color: theme.colors.mutedForeground }}
-                  >
-                    ${wallet.balance.toFixed(2)}
-                  </Text>
-                </View>
-                <Icon
-                  type="Feather"
-                  name="chevron-right"
-                  size={20}
-                  color={theme.colors.mutedForeground}
-                />
-              </View>
-            </Card>
+              </Card>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
@@ -409,6 +411,11 @@ export const TransferSheet = (props: SheetProps) => {
       routes={routes}
       initialRoute="main"
       enableRouterBackNavigation={true}
+      keyboardHandlerEnabled={true}
+      gestureEnabled={true}
+      containerStyle={{
+        height: "85%", // Ensure height is set here for keyboard handling
+      }}
     />
   );
 };

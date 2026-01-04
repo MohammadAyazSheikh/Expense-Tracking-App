@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { Text } from "./Text";
 
 const styles = StyleSheet.create((theme) => ({
@@ -60,7 +60,7 @@ const ToastItem = ({
     switch (type) {
       case "success":
         return {
-          name: "checkmark-circle" as const,
+          name: "check-circle" as const,
           color: theme.colors.success,
           bg: theme.colors.success + "15",
         };
@@ -72,13 +72,13 @@ const ToastItem = ({
         };
       case "info":
         return {
-          name: "information-circle" as const,
+          name: "info" as const,
           color: theme.colors.primary,
           bg: theme.colors.primary + "15",
         };
       case "warning":
         return {
-          name: "warning" as const,
+          name: "alert-triangle" as const,
           color: theme.colors.warning,
           bg: theme.colors.warning + "15",
         };
@@ -90,7 +90,7 @@ const ToastItem = ({
   return (
     <View style={styles.container}>
       <View style={[styles.iconContainer, { backgroundColor: iconData.bg }]}>
-        <Ionicons name={iconData.name} size={22} color={iconData.color} />
+        <Feather name={iconData.name} size={22} color={iconData.color} />
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.title}>{text1}</Text>

@@ -15,6 +15,14 @@ import { DatePickerSheet } from "./components/sheets/DatePickerSheet";
 import { AddWalletSheet } from "./components/Wallets/AddWalletSheet";
 import { EditWalletSheet } from "./components/Wallets/EditWalletSheet";
 import { TransferSheet } from "./components/Wallets/TransferSheet";
+import {
+  GenericMenuSheet,
+  MenuItem,
+} from "./components/sheets/GenericMenuSheet";
+import {
+  GenericSelectSheet,
+  SelectorOption,
+} from "./components/sheets/GenericSelectSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -70,6 +78,19 @@ declare module "react-native-actions-sheet" {
         }>;
       };
     }>;
+    "generic-menu-sheet": SheetDefinition<{
+      payload: { options: MenuItem[]; title?: string };
+      returnValue: boolean | undefined;
+    }>;
+    "generic-select-sheet": SheetDefinition<{
+      payload: {
+        options: SelectorOption[];
+        title?: string;
+        selectedValue?: string;
+        onSelect?: (value: string) => void;
+      };
+      returnValue: string | undefined;
+    }>;
   }
 }
 
@@ -84,6 +105,8 @@ export const Sheets = () => {
         "add-wallet-sheet": AddWalletSheet,
         "edit-wallet-sheet": EditWalletSheet,
         "transfer-sheet": TransferSheet,
+        "generic-menu-sheet": GenericMenuSheet,
+        "generic-select-sheet": GenericSelectSheet,
       }}
     />
   );

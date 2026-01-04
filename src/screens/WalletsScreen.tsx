@@ -11,6 +11,7 @@ import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather } from "@expo/vector-icons";
+import { Icon } from "../components/ui/Icon";
 
 import { useFinanceStore } from "../store";
 
@@ -27,7 +28,11 @@ export const WalletsScreen = () => {
   const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
 
   const getColor = (colorName: string) => {
-    return theme.colors[colorName as keyof typeof theme.colors] as string;
+    if (colorName?.startsWith("#")) return colorName;
+    return (
+      (theme.colors[colorName as keyof typeof theme.colors] as string) ||
+      theme.colors.primary
+    );
   };
 
   return (
@@ -100,10 +105,11 @@ export const WalletsScreen = () => {
                   <View
                     style={[
                       styles.walletIcon,
-                      { backgroundColor: getColor(wallet.color) + "15" },
+                      { backgroundColor: getColor(wallet.color) + "20" },
                     ]}
                   >
-                    <Feather
+                    <Icon
+                      type="MaterialCommunityIcons"
                       name={wallet.icon as any}
                       size={24}
                       color={getColor(wallet.textColor || wallet.color)}
@@ -137,9 +143,7 @@ export const WalletsScreen = () => {
           icon={<Feather name="refresh-cw" size={20} color="white" />}
           size="lg"
           style={styles.transferButton}
-          onPress={() =>
-            navigation.navigate("MainTab", { screen: "AddExpense" })
-          }
+          onPress={() => SheetManager.show("transfer-sheet")}
         />
 
         {/* Recent Transfers */}

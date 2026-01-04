@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Text } from "../components/ui/Text";
@@ -15,6 +15,8 @@ import { RootStackParamList } from "../navigation/types";
 import { useFinanceStore } from "../store";
 import { LineChart } from "react-native-gifted-charts";
 import Toast from "react-native-toast-message";
+import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { MenuItem } from "../components/sheets/GenericMenuSheet";
 
 type WalletDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -27,12 +29,20 @@ export default function WalletDetailScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<WalletDetailScreenRouteProp>();
   const { walletId } = route.params;
-  const { wallets, transactions } = useFinanceStore();
+  const { wallets, transactions, categories } = useFinanceStore();
 
   const [showBalance, setShowBalance] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
 
   const wallet = wallets.find((w) => w.id === walletId);
+
+  const getColor = (colorName: string) => {
+    if (colorName?.startsWith("#")) return colorName;
+    return (
+      (theme.colors[colorName as keyof typeof theme.colors] as string) ||
+      theme.colors.primary
+    );
+  };
 
   if (!wallet) {
     return (
@@ -76,10 +86,50 @@ export default function WalletDetailScreen() {
   ];
 
   const handleMenuAction = () => {
-    // In a real app, use a dropdown or action sheet
-    // For now showing Edit sheet
-    SheetManager.show("edit-wallet-sheet", {
-      payload: { walletId: wallet.id },
+    const options: MenuItem[] = [
+      {
+        label: t("common.edit"),
+        icon: "edit-2",
+        iconType: "Feather",
+        onPress: () =>
+          SheetManager.show("edit-wallet-sheet", {
+            payload: { walletId: wallet.id },
+          }),
+      },
+      {
+        label: t("wallets.downloadStatement"),
+        icon: "download",
+        iconType: "Feather",
+        onPress: () =>
+          navigation.navigate("WalletStatement", { walletId: wallet.id }),
+      },
+      {
+        label: t("wallets.shareDetails"),
+        icon: "share-2",
+        iconType: "Feather",
+        onPress: () => {
+          Toast.show({
+            type: "success",
+            text1: t("wallets.shareStatement"),
+            text2: t("wallets.shareStatementDesc"),
+          });
+        },
+      },
+      {
+        label: t("common.delete"),
+        icon: "trash-2",
+        iconType: "Feather",
+        variant: "destructive",
+        onPress: () => {
+          SheetManager.show("edit-wallet-sheet", {
+            payload: { walletId: wallet.id },
+          });
+        },
+      },
+    ];
+
+    SheetManager.show("generic-menu-sheet", {
+      payload: { options, title: wallet.name },
     });
   };
 
@@ -103,75 +153,18 @@ export default function WalletDetailScreen() {
     }
 
     return (
-      <View style={{ gap: theme.margins.sm }}>
-        {filtered.map((transaction) => (
-          <TouchableOpacity
-            key={transaction.id}
-            onPress={() =>
+      <View style={{ gap: theme.margins.sm, paddingBottom: 20 }}>
+        {filtered.map((item) => (
+          <TransactionCard
+            key={item.id}
+            transaction={item}
+            category={categories.find((c) => c.name === item.category)}
+            onPress={() => {
               navigation.navigate("TransactionDetail", {
-                transactionId: transaction.id,
-              })
-            }
-          >
-            <Card style={styles.transactionCard}>
-              <View style={styles.transactionRow}>
-                <View
-                  style={[
-                    styles.transactionIcon,
-                    {
-                      backgroundColor:
-                        transaction.type === "income"
-                          ? theme.colors.success + "20"
-                          : theme.colors.destructive + "20",
-                    },
-                  ]}
-                >
-                  <Icon
-                    type="Feather"
-                    name={
-                      transaction.type === "income"
-                        ? "arrow-down-left"
-                        : "arrow-up-right"
-                    }
-                    size={20}
-                    color={
-                      transaction.type === "income"
-                        ? theme.colors.success
-                        : theme.colors.destructive
-                    }
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text weight="medium">
-                    {transaction.description || transaction.category}
-                  </Text>
-                  <Text
-                    variant="caption"
-                    style={{ color: theme.colors.mutedForeground }}
-                  >
-                    {new Date(transaction.date).toLocaleDateString()}
-                  </Text>
-                </View>
-                <View style={{ alignItems: "flex-end" }}>
-                  <Text
-                    weight="bold"
-                    style={{
-                      color:
-                        transaction.type === "income"
-                          ? theme.colors.success
-                          : theme.colors.foreground,
-                    }}
-                  >
-                    {transaction.type === "income" ? "+" : "-"}$
-                    {Math.abs(transaction.amount).toFixed(2)}
-                  </Text>
-                  <Badge variant="secondary" style={{ paddingVertical: 2 }}>
-                    <Text style={{ fontSize: 10 }}>{transaction.category}</Text>
-                  </Badge>
-                </View>
-              </View>
-            </Card>
-          </TouchableOpacity>
+                transactionId: item.id,
+              });
+            }}
+          />
         ))}
       </View>
     );
@@ -188,10 +181,10 @@ export default function WalletDetailScreen() {
   };
 
   return (
-    <ScreenWrapper>
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Header */}
-        <View style={styles.header}>
+    <ScreenWrapper style={styles.container} scrollable>
+      {/* Custom Header Area */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
             <Button
               title=""
@@ -200,24 +193,16 @@ export default function WalletDetailScreen() {
                   type="Feather"
                   name="arrow-left"
                   size={24}
-                  color={theme.colors.foreground}
+                  color="white"
                 />
               }
               variant="ghost"
               onPress={() => navigation.goBack()}
-              style={{ width: 40, paddingHorizontal: 0 }}
+              style={{ width: 40, marginRight: 8 }}
             />
-            <View>
-              <Text variant="h3">{wallet.name}</Text>
-              {wallet.accountNumber && (
-                <Text
-                  variant="caption"
-                  style={{ color: theme.colors.mutedForeground }}
-                >
-                  {wallet.accountNumber}
-                </Text>
-              )}
-            </View>
+            <Text variant="h3" style={{ color: "white" }}>
+              {t("wallets.title")}
+            </Text>
           </View>
           <Button
             title=""
@@ -226,177 +211,246 @@ export default function WalletDetailScreen() {
                 type="Feather"
                 name="more-vertical"
                 size={24}
-                color={theme.colors.foreground}
+                color="white"
               />
             }
             variant="ghost"
             onPress={handleMenuAction}
-            style={{ width: 40, paddingHorizontal: 0 }}
+            style={{ width: 40 }}
           />
         </View>
 
-        <View style={styles.content}>
-          {/* Balance Card */}
-          <Card style={styles.balanceCard}>
-            <View style={styles.balanceHeader}>
-              <Text style={{ color: "white", opacity: 0.8 }}>
-                {t("wallets.currentBalance")}
+        {/* Wallet Card - Nested in header style for overlap later or just clean look */}
+        <Card style={styles.walletCard}>
+          <View style={styles.walletInfo}>
+            <View
+              style={[
+                styles.walletIcon,
+                { backgroundColor: getColor(wallet.color) + "20" },
+              ]}
+            >
+              <Icon
+                type="MaterialCommunityIcons"
+                name={wallet.icon as any}
+                size={28}
+                color={getColor(wallet.color)}
+              />
+            </View>
+            <View>
+              <Text weight="semiBold" style={{ fontSize: 18 }}>
+                {wallet.name}
+              </Text>
+              <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
+                <Badge variant="secondary">
+                  <Text style={{ fontSize: 10, textTransform: "capitalize" }}>
+                    {wallet.type}
+                  </Text>
+                </Badge>
+                <Badge variant="secondary">
+                  <Text style={{ fontSize: 10 }}>
+                    {wallet.currency || "USD"}
+                  </Text>
+                </Badge>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ marginTop: theme.margins.lg }}>
+            <Text
+              variant="caption"
+              style={{ color: theme.colors.mutedForeground }}
+            >
+              {t("wallets.currentBalance")}
+            </Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 4,
+              }}
+            >
+              <Text weight="bold" style={{ fontSize: 28 }}>
+                {showBalance ? `$${wallet.balance.toFixed(2)}` : "****"}
               </Text>
               <TouchableOpacity onPress={() => setShowBalance(!showBalance)}>
                 <Icon
                   type="Feather"
-                  name={showBalance ? "eye" : "eye-off"}
-                  size={16}
-                  color="white"
+                  name={showBalance ? "eye-off" : "eye"}
+                  size={22}
+                  color={theme.colors.mutedForeground}
                 />
               </TouchableOpacity>
             </View>
-            <Text variant="h1" style={styles.balanceText}>
-              {showBalance ? `$${wallet.balance.toFixed(2)}` : "••••••"}
-            </Text>
-            <View style={styles.badgeRow}>
-              <Badge
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  borderWidth: 0,
-                }}
+          </View>
+        </Card>
+      </View>
+
+      <View style={styles.content}>
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
+          <Card style={styles.statCard}>
+            <View
+              style={[
+                styles.statIcon,
+                { backgroundColor: theme.colors.success + "15" },
+              ]}
+            >
+              <Icon
+                type="Feather"
+                name="arrow-down-circle"
+                size={20}
+                color={theme.colors.success}
+              />
+            </View>
+            <View>
+              <Text
+                variant="caption"
+                style={{ color: theme.colors.mutedForeground }}
               >
-                <Text style={{ color: "white", textTransform: "capitalize" }}>
-                  {wallet.type}
-                </Text>
-              </Badge>
-              <Badge
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  borderWidth: 0,
-                }}
-              >
-                <Text style={{ color: "white" }}>
-                  {wallet.currency || "USD"}
-                </Text>
-              </Badge>
+                {t("wallets.income")}
+              </Text>
+              <Text weight="bold" style={{ color: theme.colors.success }}>
+                +${monthlyIncome.toFixed(0)}
+              </Text>
             </View>
           </Card>
-
-          {/* Quick Stats */}
-          <View style={styles.statsRow}>
-            <Card style={styles.statCard}>
-              <View
-                style={[
-                  styles.statIcon,
-                  { backgroundColor: theme.colors.success + "20" },
-                ]}
+          <Card style={styles.statCard}>
+            <View
+              style={[
+                styles.statIcon,
+                { backgroundColor: theme.colors.destructive + "15" },
+              ]}
+            >
+              <Icon
+                type="Feather"
+                name="arrow-up-circle"
+                size={20}
+                color={theme.colors.destructive}
+              />
+            </View>
+            <View>
+              <Text
+                variant="caption"
+                style={{ color: theme.colors.mutedForeground }}
               >
-                <Icon
-                  type="Feather"
-                  name="trending-up"
-                  size={16}
-                  color={theme.colors.success}
-                />
-              </View>
-              <Text variant="caption">{t("wallets.income")}</Text>
-              <Text weight="bold" style={{ color: theme.colors.success }}>
-                +${monthlyIncome.toFixed(2)}
+                {t("wallets.expense")}
               </Text>
-            </Card>
-            <Card style={styles.statCard}>
-              <View
-                style={[
-                  styles.statIcon,
-                  { backgroundColor: theme.colors.destructive + "20" },
-                ]}
-              >
-                <Icon
-                  type="Feather"
-                  name="trending-down"
-                  size={16}
-                  color={theme.colors.destructive}
-                />
-              </View>
-              <Text variant="caption">{t("wallets.expense")}</Text>
               <Text weight="bold" style={{ color: theme.colors.destructive }}>
-                -${monthlyExpense.toFixed(2)}
+                -${monthlyExpense.toFixed(0)}
               </Text>
-            </Card>
-          </View>
-
-          {/* Chart */}
-          <Card style={styles.chartCard}>
-            <Text weight="semiBold" style={{ marginBottom: theme.margins.md }}>
-              {t("wallets.balanceTrend")}
-            </Text>
-            <LineChart
-              data={balanceData}
-              height={150}
-              width={300} // Adjust based on screen width
-              color={theme.colors.primary}
-              thickness={2}
-              hideRules
-              hideYAxisText
-              hideAxesAndRules
-              curved
-              startFillColor={theme.colors.primary + "20"}
-              endFillColor={theme.colors.primary + "00"}
-              startOpacity={0.2}
-              endOpacity={0}
-              areaChart
-            />
+            </View>
           </Card>
-
-          {/* Actions */}
-          <View style={styles.actionRow}>
-            <Button
-              title={t("wallets.downloadStatement")}
-              variant="outline"
-              icon={
-                <Icon
-                  type="Feather"
-                  name="download"
-                  size={16}
-                  color={theme.colors.primary}
-                />
-              }
-              style={{ flex: 1 }}
-              onPress={() =>
-                navigation.navigate("WalletStatement", { walletId })
-              }
-            />
-            <Button
-              title={t("wallets.transfer")}
-              icon={
-                <Icon
-                  type="Feather"
-                  name="refresh-cw"
-                  size={16}
-                  color="white"
-                />
-              }
-              style={{ flex: 1 }}
-              onPress={() => SheetManager.show("transfer-sheet")}
-            />
-          </View>
-
-          {/* Transactions */}
-          <View>
-            <Text variant="h3" style={{ marginBottom: theme.margins.md }}>
-              {t("wallets.transactions")}
-            </Text>
-            <TabView
-              routes={routes}
-              screens={{
-                all: () => <TransactionList type="all" />,
-                income: () => <TransactionList type="income" />,
-                expense: () => <TransactionList type="expense" />,
-              }}
-            />
-          </View>
         </View>
-      </ScrollView>
+
+        {/* Chart */}
+        <Card style={styles.chartCard}>
+          <Text weight="semiBold" style={{ marginBottom: theme.margins.md }}>
+            {t("wallets.balanceTrend")}
+          </Text>
+          <LineChart
+            data={balanceData}
+            height={150}
+            width={300} // Adjust based on screen width
+            color={theme.colors.primary}
+            thickness={2}
+            hideRules
+            hideYAxisText
+            hideAxesAndRules
+            curved
+            startFillColor={theme.colors.primary + "20"}
+            endFillColor={theme.colors.primary + "00"}
+            startOpacity={0.2}
+            endOpacity={0}
+            areaChart
+            pointerConfig={{
+              pointerStripHeight: 160,
+              pointerStripColor: "lightgray",
+              pointerStripWidth: 2,
+              pointerColor: "lightgray",
+              radius: 6,
+              pointerLabelWidth: 100,
+              pointerLabelHeight: 90,
+              activatePointersOnLongPress: true,
+              autoAdjustPointerLabelPosition: false,
+              pointerLabelComponent: (items) => {
+                return (
+                  <View
+                    style={{
+                      height: 90,
+                      width: 100,
+                      justifyContent: "center",
+                      marginTop: -30,
+                      marginLeft: -40,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontSize: 14,
+                        marginBottom: 6,
+                        textAlign: "center",
+                      }}
+                    >
+                      ${items[0].value}
+                    </Text>
+                  </View>
+                );
+              },
+            }}
+          />
+        </Card>
+
+        {/* Actions */}
+        <View style={styles.actionRow}>
+          <Button
+            title={t("wallets.downloadStatement")}
+            variant="outline"
+            icon={
+              <Icon
+                type="Feather"
+                name="download"
+                size={16}
+                color={theme.colors.primary}
+              />
+            }
+            style={{ flex: 1 }}
+            onPress={() => navigation.navigate("WalletStatement", { walletId })}
+          />
+          <Button
+            title={t("wallets.transfer")}
+            icon={
+              <Icon type="Feather" name="refresh-cw" size={16} color="white" />
+            }
+            style={{ flex: 1 }}
+            onPress={() => SheetManager.show("transfer-sheet")}
+          />
+        </View>
+
+        {/* Transactions */}
+        <View>
+          <Text variant="h3" style={{ marginBottom: theme.margins.md }}>
+            {t("wallets.transactions")}
+          </Text>
+          <TabView
+            routes={routes}
+            screens={{
+              all: () => <TransactionList type="all" />,
+              income: () => <TransactionList type="income" />,
+              expense: () => <TransactionList type="expense" />,
+            }}
+          />
+        </View>
+      </View>
     </ScreenWrapper>
   );
 }
 
 const styles = StyleSheet.create((theme) => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   errorContainer: {
     flex: 1,
     alignItems: "center",
@@ -404,48 +458,59 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.margins.md,
   },
   header: {
+    padding: theme.paddings.md,
+    backgroundColor: theme.colors.primary,
+    paddingBottom: 40,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  headerTop: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: theme.paddings.md,
-    paddingVertical: theme.paddings.sm,
+    marginBottom: theme.margins.lg,
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: theme.margins.sm,
   },
+  walletCard: {
+    backgroundColor: theme.colors.card,
+    padding: theme.paddings.lg,
+    borderRadius: theme.radius.xl,
+    marginTop: -20, // Overlap effect if placed outside header, but here it's inside?
+    // Wait, in previous design it was separate.
+    // Let's make walletCard clean.
+  },
+  walletInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.margins.md,
+  },
+  walletIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.colors.primary + "15",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   content: {
     padding: theme.paddings.md,
     gap: theme.margins.lg,
+    marginTop: theme.margins.sm,
   },
-  balanceCard: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.paddings.lg,
-    borderRadius: theme.radius.xl,
-  },
-  balanceHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.margins.sm,
-  },
-  balanceText: {
-    color: "white",
-    marginBottom: theme.margins.md,
-  },
-  badgeRow: {
-    flexDirection: "row",
-    gap: theme.margins.sm,
-  },
-  statsRow: {
+  statsGrid: {
     flexDirection: "row",
     gap: theme.margins.md,
   },
   statCard: {
     flex: 1,
     padding: theme.paddings.md,
-    gap: theme.margins.xs,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.margins.sm,
   },
   statIcon: {
     width: 32,
@@ -453,7 +518,6 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: theme.margins.xs,
   },
   chartCard: {
     padding: theme.paddings.md,
@@ -465,21 +529,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   emptyState: {
     padding: theme.paddings.xl,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  transactionCard: {
-    padding: theme.paddings.md,
-  },
-  transactionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  transactionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
