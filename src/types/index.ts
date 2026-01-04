@@ -1,3 +1,5 @@
+import { IconType } from "../components/ui/Icon";
+
 export interface Transaction {
   id: string;
   name: string;
@@ -84,7 +86,7 @@ export interface Category {
   id: string;
   name: string;
   icon: string;
-  iconFamily?: string;
+  iconFamily?: IconType;
   color: string;
   type: 'income' | 'expense';
   tags?: string[];

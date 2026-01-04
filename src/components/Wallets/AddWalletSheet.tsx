@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import ActionSheet, {
   SheetProps,
   SheetManager,
@@ -15,6 +15,7 @@ import { Switch } from "../ui/Switch";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useFinanceStore } from "../../store";
 import Toast from "react-native-toast-message";
+import { CategoryItem } from "../../screens/AddExpenseScreen";
 
 const walletTypes = [
   { id: "cash", icon: "wallet", label: "Cash", color: "#2E7D32" },
@@ -108,39 +109,17 @@ export const AddWalletSheet = (props: SheetProps) => {
         </Text>
         <View style={styles.typeGrid}>
           {walletTypes.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.typeCard,
-                type === item.id && {
-                  borderColor: theme.colors.primary,
-                  backgroundColor: theme.colors.primary + "10",
-                },
-              ]}
+            <CategoryItem
+              key={`${item.id}-${item.label}`}
+              item={{
+                name: t(`wallets.types.${item.id}` as any),
+                color: item.color,
+                icon: item.icon,
+                iconFamily: "MaterialCommunityIcons",
+              }}
+              isSelected={type === item.id}
               onPress={() => setType(item.id)}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: item.color + "20" },
-                ]}
-              >
-                <Icon
-                  type="MaterialCommunityIcons"
-                  name={item.icon as any}
-                  size={24}
-                  color={item.color}
-                />
-              </View>
-              <Text variant="caption" style={{ marginTop: 4 }}>
-                {t(`wallets.types.${item.id}` as any)}
-              </Text>
-              {type === item.id && (
-                <View style={styles.checkBadge}>
-                  <Icon type="Feather" name="check" size={12} color="white" />
-                </View>
-              )}
-            </TouchableOpacity>
+            />
           ))}
         </View>
 
@@ -152,62 +131,56 @@ export const AddWalletSheet = (props: SheetProps) => {
             value={name}
             onChangeText={setName}
           />
-
+          <Input
+            label={t("wallets.initialBalance")}
+            placeholder="0.00"
+            keyboardType="numeric"
+            value={balance}
+            onChangeText={setBalance}
+            leftIcon={
+              <Text weight="bold" style={{ marginRight: 4 }}>
+                {currencies.find((c) => c === currency)
+                  ? currency === "USD"
+                    ? "$"
+                    : currency === "EUR"
+                    ? "€"
+                    : currency === "GBP"
+                    ? "£"
+                    : currency
+                  : "$"}
+              </Text>
+            }
+          />
           <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Input
-                label={t("wallets.initialBalance")}
-                placeholder="0.00"
-                keyboardType="numeric"
-                value={balance}
-                onChangeText={setBalance}
-                leftIcon={
-                  <Text weight="bold" style={{ marginRight: 4 }}>
-                    {currencies.find((c) => c === currency)
-                      ? currency === "USD"
-                        ? "$"
-                        : currency === "EUR"
-                        ? "€"
-                        : currency === "GBP"
-                        ? "£"
-                        : currency
-                      : "$"}
-                  </Text>
-                }
-              />
-            </View>
-            <View style={{ width: 100 }}>
-              {/* Simplified currency selector for now */}
-              <Text style={styles.label}>{t("wallets.currency")}</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 8 }}
-              >
-                {currencies.map((c) => (
-                  <TouchableOpacity
-                    key={c}
-                    onPress={() => setCurrency(c)}
-                    style={[
-                      styles.currencyChip,
-                      currency === c && {
-                        backgroundColor: theme.colors.primary,
-                      },
-                    ]}
+            {/* Simplified currency selector for now */}
+            <Text style={styles.label}>{t("wallets.currency")}</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8 }}
+            >
+              {currencies.map((c) => (
+                <Pressable
+                  key={c}
+                  onPress={() => setCurrency(c)}
+                  style={[
+                    styles.currencyChip,
+                    currency === c && {
+                      backgroundColor: theme.colors.primary,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      color: currency === c ? "white" : theme.colors.foreground,
+                      fontSize: 12,
+                    }}
                   >
-                    <Text
-                      style={{
-                        color:
-                          currency === c ? "white" : theme.colors.foreground,
-                        fontSize: 12,
-                      }}
-                    >
-                      {c}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+                    {c}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
 
           {(type === "bank" || type === "card") && (
@@ -297,36 +270,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     flexWrap: "wrap",
     gap: theme.margins.md,
   },
-  typeCard: {
-    width: "30%",
-    aspectRatio: 1,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.card,
-    position: "relative",
-    overflow: "hidden",
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkBadge: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   formCard: {
     padding: theme.paddings.md,
     gap: theme.margins.md,
@@ -334,12 +277,11 @@ const styles = StyleSheet.create((theme, rt) => ({
   row: {
     flexDirection: "row",
     gap: theme.margins.md,
-    alignItems: "flex-start",
+    alignItems: "center",
   },
   label: {
     fontSize: 14,
     fontWeight: "500",
-    marginBottom: 8,
     color: theme.colors.foreground,
   },
   currencyChip: {
@@ -350,6 +292,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     borderColor: theme.colors.border,
     minWidth: 36,
     alignItems: "center",
+    justifyContent: "center",
   },
   settingsCard: {
     padding: theme.paddings.md,

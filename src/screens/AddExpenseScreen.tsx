@@ -27,18 +27,24 @@ import { SheetManager } from "react-native-actions-sheet";
 import Animated from "react-native-reanimated";
 import { LayoutAnimation } from "../utils/Animation";
 import { Header } from "../components/ui/Headers";
+import { Category } from "../types";
 
 const PressAbleAnimated = Animated.createAnimatedComponent(Pressable);
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
 
-const CategoryItem = ({
+export const CategoryItem = ({
   item,
   isSelected,
   onPress,
   isTag = false,
 }: {
-  item: any;
+  item: {
+    name: string;
+    color: string;
+    icon?: string;
+    iconFamily?: IconType;
+  };
   isSelected: boolean;
   onPress: () => void;
   isTag?: boolean;
@@ -64,8 +70,8 @@ const CategoryItem = ({
           ]}
         >
           <Icon
-            type={(item.iconFamily as IconType) || "Ionicons"}
-            name={(item.icon as any) || "help-circle"}
+            type={item.iconFamily || "Ionicons"}
+            name={item.icon || "help-circle"}
             size={20}
             color="white"
           />
@@ -83,10 +89,7 @@ const CategoryItem = ({
       <Text
         variant="caption"
         weight="medium"
-        style={[
-          isTag ? { fontSize: 14 } : undefined,
-          isSelected && styles.tagTextSelected,
-        ]}
+        style={[isTag ? { fontSize: 14 } : undefined]}
       >
         {item.name}
       </Text>
@@ -649,13 +652,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   selectionItemSelected: {
     borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary + "15",
   },
   tagItemSelected: {
     backgroundColor: theme.colors.primary,
-  },
-  tagTextSelected: {
-    color: "white",
   },
   iconContainer: {
     width: 40,

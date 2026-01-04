@@ -12,7 +12,7 @@ import { alertService } from "../../utils/AlertService";
 import { useTranslation } from "../../hooks/useTranslation";
 import { Text } from "../ui/Text";
 import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
-import { Icon, IconType } from "../ui/Icon";
+import { Icon } from "../ui/Icon";
 
 interface AddCategoryModalProps {
   visible: boolean;
