@@ -29,6 +29,8 @@ export type RootStackParamList = {
   AddGroupExpense: { groupId: string };
   SettleUp: { groupId?: string };
   Friends: undefined;
+  WalletDetail: { walletId: string };
+  WalletStatement: { walletId: string };
 };
 
 export type MainTabParamList = {

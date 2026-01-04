@@ -12,6 +12,9 @@ import {
   ExpenseTagSheet,
 } from "./components/Transactions/ExpenseActionSheets";
 import { DatePickerSheet } from "./components/sheets/DatePickerSheet";
+import { AddWalletSheet } from "./components/Wallets/AddWalletSheet";
+import { EditWalletSheet } from "./components/Wallets/EditWalletSheet";
+import { TransferSheet } from "./components/Wallets/TransferSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -45,6 +48,28 @@ declare module "react-native-actions-sheet" {
       payload: { date?: string };
       returnValue: string | undefined;
     }>;
+    "add-wallet-sheet": SheetDefinition<{
+      payload?: {};
+      returnValue: boolean | undefined;
+    }>;
+    "edit-wallet-sheet": SheetDefinition<{
+      payload: { walletId: string };
+      returnValue: boolean | undefined;
+    }>;
+    "transfer-sheet": SheetDefinition<{
+      payload?: { fromWalletId?: string; toWalletId?: string };
+      returnValue: boolean | undefined;
+      routes: {
+        main: RouteDefinition<{
+          selectedWalletId?: string;
+          mode?: "from" | "to";
+        }>;
+        "wallet-selector": RouteDefinition<{
+          mode: "from" | "to";
+          excludeId?: string | null;
+        }>;
+      };
+    }>;
   }
 }
 
@@ -56,6 +81,9 @@ export const Sheets = () => {
         "expense-category-sheet": ExpenseCategorySheet,
         "expense-tag-sheet": ExpenseTagSheet,
         "date-picker-sheet": DatePickerSheet,
+        "add-wallet-sheet": AddWalletSheet,
+        "edit-wallet-sheet": EditWalletSheet,
+        "transfer-sheet": TransferSheet,
       }}
     />
   );

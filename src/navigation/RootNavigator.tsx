@@ -30,6 +30,8 @@ import { AddGroupExpenseScreen } from "../screens/AddGroupExpenseScreen";
 import { SettleUpScreen } from "../screens/SettleUpScreen";
 import { FriendsScreen } from "../screens/FriendsScreen";
 import { BudgetScreen } from "../screens/BudgetScreen";
+import WalletDetailScreen from "../screens/WalletDetailScreen";
+import WalletStatementScreen from "../screens/WalletStatementScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -70,9 +72,10 @@ const mainRoutes = () => {
       <Stack.Screen name="Groups" component={GroupsScreen} />
       <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
       <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
-      <Stack.Screen name="AddGroupExpense" component={AddGroupExpenseScreen} />
       <Stack.Screen name="SettleUp" component={SettleUpScreen} />
       <Stack.Screen name="Friends" component={FriendsScreen} />
+      <Stack.Screen name="WalletDetail" component={WalletDetailScreen} />
+      <Stack.Screen name="WalletStatement" component={WalletStatementScreen} />
     </Stack.Navigator>
   );
 };

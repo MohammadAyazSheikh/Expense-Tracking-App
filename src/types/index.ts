@@ -1,16 +1,19 @@
 export interface Transaction {
   id: string;
   name: string;
+  description?: string;
   category: string;
   amount: number;
   date: string;
   time: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'transfer';
   payment: string;
   note?: string;
   tags?: string[];
   location?: string;
   recurring?: boolean;
+  walletId?: string;
+  toWalletId?: string;
 }
 
 export interface Budget {
@@ -72,6 +75,9 @@ export interface Wallet {
   accountNumber?: string;
   last4?: string;
   icon?: string;
+  currency?: string;
+  includeInTotal?: boolean;
+  isDefault?: boolean;
 }
 
 export interface Category {
