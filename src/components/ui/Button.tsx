@@ -1,9 +1,9 @@
 import React from "react";
 import {
-  TouchableOpacity,
   ActivityIndicator,
   ViewStyle,
   TextStyle,
+  Pressable,
 } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { Text } from "./Text";
@@ -39,11 +39,10 @@ export const Button = ({
   });
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={onPress}
       disabled={disabled || loading}
       style={[styles.container, style]}
-      activeOpacity={0.7}
     >
       {loading ? (
         <ActivityIndicator size="small" color={styles.text.color as string} />
@@ -62,7 +61,7 @@ export const Button = ({
           )}
         </>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

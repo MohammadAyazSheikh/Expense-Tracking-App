@@ -12,6 +12,7 @@ import { Badge } from "../components/ui/Badge";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather } from "@expo/vector-icons";
 import { Icon } from "../components/ui/Icon";
+import { Header } from "../components/ui/Headers";
 
 import { useFinanceStore } from "../store";
 import { Wallet } from "../types";
@@ -148,20 +149,11 @@ export const WalletsScreen = () => {
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <Button
-              title=""
-              icon={<Feather name="arrow-left" size={24} color="white" />}
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={{ paddingHorizontal: 0, width: 40 }}
-            />
-            <Text variant="h2" style={styles.headerTitle}>
-              Wallets & Accounts
-            </Text>
-          </View>
+      <Header
+        title="Wallets & Accounts"
+        showBack={true}
+        onBack={() => navigation.goBack()}
+        right={
           <Button
             title="Add"
             icon={<Feather name="plus" size={16} color="white" />}
@@ -173,8 +165,8 @@ export const WalletsScreen = () => {
               SheetManager.show("add-wallet-sheet");
             }}
           />
-        </View>
-
+        }
+      >
         <View style={styles.balanceCard}>
           <Text variant="caption" style={styles.balanceLabel}>
             Total Balance
@@ -193,7 +185,7 @@ export const WalletsScreen = () => {
             </Text>
           </Badge>
         </View>
-      </View>
+      </Header>
 
       <View style={styles.content}>
         {/* Wallets List */}
@@ -272,6 +264,7 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     padding: theme.paddings.lg,
     borderRadius: theme.radius.lg,
+    marginVertical: theme.margins.lg,
     maxWidth: {
       md: 600,
     },

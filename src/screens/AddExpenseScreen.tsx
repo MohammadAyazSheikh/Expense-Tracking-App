@@ -26,6 +26,7 @@ import { Calendar } from "react-native-calendars";
 import { SheetManager } from "react-native-actions-sheet";
 import Animated from "react-native-reanimated";
 import { LayoutAnimation } from "../utils/Animation";
+import { Header } from "../components/ui/Headers";
 
 const PressAbleAnimated = Animated.createAnimatedComponent(Pressable);
 
@@ -305,13 +306,10 @@ export const AddExpenseScreen = () => {
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Text variant="h2" style={styles.headerTitle}>
-            {isEditMode ? "Edit Expense" : "Add Expense"}
-          </Text>
-        </View>
-
+      <Header
+        title={isEditMode ? "Edit Expense" : "Add Expense"}
+        showBack={false}
+      >
         <View style={styles.amountContainer}>
           <Text variant="caption" style={styles.amountLabel}>
             Amount
@@ -337,7 +335,7 @@ export const AddExpenseScreen = () => {
             />
           </View>
         </View>
-      </View>
+      </Header>
 
       <View style={styles.content}>
         {/* Category Selection */}
@@ -574,6 +572,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   amountContainer: {
     alignItems: "center",
+    marginVertical: theme.margins.lg,
   },
   amountLabel: {
     color: "rgba(255, 255, 255, 0.9)",
