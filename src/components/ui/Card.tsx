@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewProps, TouchableOpacity } from "react-native";
+import { ViewProps, Pressable } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 
 const styles = StyleSheet.create((theme) => ({
@@ -26,26 +26,29 @@ type CardVariants = UnistylesVariants<typeof styles>;
 type CardProps = ViewProps &
   CardVariants & {
     onPress?: () => void;
+    onLongPress?: () => void;
   };
 
 export const Card = ({
   children,
   variant = "primary",
   onPress,
+  onLongPress,
   style,
   ...props
 }: CardProps) => {
-  const Component = (
-    onPress ? TouchableOpacity : View
-  ) as React.ComponentType<any>;
-
   styles.useVariants({
     variant,
   });
 
   return (
-    <Component onPress={onPress} style={[styles.card, style]} {...props}>
+    <Pressable
+      onPress={onPress}
+      onLongPress={onLongPress}
+      style={[styles.card, style]}
+      {...props}
+    >
       {children}
-    </Component>
+    </Pressable>
   );
 };

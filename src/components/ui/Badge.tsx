@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewStyle } from "react-native";
+import { TextStyle, View, ViewStyle } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
 import { Text } from "./Text";
 
@@ -79,6 +79,7 @@ type BadgeVariants = UnistylesVariants<typeof styles>;
 type BadgeProps = BadgeVariants & {
   children?: React.ReactNode;
   style?: ViewStyle;
+  textStyle?: TextStyle;
   dot?: boolean;
   size?: "xl" | "md" | "sm" | "xs";
 };
@@ -87,6 +88,7 @@ export const Badge = ({
   children,
   variant = "primary",
   style,
+  textStyle,
   dot = false,
   size = "md",
 }: BadgeProps) => {
@@ -99,7 +101,7 @@ export const Badge = ({
   return (
     <View style={[styles.container, style]}>
       {children ? (
-        <Text weight="semiBold" style={styles.text}>
+        <Text weight="semiBold" style={[styles.text, textStyle]}>
           {children}
         </Text>
       ) : null}

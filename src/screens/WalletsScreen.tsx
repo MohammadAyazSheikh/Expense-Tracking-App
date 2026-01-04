@@ -14,11 +14,122 @@ import { Feather } from "@expo/vector-icons";
 import { Icon } from "../components/ui/Icon";
 
 import { useFinanceStore } from "../store";
+import { Wallet } from "../types";
 
 const recentTransfers = [
   { from: "Chase Checking", to: "Cash", amount: 200, date: "Today" },
   { from: "PayPal", to: "Chase Checking", amount: 150, date: "Yesterday" },
 ];
+
+type walletCardProps = {
+  wallet: Wallet;
+  onPress?: () => void;
+  onLongPress?: () => void;
+};
+
+const WalletCard = ({ wallet, onPress, onLongPress }: walletCardProps) => {
+  const { theme } = useUnistyles();
+
+  const getColor = (colorName: string) => {
+    if (colorName?.startsWith("#")) return colorName;
+    return (
+      (theme.colors[colorName as keyof typeof theme.colors] as string) ||
+      theme.colors.primary
+    );
+  };
+  return (
+    <Card onPress={onPress} onLongPress={onLongPress} style={styles.walletCard}>
+      <View style={styles.walletInfo}>
+        <View
+          style={[
+            styles.walletIcon,
+            { backgroundColor: getColor(wallet.color) + "20" },
+          ]}
+        >
+          <Icon
+            type="MaterialCommunityIcons"
+            name={wallet.icon as any}
+            size={24}
+            color={getColor(wallet.textColor || wallet.color)}
+          />
+        </View>
+        <View>
+          <Text weight="semiBold">{wallet.name}</Text>
+          {wallet.accountNumber && (
+            <Text variant="caption">{wallet.accountNumber}</Text>
+          )}
+          <Badge
+            variant="secondary"
+            style={{ marginTop: 4 }}
+            textStyle={{ textTransform: "capitalize" }}
+          >
+            {wallet.type}
+          </Badge>
+        </View>
+      </View>
+      <Text weight="bold" style={{ fontSize: 18 }}>
+        ${wallet.balance.toFixed(2)}
+      </Text>
+    </Card>
+  );
+};
+
+const AccountStateCard = ({
+  title,
+  value,
+  type,
+}: {
+  title: string;
+  value: string;
+  type: "expenses" | "income";
+}) => {
+  styles.useVariants({ type });
+  return (
+    <Card style={styles.statCard}>
+      <Text variant="caption" style={{ marginBottom: 4 }}>
+        {title}
+      </Text>
+      <Text weight="bold" style={styles.statValue}>
+        {value}
+      </Text>
+      <Text variant="caption">
+        {type == "expenses" ? "Expenses" : "Income"}
+      </Text>
+    </Card>
+  );
+};
+
+const RecentTransferCard = ({
+  transfer,
+}: {
+  transfer: {
+    from: string;
+    to: string;
+    amount: number;
+    date: string;
+  };
+}) => {
+  const { theme } = useUnistyles();
+  return (
+    <Card style={styles.transferItem}>
+      <View style={styles.transferInfo}>
+        <View style={styles.transferIcon}>
+          <Feather
+            name="refresh-cw"
+            size={16}
+            color={theme.colors.mutedForeground}
+          />
+        </View>
+        <View>
+          <Text weight="medium">{transfer.from}</Text>
+          <Text variant="caption">to {transfer.to}</Text>
+          <Text variant="caption">{transfer.date}</Text>
+        </View>
+      </View>
+      <Text weight="semiBold">${transfer.amount}</Text>
+    </Card>
+  );
+};
 
 export const WalletsScreen = () => {
   const { theme } = useUnistyles();
@@ -88,9 +199,8 @@ export const WalletsScreen = () => {
         {/* Wallets List */}
         <View style={{ gap: theme.margins.sm }}>
           {wallets.map((wallet) => (
-            <TouchableOpacity
-              key={wallet.id}
-              activeOpacity={0.7}
+            <WalletCard
+              wallet={wallet}
               onPress={() =>
                 navigation.navigate("WalletDetail", { walletId: wallet.id })
               }
@@ -99,41 +209,7 @@ export const WalletsScreen = () => {
                   payload: { walletId: wallet.id },
                 })
               }
-            >
-              <Card style={styles.walletCard}>
-                <View style={styles.walletInfo}>
-                  <View
-                    style={[
-                      styles.walletIcon,
-                      { backgroundColor: getColor(wallet.color) + "20" },
-                    ]}
-                  >
-                    <Icon
-                      type="MaterialCommunityIcons"
-                      name={wallet.icon as any}
-                      size={24}
-                      color={getColor(wallet.textColor || wallet.color)}
-                    />
-                  </View>
-                  <View>
-                    <Text weight="semiBold">{wallet.name}</Text>
-                    {wallet.accountNumber && (
-                      <Text variant="caption">{wallet.accountNumber}</Text>
-                    )}
-                    <Badge variant="secondary" style={{ marginTop: 4 }}>
-                      <Text
-                        style={{ fontSize: 10, textTransform: "capitalize" }}
-                      >
-                        {wallet.type}
-                      </Text>
-                    </Badge>
-                  </View>
-                </View>
-                <Text weight="bold" style={{ fontSize: 18 }}>
-                  ${wallet.balance.toFixed(2)}
-                </Text>
-              </Card>
-            </TouchableOpacity>
+            />
           ))}
         </View>
 
@@ -153,61 +229,15 @@ export const WalletsScreen = () => {
           </Text>
           <View style={{ gap: theme.margins.sm }}>
             {recentTransfers.map((transfer, index) => (
-              <Card key={index} style={styles.transferItem}>
-                <View style={styles.transferInfo}>
-                  <View style={styles.transferIcon}>
-                    <Feather
-                      name="refresh-cw"
-                      size={16}
-                      color={theme.colors.mutedForeground}
-                    />
-                  </View>
-                  <View>
-                    <Text weight="medium">{transfer.from}</Text>
-                    <Text variant="caption">to {transfer.to}</Text>
-                    <Text variant="caption">{transfer.date}</Text>
-                  </View>
-                </View>
-                <Text weight="semiBold">${transfer.amount}</Text>
-              </Card>
+              <RecentTransferCard key={index} transfer={transfer} />
             ))}
           </View>
         </View>
 
         {/* Account Stats */}
         <View style={styles.statsGrid}>
-          <Card style={styles.statCard}>
-            <Text variant="caption" style={{ marginBottom: 4 }}>
-              This Month
-            </Text>
-            <Text
-              weight="bold"
-              style={{
-                fontSize: 20,
-                color: theme.colors.success,
-                marginBottom: 4,
-              }}
-            >
-              +$1,240
-            </Text>
-            <Text variant="caption">Income</Text>
-          </Card>
-          <Card style={styles.statCard}>
-            <Text variant="caption" style={{ marginBottom: 4 }}>
-              This Month
-            </Text>
-            <Text
-              weight="bold"
-              style={{
-                fontSize: 20,
-                color: theme.colors.accent,
-                marginBottom: 4,
-              }}
-            >
-              -$890
-            </Text>
-            <Text variant="caption">Expenses</Text>
-          </Card>
+          <AccountStateCard title="This Month" value="+$1,240" type="income" />
+          <AccountStateCard title="This Month" value="-$890" type="expenses" />
         </View>
       </View>
     </ScreenWrapper>
@@ -318,5 +348,21 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     alignItems: "center",
     padding: theme.paddings.md,
+  },
+
+  statValue: {
+    fontSize: 20,
+    color: theme.colors.accent,
+    marginBottom: 4,
+    variants: {
+      type: {
+        income: {
+          color: theme.colors.success,
+        },
+        expenses: {
+          color: theme.colors.accent,
+        },
+      },
+    },
   },
 }));
