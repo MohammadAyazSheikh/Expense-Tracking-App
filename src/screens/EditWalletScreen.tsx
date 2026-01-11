@@ -1,21 +1,23 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity, ScrollView, Pressable } from "react-native";
-import ActionSheet, {
-  SheetProps,
-  SheetManager,
-} from "react-native-actions-sheet";
+import React, { useEffect, useState } from "react";
+import { View, ScrollView, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Text } from "../ui/Text";
-import { Icon } from "../ui/Icon";
-import { Button } from "../ui/Button";
-import { Input } from "../ui/Input";
-import { Card } from "../ui/Card";
-import { Badge } from "../ui/Badge";
-import { Switch } from "../ui/Switch";
-import { useTranslation } from "../../hooks/useTranslation";
-import { useFinanceStore } from "../../store";
+import { Text } from "../components/ui/Text";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Card } from "../components/ui/Card";
+import { Switch } from "../components/ui/Switch";
+import { useTranslation } from "../hooks/useTranslation";
+import { useFinanceStore } from "../store";
 import Toast from "react-native-toast-message";
-import { CategoryItem } from "../../screens/AddExpenseScreen";
+import { CategoryItem } from "../screens/AddExpenseScreen";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Header } from "../components/ui/Headers";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { RootStackParamList } from "../navigation/types";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { Icon } from "../components/ui/Icon";
+import { alertService } from "../utils/AlertService";
+import { styles } from "./AddWalletScreen";
 
 const walletTypes = [
   { id: "cash", icon: "wallet", label: "Cash", color: "#2E7D32" },
@@ -28,10 +30,12 @@ const walletTypes = [
 
 const currencies = ["USD", "EUR", "GBP", "PKR", "INR", "AED"];
 
-export const AddWalletSheet = (props: SheetProps) => {
+export const EditWalletScreen = () => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, "EditWallet">>();
+  const { updateWallet, deleteWallet, wallets } = useFinanceStore();
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { addWallet } = useFinanceStore();
 
   const [name, setName] = useState("");
   const [balance, setBalance] = useState("");
@@ -41,8 +45,23 @@ export const AddWalletSheet = (props: SheetProps) => {
   const [includeInTotal, setIncludeInTotal] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
 
+  const wallet = wallets.find((w) => w.id === route?.params?.walletId);
+
+  useEffect(() => {
+    if (wallet) {
+      setName(wallet.name);
+      setBalance(wallet.balance.toString());
+      setType(wallet.type.toLocaleLowerCase());
+      setCurrency(wallet.currency as string);
+      setAccountNumber(wallet.accountNumber as string);
+      setIncludeInTotal(wallet.includeInTotal as boolean);
+      setIsDefault(wallet.isDefault as boolean);
+    }
+  }, [wallet]);
+
   const handleSave = () => {
-    if (!name || !balance) {
+    if (!wallet) return;
+    if (!name) {
       Toast.show({
         type: "error",
         text1: t("common.error"),
@@ -53,14 +72,12 @@ export const AddWalletSheet = (props: SheetProps) => {
 
     const selectedType = walletTypes.find((t) => t.id === type);
 
-    addWallet({
+    updateWallet(wallet.id, {
       name,
-      balance: parseFloat(balance),
       type,
-      color: selectedType?.color || theme.colors.primary,
-      icon: selectedType?.icon || "wallet",
+      color: selectedType?.color || wallet.color,
+      icon: selectedType?.icon || wallet.icon || "wallet",
       accountNumber,
-      currency,
       includeInTotal,
       isDefault,
     });
@@ -68,41 +85,48 @@ export const AddWalletSheet = (props: SheetProps) => {
     Toast.show({
       type: "success",
       text1: t("common.success"),
-      text2: t("wallets.addedSuccess"),
+      text2: t("wallets.updatedSuccess"),
     });
-
-    SheetManager.hide("add-wallet-sheet");
   };
 
-  const handleReset = () => {
-    setName("");
-    setBalance("");
-    setType("cash");
-    setAccountNumber("");
-    setIncludeInTotal(true);
-    setIsDefault(false);
+  const handleDelete = () => {
+    alertService.show(t("common.delete"), t("wallets.deleteConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("common.delete"),
+        style: "destructive",
+        onPress: () => {
+          if (wallet) {
+            deleteWallet(wallet.id);
+
+            Toast.show({
+              type: "success",
+              text1: t("common.success"),
+              text2: t("wallets.deletedSuccess"),
+            });
+
+            setTimeout(() => {
+              navigation.navigate("Wallets");
+            }, 1000);
+          }
+        },
+      },
+    ]);
   };
 
+  if (!wallet) return null;
   return (
-    <ActionSheet
-      id={props.sheetId}
-      containerStyle={styles.container}
-      indicatorStyle={{ backgroundColor: theme.colors.border }}
-      gestureEnabled={true}
-    >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => SheetManager.hide("add-wallet-sheet")}>
-          <Text style={styles.cancelButton}>{t("common.cancel")}</Text>
-        </TouchableOpacity>
-        <Text variant="h2" style={styles.title}>
-          {t("wallets.addWallet")}
-        </Text>
-        <TouchableOpacity onPress={handleReset}>
-          <Text style={styles.resetButton}>{t("common.reset")}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content}>
+    <ScreenWrapper style={{ height: "100%" }}>
+      <Header
+        onBack={() => {
+          navigation.goBack();
+        }}
+        title={t("wallets.editWallet")}
+      />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
         {/* Wallet Type Grid */}
         <Text weight="semiBold" style={{ marginBottom: theme.margins.sm }}>
           {t("wallets.selectType")}
@@ -224,93 +248,25 @@ export const AddWalletSheet = (props: SheetProps) => {
             <Switch value={isDefault} onValueChange={setIsDefault} />
           </View>
         </Card>
-      </ScrollView>
 
-      <View style={styles.footer}>
         <Button title={t("common.save")} onPress={handleSave} />
-      </View>
-    </ActionSheet>
+
+        <Button
+          title={t("wallets.deleteWallet")}
+          variant="ghost"
+          style={{ marginTop: theme.margins.md }}
+          textStyle={{ color: theme.colors.destructive }}
+          icon={
+            <Icon
+              type="Feather"
+              name="trash-2"
+              size={18}
+              color={theme.colors.destructive}
+            />
+          }
+          onPress={handleDelete}
+        />
+      </ScrollView>
+    </ScreenWrapper>
   );
 };
-
-const styles = StyleSheet.create((theme, rt) => ({
-  container: {
-    height: (rt.screen.height / 100) * 85,
-    backgroundColor: theme.colors.background,
-    borderTopEndRadius: theme.radius.xl,
-    borderTopStartRadius: theme.radius.xl,
-    paddingBottom: theme.paddings.md,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.paddings.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  title: {
-    color: theme.colors.foreground,
-  },
-  cancelButton: {
-    color: theme.colors.mutedForeground,
-    fontSize: theme.fontSize.md,
-  },
-  resetButton: {
-    color: theme.colors.primary,
-    fontSize: theme.fontSize.md,
-  },
-  content: {
-    padding: theme.paddings.md,
-    gap: theme.margins.lg,
-    paddingBottom: 40,
-  },
-  typeGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: theme.margins.md,
-  },
-  formCard: {
-    padding: theme.paddings.md,
-    gap: theme.margins.md,
-  },
-  row: {
-    flexDirection: "row",
-    gap: theme.margins.md,
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: theme.colors.foreground,
-  },
-  currencyChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    minWidth: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  settingsCard: {
-    padding: theme.paddings.md,
-  },
-  settingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: theme.paddings.xs,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: theme.colors.border,
-    marginVertical: theme.margins.sm,
-  },
-  footer: {
-    padding: theme.paddings.md,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-}));

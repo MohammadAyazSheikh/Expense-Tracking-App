@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, ScrollView, StatusBar, ViewStyle } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StyleSheet } from 'react-native-unistyles';
+import React from "react";
+import { View, ScrollView, StatusBar, ViewStyle } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native-unistyles";
 
 interface ScreenWrapperProps {
   children: React.ReactNode;
@@ -10,29 +10,24 @@ interface ScreenWrapperProps {
   contentContainerStyle?: ViewStyle;
 }
 
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  content: {
-  }
+  content: {},
 }));
 
 export const ScreenWrapper = ({
   children,
   scrollable = false,
   style,
-  contentContainerStyle
+  contentContainerStyle,
 }: ScreenWrapperProps) => {
-  const Content = (
-    <View style={[styles.content, style]}>
-      {children}
-    </View>
-  );
+  const Content = <View style={[styles.content, style]}>{children}</View>;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
       {scrollable ? (
         <ScrollView

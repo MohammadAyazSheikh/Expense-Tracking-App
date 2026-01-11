@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View } from "react-native";
 import { SheetManager } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
@@ -154,7 +154,7 @@ export const WalletsScreen = () => {
             style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}
             textStyle={{ color: "white" }}
             onPress={() => {
-              SheetManager.show("add-wallet-sheet");
+              navigation.navigate("AddWallet");
             }}
           />
         }
@@ -182,16 +182,15 @@ export const WalletsScreen = () => {
       <View style={styles.content}>
         {/* Wallets List */}
         <View style={{ gap: theme.margins.sm }}>
-          {wallets.map((wallet) => (
+          {wallets.map((wallet, index) => (
             <WalletCard
+              key={`${wallet.id}-${index}`}
               wallet={wallet}
               onPress={() =>
                 navigation.navigate("WalletDetail", { walletId: wallet.id })
               }
               onLongPress={() =>
-                SheetManager.show("edit-wallet-sheet", {
-                  payload: { walletId: wallet.id },
-                })
+                navigation.navigate("EditWallet", { walletId: wallet.id })
               }
             />
           ))}
@@ -213,7 +212,10 @@ export const WalletsScreen = () => {
           </Text>
           <View style={{ gap: theme.margins.sm }}>
             {recentTransfers.map((transfer, index) => (
-              <RecentTransferCard key={index} transfer={transfer} />
+              <RecentTransferCard
+                key={`${transfer.from}-${transfer.to}-${index}`}
+                transfer={transfer}
+              />
             ))}
           </View>
         </View>

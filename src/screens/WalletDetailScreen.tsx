@@ -7,18 +7,19 @@ import { Icon } from "../components/ui/Icon";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
+import { useFinanceStore } from "../store";
 import { TabView } from "../components/ui/TabView";
 import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
-import { useFinanceStore } from "../store";
-import { LineChart } from "react-native-gifted-charts";
 import Toast from "react-native-toast-message";
-import { TransactionCard } from "../components/Transactions/TransactionCard";
-import { MenuItem } from "../components/sheets/MenuSheet";
-import { Feather } from "@expo/vector-icons";
+import { alertService } from "../utils/AlertService";
 import { Header } from "../components/ui/Headers";
+import { LineChart } from "react-native-gifted-charts";
+import { MenuItem } from "../components/sheets/MenuSheet";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 
 type WalletDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -28,10 +29,10 @@ type WalletDetailScreenRouteProp = RouteProp<
 export default function WalletDetailScreen() {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<WalletDetailScreenRouteProp>();
   const { walletId } = route.params;
-  const { wallets, transactions, categories } = useFinanceStore();
+  const { wallets, transactions, categories, deleteWallet } = useFinanceStore();
 
   const [showBalance, setShowBalance] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
@@ -87,6 +88,32 @@ export default function WalletDetailScreen() {
     { value: wallet.balance },
   ];
 
+  const handleDelete = () => {
+    return;
+    alertService.show(t("common.delete"), t("wallets.deleteConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("common.delete"),
+        style: "destructive",
+        onPress: () => {
+          if (wallet) {
+            deleteWallet(wallet.id);
+
+            Toast.show({
+              type: "success",
+              text1: t("common.success"),
+              text2: t("wallets.deletedSuccess"),
+            });
+
+            setTimeout(() => {
+              navigation.navigate("Wallets");
+            }, 1000);
+          }
+        },
+      },
+    ]);
+  };
+
   const handleMenuAction = () => {
     const options: MenuItem[] = [
       {
@@ -94,9 +121,7 @@ export default function WalletDetailScreen() {
         icon: "edit-2",
         iconType: "Feather",
         onPress: () =>
-          SheetManager.show("edit-wallet-sheet", {
-            payload: { walletId: wallet.id },
-          }),
+          navigation.navigate("EditWallet", { walletId: wallet.id }),
       },
       {
         label: t("wallets.downloadStatement"),
@@ -123,9 +148,7 @@ export default function WalletDetailScreen() {
         iconType: "Feather",
         variant: "destructive",
         onPress: () => {
-          SheetManager.show("edit-wallet-sheet", {
-            payload: { walletId: wallet.id },
-          });
+          handleDelete();
         },
       },
     ];
@@ -156,14 +179,15 @@ export default function WalletDetailScreen() {
 
     return (
       <View style={{ gap: theme.margins.sm, paddingBottom: 20 }}>
-        {filtered.map((item) => (
+        {filtered.map((item, index) => (
           <TransactionCard
-            key={item.id}
+            key={`${item.id}-${item.type}-${index}`}
             transaction={item}
             category={categories.find((c) => c.name === item.category)}
             onPress={() => {
               navigation.navigate("TransactionDetail", {
-                transactionId: item.id,
+                id: item.id,
+                category: item.category,
               });
             }}
           />
@@ -178,10 +202,12 @@ export default function WalletDetailScreen() {
     { key: "expense", title: t("wallets.expense") },
   ];
 
-  const renderScene = ({ route }: { route: { key: string } }) => {
-    return <TransactionList type={route.key as any} />;
-  };
-
+  if (!wallet)
+    return (
+      <ScreenWrapper style={styles.container} scrollable>
+        <Text>Wallet not found</Text>
+      </ScreenWrapper>
+    );
   return (
     <ScreenWrapper style={styles.container} scrollable>
       {/*˝ Header Area */}

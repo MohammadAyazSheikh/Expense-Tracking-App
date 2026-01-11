@@ -10,6 +10,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { Text } from "./Text";
 import { Icon } from "./Icon";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type HeaderProps = {
   title?: string;
@@ -22,6 +23,7 @@ type HeaderProps = {
   style?: ViewStyle;
   titleStyle?: TextStyle;
   contentContainerStyle?: ViewStyle;
+  applySafeAreaPadding?: boolean;
 };
 
 export const Header = ({
@@ -35,10 +37,11 @@ export const Header = ({
   style,
   titleStyle,
   contentContainerStyle,
+  applySafeAreaPadding,
 }: HeaderProps) => {
   const { theme } = useUnistyles();
   const navigation = useNavigation();
-
+  const safeAreaInsets = useSafeAreaInsets();
   // Determine if back button should be shown
   const shouldShowBack = showBack !== undefined ? showBack : !!onBack;
 
@@ -55,7 +58,14 @@ export const Header = ({
   const bgColor = backgroundColor || theme.colors.primary;
 
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }, style]}>
+    <View
+      style={[
+        styles.container,
+        applySafeAreaPadding && { marginTop: safeAreaInsets.top },
+        { backgroundColor: bgColor },
+        style,
+      ]}
+    >
       <View style={styles.topRow}>
         <View style={styles.leftContainer}>
           {left ? (

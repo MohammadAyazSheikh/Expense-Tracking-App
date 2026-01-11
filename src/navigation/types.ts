@@ -11,7 +11,6 @@ export type RootStackParamList = {
   Security: undefined;
   HelpSupport: undefined;
   NotFound: undefined;
-  Wallets: undefined;
   SmartSense: undefined;
   CategoryManager: undefined;
   Calendar: undefined;
@@ -29,6 +28,9 @@ export type RootStackParamList = {
   AddGroupExpense: { groupId: string };
   SettleUp: { groupId?: string };
   Friends: undefined;
+  Wallets: undefined;
+  AddWallet: undefined;
+  EditWallet: { walletId: string };
   WalletDetail: { walletId: string };
   WalletStatement: { walletId: string };
 };

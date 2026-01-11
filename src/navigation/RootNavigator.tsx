@@ -32,6 +32,10 @@ import { FriendsScreen } from "../screens/FriendsScreen";
 import { BudgetScreen } from "../screens/BudgetScreen";
 import WalletDetailScreen from "../screens/WalletDetailScreen";
 import WalletStatementScreen from "../screens/WalletStatementScreen";
+import { AddWalletScreen } from "../screens/AddWalletScreen";
+import { useTranslation } from "react-i18next";
+import { Header } from "../components/ui/Headers";
+import { EditWalletScreen } from "../screens/EditWalletScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -49,6 +53,7 @@ const authRoutes = () => {
 };
 
 const mainRoutes = () => {
+  const { t } = useTranslation();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTab" component={TabNavigator} />
@@ -57,7 +62,6 @@ const mainRoutes = () => {
       <Stack.Screen name="Security" component={SecurityScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
-      <Stack.Screen name="Wallets" component={WalletsScreen} />
       <Stack.Screen name="SmartSense" component={SmartSenseScreen} />
       <Stack.Screen name="CategoryManager" component={CategoryManagerScreen} />
       <Stack.Screen name="Calendar" component={CalendarScreen} />
@@ -74,6 +78,9 @@ const mainRoutes = () => {
       <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
       <Stack.Screen name="SettleUp" component={SettleUpScreen} />
       <Stack.Screen name="Friends" component={FriendsScreen} />
+      <Stack.Screen name="Wallets" component={WalletsScreen} />
+      <Stack.Screen name="AddWallet" component={AddWalletScreen} />
+      <Stack.Screen name="EditWallet" component={EditWalletScreen} />
       <Stack.Screen name="WalletDetail" component={WalletDetailScreen} />
       <Stack.Screen name="WalletStatement" component={WalletStatementScreen} />
     </Stack.Navigator>
