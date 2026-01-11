@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import ActionSheet, {
   SheetProps,
   SheetManager,
@@ -8,6 +8,7 @@ import ActionSheet, {
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "../ui/Text";
 import { Icon, IconType } from "../ui/Icon";
+import { Button } from "../ui/Button";
 
 export interface MenuItem {
   label: string;
@@ -17,14 +18,14 @@ export interface MenuItem {
   variant?: "default" | "destructive";
 }
 
-export const GenericMenuSheet = (props: SheetProps) => {
+export const MenuSheet = (props: SheetProps) => {
   const { theme } = useUnistyles();
-  const payload = useSheetPayload("generic-menu-sheet");
+  const payload = useSheetPayload("menu-sheet");
   const options: MenuItem[] = payload?.options || [];
   const title = payload?.title;
 
   const handlePress = (item: MenuItem) => {
-    SheetManager.hide("generic-menu-sheet");
+    SheetManager.hide("menu-sheet");
     setTimeout(() => {
       item.onPress();
     }, 100);
@@ -44,7 +45,7 @@ export const GenericMenuSheet = (props: SheetProps) => {
           </Text>
         )}
         {options.map((item, index) => (
-          <TouchableOpacity
+          <Pressable
             key={index}
             style={styles.menuItem}
             onPress={() => handlePress(item)}
@@ -73,14 +74,12 @@ export const GenericMenuSheet = (props: SheetProps) => {
             >
               {item.label}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
-        <TouchableOpacity
-          style={[styles.menuItem, styles.cancelItem]}
-          onPress={() => SheetManager.hide("generic-menu-sheet")}
-        >
-          <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
+        <Button
+          title="Cancel"
+          onPress={() => SheetManager.hide("menu-sheet")}
+        />
       </View>
     </ActionSheet>
   );
@@ -114,17 +113,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   menuLabel: {
     fontSize: theme.fontSize.md,
-    color: theme.colors.foreground,
-  },
-  cancelItem: {
-    marginTop: theme.margins.md,
-    justifyContent: "center",
-    paddingVertical: theme.paddings.md,
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.radius.md,
-  },
-  cancelText: {
-    fontWeight: "bold",
     color: theme.colors.foreground,
   },
 }));

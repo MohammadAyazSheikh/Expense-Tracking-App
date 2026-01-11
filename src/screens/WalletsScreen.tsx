@@ -139,14 +139,6 @@ export const WalletsScreen = () => {
 
   const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
 
-  const getColor = (colorName: string) => {
-    if (colorName?.startsWith("#")) return colorName;
-    return (
-      (theme.colors[colorName as keyof typeof theme.colors] as string) ||
-      theme.colors.primary
-    );
-  };
-
   return (
     <ScreenWrapper style={styles.container} scrollable>
       <Header

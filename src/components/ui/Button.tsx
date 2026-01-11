@@ -11,7 +11,7 @@ import { Text } from "./Text";
 type ButtonVariants = UnistylesVariants<typeof styles>;
 
 type ButtonProps = ButtonVariants & {
-  title: string;
+  title?: string;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;

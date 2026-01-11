@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Text } from "../components/ui/Text";
@@ -16,7 +16,9 @@ import { useFinanceStore } from "../store";
 import { LineChart } from "react-native-gifted-charts";
 import Toast from "react-native-toast-message";
 import { TransactionCard } from "../components/Transactions/TransactionCard";
-import { MenuItem } from "../components/sheets/GenericMenuSheet";
+import { MenuItem } from "../components/sheets/MenuSheet";
+import { Feather } from "@expo/vector-icons";
+import { Header } from "../components/ui/Headers";
 
 type WalletDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -128,7 +130,7 @@ export default function WalletDetailScreen() {
       },
     ];
 
-    SheetManager.show("generic-menu-sheet", {
+    SheetManager.show("menu-sheet", {
       payload: { options, title: wallet.name },
     });
   };
@@ -182,45 +184,19 @@ export default function WalletDetailScreen() {
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
-      {/* Custom Header Area */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <Button
-              title=""
-              icon={
-                <Icon
-                  type="Feather"
-                  name="arrow-left"
-                  size={24}
-                  color="white"
-                />
-              }
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={{ width: 40, marginRight: 8 }}
-            />
-            <Text variant="h3" style={{ color: "white" }}>
-              {t("wallets.title")}
-            </Text>
-          </View>
-          <Button
-            title=""
-            icon={
-              <Icon
-                type="Feather"
-                name="more-vertical"
-                size={24}
-                color="white"
-              />
-            }
-            variant="ghost"
-            onPress={handleMenuAction}
-            style={{ width: 40 }}
-          />
-        </View>
+      {/*˝ Header Area */}
 
-        {/* Wallet Card - Nested in header style for overlap later or just clean look */}
+      <Header
+        title={t("wallets.title")}
+        showBack={true}
+        onBack={() => navigation.goBack()}
+        right={
+          <Pressable onPress={handleMenuAction}>
+            <Icon type="Feather" name="more-vertical" size={24} color="white" />
+          </Pressable>
+        }
+      >
+        {/* Wallet Card */}
         <Card style={styles.walletCard}>
           <View style={styles.walletInfo}>
             <View
@@ -241,16 +217,8 @@ export default function WalletDetailScreen() {
                 {wallet.name}
               </Text>
               <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
-                <Badge variant="secondary">
-                  <Text style={{ fontSize: 10, textTransform: "capitalize" }}>
-                    {wallet.type}
-                  </Text>
-                </Badge>
-                <Badge variant="secondary">
-                  <Text style={{ fontSize: 10 }}>
-                    {wallet.currency || "USD"}
-                  </Text>
-                </Badge>
+                <Badge variant="secondary">{wallet.type}</Badge>
+                <Badge variant="secondary">{wallet.currency || "USD"}</Badge>
               </View>
             </View>
           </View>
@@ -284,7 +252,7 @@ export default function WalletDetailScreen() {
             </View>
           </View>
         </Card>
-      </View>
+      </Header>
 
       <View style={styles.content}>
         {/* Stats Grid */}
@@ -300,7 +268,7 @@ export default function WalletDetailScreen() {
                 type="Feather"
                 name="arrow-down-circle"
                 size={20}
-                color={theme.colors.success}
+                color={theme.colors.accentForeground}
               />
             </View>
             <View>
@@ -326,7 +294,7 @@ export default function WalletDetailScreen() {
                 type="Feather"
                 name="arrow-up-circle"
                 size={20}
-                color={theme.colors.destructive}
+                color={theme.colors.accentForeground}
               />
             </View>
             <View>
@@ -373,7 +341,7 @@ export default function WalletDetailScreen() {
               pointerLabelHeight: 90,
               activatePointersOnLongPress: true,
               autoAdjustPointerLabelPosition: false,
-              pointerLabelComponent: (items) => {
+              pointerLabelComponent: (items: any) => {
                 return (
                   <View
                     style={{
@@ -457,31 +425,19 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     gap: theme.margins.md,
   },
-  header: {
-    padding: theme.paddings.md,
-    backgroundColor: theme.colors.primary,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-  },
-  headerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.margins.lg,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.sm,
-  },
+
   walletCard: {
     backgroundColor: theme.colors.card,
     padding: theme.paddings.lg,
-    borderRadius: theme.radius.xl,
-    marginTop: -20, // Overlap effect if placed outside header, but here it's inside?
-    // Wait, in previous design it was separate.
-    // Let's make walletCard clean.
+    borderRadius: theme.radius.lg,
+    marginVertical: theme.margins.lg,
+    maxWidth: {
+      md: 600,
+    },
+    alignSelf: {
+      md: "center",
+    },
+    width: "100%",
   },
   walletInfo: {
     flexDirection: "row",
