@@ -36,6 +36,7 @@ import { AddWalletScreen } from "../screens/AddWalletScreen";
 import { useTranslation } from "react-i18next";
 import { Header } from "../components/ui/Headers";
 import { EditWalletScreen } from "../screens/EditWalletScreen";
+import { TransferScreen } from "../screens/TransferScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -83,6 +84,7 @@ const mainRoutes = () => {
       <Stack.Screen name="EditWallet" component={EditWalletScreen} />
       <Stack.Screen name="WalletDetail" component={WalletDetailScreen} />
       <Stack.Screen name="WalletStatement" component={WalletStatementScreen} />
+      <Stack.Screen name="Transfer" component={TransferScreen} />
     </Stack.Navigator>
   );
 };

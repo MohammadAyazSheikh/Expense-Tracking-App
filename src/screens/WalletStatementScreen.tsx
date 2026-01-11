@@ -13,7 +13,7 @@ import { useFinanceStore } from "../store";
 import Toast from "react-native-toast-message";
 import { TransactionCard } from "../components/Transactions/TransactionCard";
 import { SheetManager } from "react-native-actions-sheet";
-import { SelectorOption } from "../components/sheets/GenericSelectSheet";
+import { SelectorOption } from "../components/sheets/SelectSheet";
 
 type WalletStatementScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -43,7 +43,7 @@ export default function WalletStatementScreen() {
       { label: "All Time", value: "all_time" },
     ];
 
-    const result = await SheetManager.show("generic-select-sheet", {
+    const result = await SheetManager.show("select-sheet", {
       payload: {
         options,
         title: "Select Period",
@@ -63,7 +63,7 @@ export default function WalletStatementScreen() {
       { label: t("wallets.expense"), value: "expense" },
     ];
 
-    const result = await SheetManager.show("generic-select-sheet", {
+    const result = await SheetManager.show("select-sheet", {
       payload: {
         options,
         title: "Filter by Type",

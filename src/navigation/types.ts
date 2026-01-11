@@ -33,6 +33,7 @@ export type RootStackParamList = {
   EditWallet: { walletId: string };
   WalletDetail: { walletId: string };
   WalletStatement: { walletId: string };
+  Transfer: undefined;
 };
 
 export type MainTabParamList = {

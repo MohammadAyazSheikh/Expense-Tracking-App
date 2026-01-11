@@ -1,6 +1,5 @@
 import React from "react";
 import { View } from "react-native";
-import { SheetManager } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -16,6 +15,7 @@ import { Header } from "../components/ui/Headers";
 
 import { useFinanceStore } from "../store";
 import { Wallet } from "../types";
+import { useTranslation } from "react-i18next";
 
 const recentTransfers = [
   { from: "Chase Checking", to: "Cash", amount: 200, date: "Today" },
@@ -134,6 +134,7 @@ const RecentTransferCard = ({
 
 export const WalletsScreen = () => {
   const { theme } = useUnistyles();
+  const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const wallets = useFinanceStore((state) => state.wallets);
 
@@ -198,11 +199,11 @@ export const WalletsScreen = () => {
 
         {/* Transfer Button */}
         <Button
-          title="Transfer Between Accounts"
+          title={t("wallets.transferTitle")}
           icon={<Feather name="refresh-cw" size={20} color="white" />}
           size="lg"
           style={styles.transferButton}
-          onPress={() => SheetManager.show("transfer-sheet")}
+          onPress={() => navigation.navigate("Transfer")}
         />
 
         {/* Recent Transfers */}

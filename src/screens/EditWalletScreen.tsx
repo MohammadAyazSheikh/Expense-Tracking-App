@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { View, ScrollView, Pressable } from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useUnistyles } from "react-native-unistyles";
 import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -37,49 +38,59 @@ export const EditWalletScreen = () => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
 
-  const [name, setName] = useState("");
-  const [balance, setBalance] = useState("");
-  const [type, setType] = useState("cash");
-  const [currency, setCurrency] = useState("USD");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [includeInTotal, setIncludeInTotal] = useState(true);
-  const [isDefault, setIsDefault] = useState(false);
-
   const wallet = wallets.find((w) => w.id === route?.params?.walletId);
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      name: "",
+      balance: "",
+      type: "cash",
+      currency: "USD",
+      accountNumber: "",
+      includeInTotal: true,
+      isDefault: false,
+    },
+  });
+
+  const type = watch("type");
+  const currency = watch("currency");
+  const includeInTotal = watch("includeInTotal");
+  const isDefault = watch("isDefault");
 
   useEffect(() => {
     if (wallet) {
-      setName(wallet.name);
-      setBalance(wallet.balance.toString());
-      setType(wallet.type.toLocaleLowerCase());
-      setCurrency(wallet.currency as string);
-      setAccountNumber(wallet.accountNumber as string);
-      setIncludeInTotal(wallet.includeInTotal as boolean);
-      setIsDefault(wallet.isDefault as boolean);
-    }
-  }, [wallet]);
-
-  const handleSave = () => {
-    if (!wallet) return;
-    if (!name) {
-      Toast.show({
-        type: "error",
-        text1: t("common.error"),
-        text2: t("wallets.fillRequired"),
+      reset({
+        name: wallet.name,
+        balance: wallet.balance.toString(),
+        type: wallet.type.toLowerCase(),
+        currency: wallet.currency || "USD",
+        accountNumber: wallet.accountNumber || "",
+        includeInTotal: wallet.includeInTotal ?? true,
+        isDefault: wallet.isDefault ?? false,
       });
-      return;
     }
+  }, [wallet, reset]);
 
-    const selectedType = walletTypes.find((t) => t.id === type);
+  const onSubmit = (data: any) => {
+    if (!wallet) return;
+
+    const selectedType = walletTypes.find((t) => t.id === data.type);
 
     updateWallet(wallet.id, {
-      name,
-      type,
+      name: data.name,
+      type: data.type,
       color: selectedType?.color || wallet.color,
       icon: selectedType?.icon || wallet.icon || "wallet",
-      accountNumber,
-      includeInTotal,
-      isDefault,
+      accountNumber: data.accountNumber,
+      includeInTotal: data.includeInTotal,
+      isDefault: data.isDefault,
     });
 
     Toast.show({
@@ -142,39 +153,57 @@ export const EditWalletScreen = () => {
                 iconFamily: "MaterialCommunityIcons",
               }}
               isSelected={type === item.id}
-              onPress={() => setType(item.id)}
+              onPress={() => setValue("type", item.id)}
             />
           ))}
         </View>
 
         {/* Basic Info */}
         <Card style={styles.formCard}>
-          <Input
-            label={t("wallets.name")}
-            placeholder="e.g. Main Account"
-            value={name}
-            onChangeText={setName}
+          <Controller
+            control={control}
+            name="name"
+            rules={{ required: t("wallets.fillRequired") }}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label={t("wallets.name")}
+                placeholder="e.g. Main Account"
+                value={value}
+                onChangeText={onChange}
+                error={errors.name?.message as string}
+              />
+            )}
           />
-          <Input
-            label={t("wallets.initialBalance")}
-            placeholder="0.00"
-            keyboardType="numeric"
-            value={balance}
-            onChangeText={setBalance}
-            leftIcon={
-              <Text weight="bold" style={{ marginRight: 4 }}>
-                {currencies.find((c) => c === currency)
-                  ? currency === "USD"
-                    ? "$"
-                    : currency === "EUR"
-                    ? "€"
-                    : currency === "GBP"
-                    ? "£"
-                    : currency
-                  : "$"}
-              </Text>
-            }
+
+          <Controller
+            control={control}
+            name="balance"
+            rules={{ required: t("wallets.fillRequired") }}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label={t("wallets.initialBalance")}
+                placeholder="0.00"
+                keyboardType="numeric"
+                value={value}
+                onChangeText={onChange}
+                error={errors.balance?.message as string}
+                leftIcon={
+                  <Text weight="bold" style={{ marginRight: 4 }}>
+                    {currencies.find((c) => c === currency)
+                      ? currency === "USD"
+                        ? "$"
+                        : currency === "EUR"
+                        ? "€"
+                        : currency === "GBP"
+                        ? "£"
+                        : currency
+                      : "$"}
+                  </Text>
+                }
+              />
+            )}
           />
+
           <View style={styles.row}>
             {/* Simplified currency selector for now */}
             <Text style={styles.label}>{t("wallets.currency")}</Text>
@@ -186,7 +215,7 @@ export const EditWalletScreen = () => {
               {currencies.map((c) => (
                 <Pressable
                   key={c}
-                  onPress={() => setCurrency(c)}
+                  onPress={() => setValue("currency", c)}
                   style={[
                     styles.currencyChip,
                     currency === c && {
@@ -208,12 +237,18 @@ export const EditWalletScreen = () => {
           </View>
 
           {(type === "bank" || type === "card") && (
-            <Input
-              label={t("wallets.accountNumber")}
-              placeholder="**** **** **** 1234"
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-              keyboardType="number-pad"
+            <Controller
+              control={control}
+              name="accountNumber"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label={t("wallets.accountNumber")}
+                  placeholder="**** **** **** 1234"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="number-pad"
+                />
+              )}
             />
           )}
         </Card>
@@ -230,7 +265,10 @@ export const EditWalletScreen = () => {
                 {t("wallets.includeDesc")}
               </Text>
             </View>
-            <Switch value={includeInTotal} onValueChange={setIncludeInTotal} />
+            <Switch
+              value={includeInTotal}
+              onValueChange={(val) => setValue("includeInTotal", val)}
+            />
           </View>
 
           <View style={styles.divider} />
@@ -245,11 +283,14 @@ export const EditWalletScreen = () => {
                 {t("wallets.defaultDesc")}
               </Text>
             </View>
-            <Switch value={isDefault} onValueChange={setIsDefault} />
+            <Switch
+              value={isDefault}
+              onValueChange={(val) => setValue("isDefault", val)}
+            />
           </View>
         </Card>
 
-        <Button title={t("common.save")} onPress={handleSave} />
+        <Button title={t("common.save")} onPress={handleSubmit(onSubmit)} />
 
         <Button
           title={t("wallets.deleteWallet")}

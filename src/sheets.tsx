@@ -12,12 +12,9 @@ import {
   ExpenseTagSheet,
 } from "./components/Transactions/ExpenseActionSheets";
 import { DatePickerSheet } from "./components/sheets/DatePickerSheet";
-import { TransferSheet } from "./components/Wallets/TransferSheet";
+import { WalletSelectorSheet } from "./components/Wallets/WalletSelectorSheet";
 import { MenuSheet, MenuItem } from "./components/sheets/MenuSheet";
-import {
-  GenericSelectSheet,
-  SelectorOption,
-} from "./components/sheets/GenericSelectSheet";
+import { SelectSheet, SelectorOption } from "./components/sheets/SelectSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -51,25 +48,18 @@ declare module "react-native-actions-sheet" {
       payload: { date?: string };
       returnValue: string | undefined;
     }>;
-    "transfer-sheet": SheetDefinition<{
-      payload?: { fromWalletId?: string; toWalletId?: string };
-      returnValue: boolean | undefined;
-      routes: {
-        main: RouteDefinition<{
-          selectedWalletId?: string;
-          mode?: "from" | "to";
-        }>;
-        "wallet-selector": RouteDefinition<{
-          mode: "from" | "to";
-          excludeId?: string | null;
-        }>;
+    "wallet-selector-sheet": SheetDefinition<{
+      payload: {
+        excludeId?: string;
+        title?: string;
       };
+      returnValue: string | undefined;
     }>;
     "menu-sheet": SheetDefinition<{
       payload: { options: MenuItem[]; title?: string };
       returnValue: boolean | undefined;
     }>;
-    "generic-select-sheet": SheetDefinition<{
+    "select-sheet": SheetDefinition<{
       payload: {
         options: SelectorOption[];
         title?: string;
@@ -89,9 +79,9 @@ export const Sheets = () => {
         "expense-category-sheet": ExpenseCategorySheet,
         "expense-tag-sheet": ExpenseTagSheet,
         "date-picker-sheet": DatePickerSheet,
-        "transfer-sheet": TransferSheet,
+        "wallet-selector-sheet": WalletSelectorSheet,
         "menu-sheet": MenuSheet,
-        "generic-select-sheet": GenericSelectSheet,
+        "select-sheet": SelectSheet,
       }}
     />
   );

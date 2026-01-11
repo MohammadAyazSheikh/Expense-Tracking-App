@@ -16,21 +16,12 @@ export interface SelectorOption {
   icon?: string;
 }
 
-export const GenericSelectSheet = (props: SheetProps) => {
+export const SelectSheet = (props: SheetProps) => {
   const { theme } = useUnistyles();
-  const payload = useSheetPayload("generic-select-sheet");
+  const payload = useSheetPayload("select-sheet");
   const options: SelectorOption[] = payload?.options || [];
   const title = payload?.title || "Select";
   const selectedValue = payload?.selectedValue;
-  const onSelect = payload?.onSelect; // We can't pass functions in payload easily if using show() from outside, but local SheetManager usage inside component allows it if registered with correct type. Wait, show() args must be serializable?
-  // React Native Actions Sheet payload can pass functions if called locally?
-  // Docs say payload should be serializable.
-  // But usually we can pass functions in local usage.
-  // BUT checking usage: SheetManager.show is global.
-  // It is safer to return a value!
-  // "returnValue" in definition.
-
-  // So we will use SheetManager.hide("sheet", { payload: value })? No this is return value.
 
   const [search, setSearch] = useState("");
 
@@ -39,7 +30,7 @@ export const GenericSelectSheet = (props: SheetProps) => {
   );
 
   const handleSelect = (value: string) => {
-    SheetManager.hide("generic-select-sheet", { payload: value });
+    SheetManager.hide("select-sheet", { payload: value });
   };
 
   return (
@@ -54,9 +45,7 @@ export const GenericSelectSheet = (props: SheetProps) => {
         <Text weight="bold" style={styles.title}>
           {title}
         </Text>
-        <TouchableOpacity
-          onPress={() => SheetManager.hide("generic-select-sheet")}
-        >
+        <TouchableOpacity onPress={() => SheetManager.hide("select-sheet")}>
           <Icon
             type="Feather"
             name="x"

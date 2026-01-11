@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
 import { View, ScrollView, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "../components/ui/Text";
@@ -33,40 +34,48 @@ export const AddWalletScreen = () => {
   const { t } = useTranslation();
   const { addWallet } = useFinanceStore();
 
-  const [name, setName] = useState("");
-  const [balance, setBalance] = useState("");
-  const [type, setType] = useState("cash");
-  const [currency, setCurrency] = useState("USD");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [includeInTotal, setIncludeInTotal] = useState(true);
-  const [isDefault, setIsDefault] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      name: "",
+      balance: "",
+      type: "cash",
+      currency: "USD",
+      accountNumber: "",
+      includeInTotal: true,
+      isDefault: false,
+    },
+  });
 
-  const handleSave = () => {
-    if (!name || !balance) {
-      Toast.show({
-        type: "error",
-        text1: t("common.error"),
-        text2: t("wallets.fillRequired"),
-      });
-      return;
-    }
+  const type = watch("type");
+  const currency = watch("currency");
+  const includeInTotal = watch("includeInTotal");
+  const isDefault = watch("isDefault");
 
-    const selectedType = walletTypes.find((t) => t.id === type);
+  const onSubmit = (data: any) => {
+    const selectedType = walletTypes.find((t) => t.id === data.type);
 
     addWallet({
-      name,
-      balance: parseFloat(balance),
-      type,
+      name: data.name,
+      balance: parseFloat(data.balance),
+      type: data.type,
       color: selectedType?.color || theme.colors.primary,
       icon: selectedType?.icon || "wallet",
-      accountNumber,
-      currency,
-      includeInTotal,
-      isDefault,
+      accountNumber: data.accountNumber,
+      currency: data.currency,
+      includeInTotal: data.includeInTotal,
+      isDefault: data.isDefault,
     });
+
     setTimeout(() => {
       navigation.goBack();
     }, 1000);
+
     Toast.show({
       type: "success",
       text1: t("common.success"),
@@ -101,39 +110,57 @@ export const AddWalletScreen = () => {
                 iconFamily: "MaterialCommunityIcons",
               }}
               isSelected={type === item.id}
-              onPress={() => setType(item.id)}
+              onPress={() => setValue("type", item.id)}
             />
           ))}
         </View>
 
         {/* Basic Info */}
         <Card style={styles.formCard}>
-          <Input
-            label={t("wallets.name")}
-            placeholder="e.g. Main Account"
-            value={name}
-            onChangeText={setName}
+          <Controller
+            control={control}
+            name="name"
+            rules={{ required: t("wallets.fillRequired") }}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label={t("wallets.name")}
+                placeholder="e.g. Main Account"
+                value={value}
+                onChangeText={onChange}
+                error={errors.name?.message as string}
+              />
+            )}
           />
-          <Input
-            label={t("wallets.initialBalance")}
-            placeholder="0.00"
-            keyboardType="numeric"
-            value={balance}
-            onChangeText={setBalance}
-            leftIcon={
-              <Text weight="bold" style={{ marginRight: 4 }}>
-                {currencies.find((c) => c === currency)
-                  ? currency === "USD"
-                    ? "$"
-                    : currency === "EUR"
-                    ? "€"
-                    : currency === "GBP"
-                    ? "£"
-                    : currency
-                  : "$"}
-              </Text>
-            }
+
+          <Controller
+            control={control}
+            name="balance"
+            rules={{ required: t("wallets.fillRequired") }}
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label={t("wallets.initialBalance")}
+                placeholder="0.00"
+                keyboardType="numeric"
+                value={value}
+                onChangeText={onChange}
+                error={errors.balance?.message as string}
+                leftIcon={
+                  <Text weight="bold" style={{ marginRight: 4 }}>
+                    {currencies.find((c) => c === currency)
+                      ? currency === "USD"
+                        ? "$"
+                        : currency === "EUR"
+                        ? "€"
+                        : currency === "GBP"
+                        ? "£"
+                        : currency
+                      : "$"}
+                  </Text>
+                }
+              />
+            )}
           />
+
           <View style={styles.row}>
             {/* Simplified currency selector for now */}
             <Text style={styles.label}>{t("wallets.currency")}</Text>
@@ -145,7 +172,7 @@ export const AddWalletScreen = () => {
               {currencies.map((c) => (
                 <Pressable
                   key={c}
-                  onPress={() => setCurrency(c)}
+                  onPress={() => setValue("currency", c)}
                   style={[
                     styles.currencyChip,
                     currency === c && {
@@ -167,12 +194,18 @@ export const AddWalletScreen = () => {
           </View>
 
           {(type === "bank" || type === "card") && (
-            <Input
-              label={t("wallets.accountNumber")}
-              placeholder="**** **** **** 1234"
-              value={accountNumber}
-              onChangeText={setAccountNumber}
-              keyboardType="number-pad"
+            <Controller
+              control={control}
+              name="accountNumber"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label={t("wallets.accountNumber")}
+                  placeholder="**** **** **** 1234"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="number-pad"
+                />
+              )}
             />
           )}
         </Card>
@@ -189,7 +222,10 @@ export const AddWalletScreen = () => {
                 {t("wallets.includeDesc")}
               </Text>
             </View>
-            <Switch value={includeInTotal} onValueChange={setIncludeInTotal} />
+            <Switch
+              value={includeInTotal}
+              onValueChange={(val) => setValue("includeInTotal", val)}
+            />
           </View>
 
           <View style={styles.divider} />
@@ -204,11 +240,14 @@ export const AddWalletScreen = () => {
                 {t("wallets.defaultDesc")}
               </Text>
             </View>
-            <Switch value={isDefault} onValueChange={setIsDefault} />
+            <Switch
+              value={isDefault}
+              onValueChange={(val) => setValue("isDefault", val)}
+            />
           </View>
         </Card>
 
-        <Button title={t("common.save")} onPress={handleSave} />
+        <Button title={t("common.save")} onPress={handleSubmit(onSubmit)} />
       </ScrollView>
     </ScreenWrapper>
   );

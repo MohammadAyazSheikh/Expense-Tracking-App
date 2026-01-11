@@ -10,9 +10,7 @@ import { Text } from "../ui/Text";
 import { Icon } from "../ui/Icon";
 import { Button } from "../ui/Button";
 import moment from "moment";
-import { lightTheme } from "../../styles/theme";
 
-type Theme = typeof lightTheme;
 type ViewMode = "calendar" | "month" | "year";
 
 const MONTHS = [
