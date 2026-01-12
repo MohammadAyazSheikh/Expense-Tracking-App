@@ -199,7 +199,7 @@ export const WalletsScreen = () => {
 
         {/* Transfer Button */}
         <Button
-          title={t("wallets.transferTitle")}
+          title={t("wallets.transfer")}
           icon={<Feather name="refresh-cw" size={20} color="white" />}
           size="lg"
           style={styles.transferButton}

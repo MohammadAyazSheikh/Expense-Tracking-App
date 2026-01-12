@@ -4,7 +4,7 @@ import type { InitOptions } from 'i18next';
 declare module 'i18next' {
   interface CustomTypeOptions {
     resources: typeof en;
-    defaultNS: 'translation';
+    defaultNS: 'default';
     nsSeparator: '.';
     keySeparator: '.';
   }
@@ -13,7 +13,7 @@ declare module 'i18next' {
 declare module 'react-i18next' {
   interface CustomTypeOptions {
     resources: typeof en;
-    defaultNS: 'translation';
+    defaultNS: 'default';
     nsSeparator: '.';
     keySeparator: '.';
   }

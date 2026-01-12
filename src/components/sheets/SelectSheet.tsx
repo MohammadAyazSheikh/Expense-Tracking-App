@@ -152,7 +152,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     color: theme.colors.foreground,
   },
   selectedLabel: {
-    color: theme.colors.primary,
+    color: theme.colors.background,
     fontWeight: "bold",
   },
   emptyText: {
