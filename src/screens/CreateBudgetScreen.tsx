@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useFinanceStore } from "../store";
 import { Category } from "../types";
 import Toast from "react-native-toast-message";
+import { Header } from "../components/ui/Headers";
 
 export const CreateBudgetScreen = () => {
   const { theme } = useUnistyles();
@@ -62,24 +63,7 @@ export const CreateBudgetScreen = () => {
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
-      <LinearGradient
-        colors={[theme.colors.primary, theme.colors.primary + "CC"]}
-        style={styles.header}
-      >
-        <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Feather name="arrow-left" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
-          <Text variant="h2" style={styles.headerTitle}>
-            Create Budget
-          </Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </LinearGradient>
+      <Header title="Create Budget" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
         {/* Budget Amount Card */}
@@ -217,21 +201,9 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerTitle: {
-    color: "white",
-  },
+
   content: {
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
     gap: theme.margins.md,
   },
   amountCard: {

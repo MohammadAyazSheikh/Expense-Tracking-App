@@ -12,7 +12,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
+import { Button, DropDownButton } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { Switch } from "../components/ui/Switch";
@@ -281,25 +281,19 @@ export const TransferScreen = () => {
 
         {/* Date */}
         <Card style={styles.dateCard} onPress={openDateSheet}>
-          <View style={styles.dateRow}>
-            <View style={styles.dateIconWrapper}>
+          <DropDownButton
+            leftIcon={
               <Icon
                 type="Feather"
                 name="calendar"
                 size={20}
                 color={theme.colors.mutedForeground}
               />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text
-                variant="caption"
-                style={{ color: theme.colors.mutedForeground }}
-              >
-                Date
-              </Text>
-              <Text weight="medium">{date}</Text>
-            </View>
-          </View>
+            }
+            label="Date"
+            selectedValue={date}
+            onPress={openDateSheet}
+          />
         </Card>
 
         {/* Note */}
@@ -524,19 +518,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   dateCard: {
     padding: theme.paddings.md,
-  },
-  dateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  dateIconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.muted + "20",
-    alignItems: "center",
-    justifyContent: "center",
   },
   recurringCard: {
     padding: theme.paddings.md,

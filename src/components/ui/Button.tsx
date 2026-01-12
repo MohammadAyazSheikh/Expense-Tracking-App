@@ -1,12 +1,18 @@
 import React from "react";
 import {
-  ActivityIndicator,
+  View,
   ViewStyle,
   TextStyle,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
-import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
+import {
+  StyleSheet,
+  UnistylesVariants,
+  useUnistyles,
+} from "react-native-unistyles";
 import { Text } from "./Text";
+import { Feather } from "@expo/vector-icons";
 
 type ButtonVariants = UnistylesVariants<typeof styles>;
 
@@ -62,6 +68,49 @@ export const Button = ({
         </>
       )}
     </Pressable>
+  );
+};
+
+type DropDownButtonProps = {
+  leftIcon?: React.ReactNode;
+  label?: string;
+  onPress: () => void;
+  selectedValue: string;
+  style?: ViewStyle;
+  labelStyle?: TextStyle;
+  valueStyle?: TextStyle;
+  containerStyle?: ViewStyle;
+};
+
+export const DropDownButton = ({
+  leftIcon,
+  label,
+  onPress,
+  selectedValue,
+  style,
+  labelStyle,
+  valueStyle,
+  containerStyle,
+}: DropDownButtonProps) => {
+  const { theme } = useUnistyles();
+  return (
+    <View style={[containerStyle]}>
+      {label && (
+        <Text weight="semiBold" style={[styles.label, labelStyle]}>
+          {label}
+        </Text>
+      )}
+      <Pressable style={[styles.selectorButton, style]} onPress={onPress}>
+        {leftIcon}
+        <Text style={[valueStyle]}>{selectedValue}</Text>
+        <Feather
+          name="chevron-down"
+          size={20}
+          color={theme.colors.mutedForeground}
+          style={{ marginLeft: "auto" }}
+        />
+      </Pressable>
+    </View>
   );
 };
 
@@ -133,5 +182,19 @@ const styles = StyleSheet.create((theme) => ({
         },
       },
     },
+  },
+
+  //dropdown button
+  label: {
+    marginBottom: theme.margins.sm,
+  },
+  selectorButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: theme.paddings.md,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: theme.margins.sm,
   },
 }));

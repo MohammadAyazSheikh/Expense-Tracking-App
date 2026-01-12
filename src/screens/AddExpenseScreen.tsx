@@ -11,7 +11,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainTabParamList, RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
+import { Button, DropDownButton } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
@@ -21,13 +21,10 @@ import { useFinanceStore } from "../store";
 import { useFonts } from "../hooks/useFonts";
 import { useTranslation } from "../hooks/useTranslation";
 import { Icon, IconType } from "../components/ui/Icon";
-import ModalWrapper from "../components/ui/ModalWrapper";
-import { Calendar } from "react-native-calendars";
 import { SheetManager } from "react-native-actions-sheet";
 import Animated from "react-native-reanimated";
 import { LayoutAnimation } from "../utils/Animation";
 import { Header } from "../components/ui/Headers";
-import { Category } from "../types";
 
 const PressAbleAnimated = Animated.createAnimatedComponent(Pressable);
 
@@ -109,8 +106,6 @@ export const AddExpenseScreen = () => {
   const updateTransaction = useFinanceStore((state) => state.updateTransaction);
   const categories = useFinanceStore((state) => state.categories);
   const tags = useFinanceStore((state) => state.tags);
-
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const editId = route.params?.transactionId;
   const isEditMode = !!editId;
@@ -418,23 +413,19 @@ export const AddExpenseScreen = () => {
 
         {/* Date Selection */}
         <Card>
-          <Text weight="semiBold" style={styles.sectionLabel}>
-            Date
-          </Text>
-          <TouchableOpacity style={styles.dateSelector} onPress={openDateSheet}>
-            <Feather
-              name="calendar"
-              size={20}
-              color={theme.colors.foreground}
-            />
-            <Text>{selectedDate}</Text>
-            <Feather
-              name="chevron-down"
-              size={20}
-              color={theme.colors.mutedForeground}
-              style={{ marginLeft: "auto" }}
-            />
-          </TouchableOpacity>
+          <DropDownButton
+            label="Date"
+            selectedValue={selectedDate}
+            onPress={openDateSheet}
+            leftIcon={
+              <Icon
+                type="Feather"
+                name="calendar"
+                size={20}
+                color={theme.colors.mutedForeground}
+              />
+            }
+          />
         </Card>
 
         {/* Details */}
@@ -513,41 +504,6 @@ export const AddExpenseScreen = () => {
           onPress={handleSubmit(onSubmit)}
         />
       </View>
-
-      {/* Date Picker Modal */}
-      <ModalWrapper
-        visible={showDatePicker}
-        onBackdropPress={() => setShowDatePicker(false)}
-        animationType="fade"
-      >
-        <View
-          style={{
-            backgroundColor: theme.colors.card,
-            borderRadius: theme.radius.lg,
-            padding: 10,
-          }}
-        >
-          <Calendar
-            current={selectedDate}
-            onDayPress={(day: any) => {
-              setValue("date", day.dateString);
-              setShowDatePicker(false);
-            }}
-            theme={{
-              backgroundColor: theme.colors.card,
-              calendarBackground: theme.colors.card,
-              textSectionTitleColor: theme.colors.foreground,
-              selectedDayBackgroundColor: theme.colors.primary,
-              selectedDayTextColor: "#ffffff",
-              todayTextColor: theme.colors.primary,
-              dayTextColor: theme.colors.foreground,
-              textDisabledColor: theme.colors.muted,
-              arrowColor: theme.colors.primary,
-              monthTextColor: theme.colors.foreground,
-            }}
-          />
-        </View>
-      </ModalWrapper>
     </ScreenWrapper>
   );
 };
@@ -707,16 +663,7 @@ const styles = StyleSheet.create((theme) => ({
     marginTop: theme.margins.md,
     marginBottom: theme.margins.xl,
   },
-  // Date Selector
-  dateSelector: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: theme.paddings.md,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    gap: theme.margins.sm,
-  },
+
   // Modal Styles
   modalContainer: {
     justifyContent: "flex-end",
