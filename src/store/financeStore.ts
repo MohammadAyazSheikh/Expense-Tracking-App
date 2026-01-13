@@ -129,9 +129,9 @@ const MOCK_WALLETS: Wallet[] = [
 ];
 
 const MOCK_BUDGETS: Budget[] = [
-  { id: '1', category: "Food", limit: 500, spent: 350, period: "monthly", color: "#FF9800", icon: "🍔" },
-  { id: '2', category: "Transport", limit: 200, spent: 120, period: "monthly", color: "#2196F3", icon: "🚗" },
-  { id: '3', category: "Shopping", limit: 300, spent: 280, period: "monthly", color: "#E91E63", icon: "🛍️" },
+  { id: '1', category: "Food", limit: 500, spent: 350, period: "monthly", color: "#FF9800", },
+  { id: '2', category: "Transport", limit: 200, spent: 120, period: "monthly", color: "#2196F3", },
+  { id: '3', category: "Shopping", limit: 300, spent: 280, period: "monthly", color: "#E91E63" },
 ];
 
 const DEFAULT_CATEGORIES: Category[] = [

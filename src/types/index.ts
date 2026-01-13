@@ -25,7 +25,6 @@ export interface Budget {
   spent: number;
   period: 'monthly' | 'weekly' | 'yearly';
   color: string;
-  icon?: string;
 }
 
 export interface Group {

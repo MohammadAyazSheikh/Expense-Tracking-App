@@ -1,15 +1,10 @@
 import React from "react";
-import {
-  View,
-  TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-  Pressable,
-} from "react-native";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useNavigation } from "@react-navigation/native";
+import { View, ViewStyle, TextStyle, Pressable } from "react-native";
 import { Text } from "./Text";
 import { Icon } from "./Icon";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type HeaderProps = {
@@ -58,7 +53,10 @@ export const Header = ({
   const bgColor = backgroundColor || theme.colors.primary;
 
   return (
-    <View
+    <LinearGradient
+      colors={[theme.colors.primary, theme.colors.primaryLight]}
+      start={{ x: 0.5, y: 0.5 }}
+      end={{ x: 0, y: 0 }}
       style={[
         styles.container,
         applySafeAreaPadding && { marginTop: safeAreaInsets.top },
@@ -104,7 +102,7 @@ export const Header = ({
           {children}
         </View>
       )}
-    </View>
+    </LinearGradient>
   );
 };
 

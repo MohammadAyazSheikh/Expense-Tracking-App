@@ -8,7 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { SheetManager } from "react-native-actions-sheet";
 import Toast from "react-native-toast-message";
-
 import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
 import { Button, DropDownButton } from "../components/ui/Button";
@@ -138,7 +137,6 @@ export const CreateBudgetScreen = () => {
       spent: 0,
       period: data.period,
       color: category.color,
-      icon: category.icon,
     });
 
     Toast.show({
@@ -338,29 +336,6 @@ export const CreateBudgetScreen = () => {
           </View>
         </Card>
 
-        {/* Preview Card */}
-        {selectedCategory && amount && (
-          <Card style={styles.previewCard}>
-            <Text weight="semiBold" style={{ marginBottom: 12 }}>
-              Preview
-            </Text>
-            <View style={styles.previewContent}>
-              <View style={styles.previewIcon}>
-                <Text style={{ fontSize: 28 }}>{selectedCategory.icon}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text weight="semiBold">{selectedCategory.name}</Text>
-                <Text
-                  variant="caption"
-                  style={{ color: theme.colors.mutedForeground }}
-                >
-                  ${parseFloat(amount || "0").toFixed(2)} / {period}
-                </Text>
-              </View>
-            </View>
-          </Card>
-        )}
-
         {/* Create Button */}
         <Button
           title="Create Budget"
@@ -429,25 +404,6 @@ const styles = StyleSheet.create((theme) => ({
     paddingTop: theme.paddings.md,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
-  },
-  previewCard: {
-    backgroundColor: theme.colors.primary + "08",
-    borderWidth: 1,
-    borderColor: theme.colors.primary + "20",
-    padding: theme.paddings.md,
-  },
-  previewContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  previewIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.colors.primary + "15",
-    alignItems: "center",
-    justifyContent: "center",
   },
   createButton: {
     marginTop: theme.margins.md,

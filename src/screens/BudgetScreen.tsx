@@ -1,5 +1,4 @@
-import { View, ScrollView } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -11,167 +10,106 @@ import { Badge } from "../components/ui/Badge";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather } from "@expo/vector-icons";
-
 import { useFinanceStore } from "../store";
+import { Icon } from "../components/ui/Icon";
+import { Budget, Category } from "../types";
+import { Header } from "../components/ui/Headers";
+
+type budgetCardProps = {
+  budget: Budget;
+  category: Category;
+};
+const BudgetCard = ({ budget, category }: budgetCardProps) => {
+  const { theme } = useUnistyles();
+  const isOverLimit = budget.spent > budget.limit;
+  const isNearLimit = budget.spent > budget.limit * 0.8;
+  const percentage = (budget.spent / budget.limit) * 100;
+  return (
+    <Card key={budget.category} style={styles.budgetCard}>
+      <View style={styles.budgetHeader}>
+        <View style={styles.budgetInfo}>
+          <Icon
+            name={category?.icon}
+            type={category?.iconFamily as any}
+            size={24}
+            color={category?.color}
+          />
+          <View>
+            <Text weight="semiBold">{budget.category}</Text>
+            <Text variant="caption">
+              ${budget.spent} of ${budget.limit}
+            </Text>
+          </View>
+        </View>
+        {isOverLimit && (
+          <Badge
+            variant="destructive"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <Feather name="alert-circle" size={10} color="white" />
+            <Text style={{ color: "white", fontSize: 10 }} weight="semiBold">
+              Over
+            </Text>
+          </Badge>
+        )}
+        {isNearLimit && !isOverLimit && (
+          <Badge
+            variant="warning"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <Feather name="alert-circle" size={12} color="white" />
+            <Text style={{ color: "white", fontSize: 10 }} weight="semiBold">
+              {"  Near Limit"}
+            </Text>
+          </Badge>
+        )}
+      </View>
+
+      <ProgressBar value={percentage} max={100} color={budget.color} />
+
+      <View style={styles.budgetStats}>
+        <Text variant="caption">{percentage.toFixed(0)}% used</Text>
+        <Text
+          variant="caption"
+          weight="semiBold"
+          style={{
+            color: isOverLimit
+              ? theme.colors.destructive
+              : theme.colors.success,
+          }}
+        >
+          ${Math.abs(budget.limit - budget.spent)}{" "}
+          {isOverLimit ? "over" : "left"}
+        </Text>
+      </View>
+    </Card>
+  );
+};
 
 export const BudgetScreen = () => {
-  const styles = StyleSheet.create((theme) => ({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      padding: theme.paddings.lg,
-      paddingBottom: theme.paddings.xl,
-    },
-    headerTop: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: theme.margins.lg,
-    },
-    headerLeft: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.margins.md,
-    },
-    headerTitle: {
-      color: "white",
-    },
-    summaryCard: {
-      backgroundColor: "rgba(255, 255, 255, 0.2)",
-      padding: theme.paddings.lg,
-      borderRadius: theme.radius.lg,
-      maxWidth: {
-        md: 600,
-      },
-      alignSelf: {
-        md: "center",
-      },
-      width: "100%",
-    },
-    summaryRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      marginBottom: theme.margins.md,
-    },
-    summaryLabel: {
-      color: "rgba(255, 255, 255, 0.8)",
-      marginBottom: 4,
-    },
-    summaryValue: {
-      color: "white",
-      fontSize: 28,
-    },
-    summaryRemaining: {
-      color: "rgba(255, 255, 255, 0.8)",
-      marginTop: theme.margins.sm,
-    },
-    content: {
-      padding: theme.paddings.md,
-      marginTop: -theme.margins.lg,
-      gap: theme.margins.md,
-      maxWidth: {
-        md: 800,
-      },
-      alignSelf: "center",
-      width: "100%",
-    },
-    insightCard: {
-      flexDirection: "row",
-      gap: theme.margins.md,
-      backgroundColor: theme.colors.card,
-      borderWidth: 1,
-      borderColor: theme.colors.primary + "30",
-      alignItems: "center",
-    },
-    insightIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: theme.colors.primary + "15",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    sectionHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: theme.margins.xs,
-    },
-    budgetCard: {
-      padding: theme.paddings.lg,
-    },
-    budgetHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: theme.margins.md,
-    },
-    budgetInfo: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.margins.md,
-    },
-    budgetIcon: {
-      fontSize: 24,
-    },
-    budgetStats: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginTop: theme.margins.sm,
-    },
-    goalCard: {
-      marginTop: theme.margins.md,
-    },
-    goalHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: theme.margins.md,
-      marginBottom: theme.margins.md,
-    },
-    goalIcon: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      backgroundColor: theme.colors.primary + "15",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-  }));
-
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const budgets = useFinanceStore((state) => state.budgets);
+  const categories = useFinanceStore((state) => state.categories);
 
   const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const totalLimit = budgets.reduce((sum, b) => sum + b.limit, 0);
   const overallProgress = (totalSpent / totalLimit) * 100;
 
-  const getColor = (colorName: string) => {
-    return theme.colors[colorName as keyof typeof theme.colors] as string;
-  };
-
   return (
     <ScreenWrapper style={styles.container} scrollable>
-      <LinearGradient
-        colors={[theme.colors.primary, theme.colors.primary + "CC"]}
-        style={styles.header}
-      >
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <Button
-              title=""
-              icon={<Feather name="arrow-left" size={24} color="white" />}
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={{ paddingHorizontal: 0, width: 40 }}
-            />
-            <Text variant="h2" style={styles.headerTitle}>
-              Budget Manager
-            </Text>
-          </View>
+      {/* Header */}
+      <Header
+        onBack={() => navigation.goBack()}
+        right={
           <Button
             title="New Budget"
             icon={<Feather name="plus" size={16} color="white" />}
@@ -181,8 +119,8 @@ export const BudgetScreen = () => {
             textStyle={{ color: "white" }}
             onPress={() => navigation.navigate("CreateBudget")}
           />
-        </View>
-
+        }
+      >
         <Card style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <View>
@@ -215,13 +153,13 @@ export const BudgetScreen = () => {
             ${(totalLimit - totalSpent).toLocaleString()} remaining this month
           </Text>
         </Card>
-      </LinearGradient>
+      </Header>
 
       <View style={styles.content}>
         {/* AI Insights */}
         <Card style={styles.insightCard}>
           <View style={styles.insightIcon}>
-            <Feather name="zap" size={20} color={theme.colors.primary} />
+            <Feather name="zap" size={20} color={theme.colors.background} />
           </View>
           <View style={{ flex: 1 }}>
             <Text weight="semiBold" style={{ marginBottom: 4 }}>
@@ -237,7 +175,7 @@ export const BudgetScreen = () => {
         {/* Budget Categories */}
         <View style={{ gap: theme.margins.md }}>
           <View style={styles.sectionHeader}>
-            <Text variant="h3">Categories</Text>
+            <Text variant="h2">Categories</Text>
             <Button
               title="View Trends"
               icon={
@@ -254,82 +192,13 @@ export const BudgetScreen = () => {
           </View>
 
           {budgets.map((budget) => {
-            const percentage = (budget.spent / budget.limit) * 100;
-            const isNearLimit = percentage > 80;
-            const isOverLimit = percentage >= 100;
-
+            const category = categories.find((c) => c.name === budget.category);
             return (
-              <Card key={budget.category} style={styles.budgetCard}>
-                <View style={styles.budgetHeader}>
-                  <View style={styles.budgetInfo}>
-                    <Text style={styles.budgetIcon}>{budget.icon}</Text>
-                    <View>
-                      <Text weight="semiBold">{budget.category}</Text>
-                      <Text variant="caption">
-                        ${budget.spent} of ${budget.limit}
-                      </Text>
-                    </View>
-                  </View>
-                  {isOverLimit && (
-                    <Badge
-                      variant="destructive"
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Feather name="alert-circle" size={10} color="white" />
-                      <Text
-                        style={{ color: "white", fontSize: 10 }}
-                        weight="semiBold"
-                      >
-                        Over
-                      </Text>
-                    </Badge>
-                  )}
-                  {isNearLimit && !isOverLimit && (
-                    <Badge
-                      variant="warning"
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <Feather name="alert-circle" size={10} color="white" />
-                      <Text
-                        style={{ color: "white", fontSize: 10 }}
-                        weight="semiBold"
-                      >
-                        Near Limit
-                      </Text>
-                    </Badge>
-                  )}
-                </View>
-
-                <ProgressBar
-                  value={percentage}
-                  max={100}
-                  color={getColor(budget.color)}
-                />
-
-                <View style={styles.budgetStats}>
-                  <Text variant="caption">{percentage.toFixed(0)}% used</Text>
-                  <Text
-                    variant="caption"
-                    weight="semiBold"
-                    style={{
-                      color: isOverLimit
-                        ? theme.colors.destructive
-                        : theme.colors.success,
-                    }}
-                  >
-                    ${Math.abs(budget.limit - budget.spent)}{" "}
-                    {isOverLimit ? "over" : "left"}
-                  </Text>
-                </View>
-              </Card>
+              <BudgetCard
+                key={budget.category}
+                budget={budget}
+                category={category!}
+              />
             );
           })}
         </View>
@@ -341,7 +210,7 @@ export const BudgetScreen = () => {
               <Feather
                 name="trending-up"
                 size={24}
-                color={theme.colors.primary}
+                color={theme.colors.background}
               />
             </View>
             <View>
@@ -349,7 +218,7 @@ export const BudgetScreen = () => {
               <Text variant="caption">Save $500 this month</Text>
             </View>
           </View>
-          <ProgressBar value={60} max={100} />
+          <ProgressBar value={80} max={100} />
           <Text variant="caption" style={{ marginTop: 8 }}>
             $325 saved • $175 to go
           </Text>
@@ -358,3 +227,112 @@ export const BudgetScreen = () => {
     </ScreenWrapper>
   );
 };
+
+const styles = StyleSheet.create((theme) => ({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+
+  summaryCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    padding: theme.paddings.lg,
+    borderRadius: theme.radius.lg,
+    marginVertical: theme.margins.lg,
+    maxWidth: {
+      md: 600,
+    },
+    alignSelf: {
+      md: "center",
+    },
+    width: "100%",
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: theme.margins.md,
+  },
+  summaryLabel: {
+    color: "rgba(255, 255, 255, 0.8)",
+    marginBottom: 4,
+  },
+  summaryValue: {
+    color: "white",
+    fontSize: 28,
+  },
+  summaryRemaining: {
+    color: "rgba(255, 255, 255, 0.8)",
+    marginTop: theme.margins.sm,
+  },
+  content: {
+    padding: theme.paddings.md,
+    gap: theme.margins.md,
+    maxWidth: {
+      md: 800,
+    },
+    alignSelf: "center",
+    width: "100%",
+  },
+  insightCard: {
+    flexDirection: "row",
+    gap: theme.margins.md,
+    backgroundColor: theme.colors.card,
+    borderWidth: 1,
+    borderColor: theme.colors.primary + "30",
+    alignItems: "center",
+  },
+  insightIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.primary + "15",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.margins.xs,
+  },
+  budgetCard: {
+    padding: theme.paddings.lg,
+  },
+  budgetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.margins.md,
+  },
+  budgetInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.margins.md,
+  },
+  budgetIcon: {
+    fontSize: 24,
+  },
+  budgetStats: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: theme.margins.sm,
+  },
+  goalCard: {
+    marginTop: theme.margins.md,
+  },
+  goalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.margins.md,
+    marginBottom: theme.margins.md,
+  },
+  goalIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.colors.primary + "15",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+}));
