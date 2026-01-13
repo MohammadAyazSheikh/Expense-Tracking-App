@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, ScrollView } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";

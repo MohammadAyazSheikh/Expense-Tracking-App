@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import ActionSheet, {
   SheetProps,
   SheetManager,
@@ -45,14 +45,14 @@ export const SelectSheet = (props: SheetProps) => {
         <Text weight="bold" style={styles.title}>
           {title}
         </Text>
-        <TouchableOpacity onPress={() => SheetManager.hide("select-sheet")}>
+        <Pressable onPress={() => SheetManager.hide("select-sheet")}>
           <Icon
             type="Feather"
             name="x"
             size={24}
             color={theme.colors.mutedForeground}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <View style={styles.searchContainer}>
@@ -144,7 +144,6 @@ const styles = StyleSheet.create((theme, rt) => ({
   },
   selectedOption: {
     backgroundColor: theme.colors.primary + "10",
-    borderRadius: theme.radius.md,
     borderBottomWidth: 0,
   },
   optionLabel: {
