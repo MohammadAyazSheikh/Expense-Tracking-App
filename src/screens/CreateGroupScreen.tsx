@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity, ScrollView } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -9,10 +9,12 @@ import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { SettingsGroup } from "../components/ui/SettingsGroup";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useFinanceStore } from "../store";
 import Toast from "react-native-toast-message";
+import { Header } from "../components/ui/Headers";
+import { Input } from "../components/ui/Input";
+import { SettingsRow } from "../components/ui/SettingsRow";
+import Checkbox from "../components/ui/Checkbox";
 
 const ICONS = ["🏠", "✈️", "🍔", "🛍️", "⚽", "🎓", "💼", "🎮", "🚗", "🍷"];
 
@@ -68,24 +70,7 @@ export const CreateGroupScreen = () => {
 
   return (
     <ScreenWrapper style={styles.container}>
-      <LinearGradient
-        colors={[theme.colors.primary, theme.colors.primary + "CC"]}
-        style={styles.header}
-      >
-        <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Feather name="arrow-left" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
-          <Text variant="h2" style={styles.headerTitle}>
-            Create Group
-          </Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </LinearGradient>
+      <Header title="Create Group" onBack={() => navigation.goBack()}></Header>
 
       <ScrollView
         style={styles.content}
@@ -118,48 +103,29 @@ export const CreateGroupScreen = () => {
               ))}
             </ScrollView>
           </View>
-
-          <View style={styles.nameInputContainer}>
-            <Text variant="caption" style={styles.inputLabel}>
-              Group Name
-            </Text>
-            <TextInput
-              style={styles.nameInput}
-              placeholder="e.g. Vacation 2024"
-              value={name}
-              onChangeText={setName}
-              placeholderTextColor={theme.colors.mutedForeground}
-            />
-          </View>
+          <Input
+            label="Group Name"
+            placeholder="e.g. Vacation 2024"
+            value={name}
+            onChangeText={setName}
+            placeholderTextColor={theme.colors.mutedForeground}
+          />
         </Card>
-
         <SettingsGroup title="Add Members">
           {friends.map((friend) => (
-            <TouchableOpacity
+            <SettingsRow
               key={friend.id}
-              style={styles.friendItem}
+              icon={<Text style={{ fontSize: 20 }}>{friend.avatar}</Text>}
+              label={friend.name}
               onPress={() => toggleFriend(friend.id)}
-            >
-              <View style={styles.friendInfo}>
-                <View style={styles.friendAvatar}>
-                  <Text style={{ fontSize: 20 }}>{friend.avatar}</Text>
-                </View>
-                <Text weight="medium">{friend.name}</Text>
-              </View>
-              <View
-                style={[
-                  styles.checkbox,
-                  selectedFriends.includes(friend.id) && {
-                    backgroundColor: theme.colors.primary,
-                    borderColor: theme.colors.primary,
-                  },
-                ]}
-              >
-                {selectedFriends.includes(friend.id) && (
-                  <Feather name="check" size={14} color="white" />
-                )}
-              </View>
-            </TouchableOpacity>
+              showChevron={false}
+              rightElement={
+                <Checkbox
+                  checked={selectedFriends.includes(friend.id)}
+                  onPress={() => toggleFriend(friend.id)}
+                />
+              }
+            />
           ))}
           {friends.length === 0 && (
             <View style={{ padding: 20, alignItems: "center" }}>
@@ -169,7 +135,6 @@ export const CreateGroupScreen = () => {
             </View>
           )}
         </SettingsGroup>
-
         <Button
           title="Create Group"
           onPress={handleCreate}
@@ -191,21 +156,13 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.paddings.lg,
     paddingBottom: theme.paddings.xl,
   },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerTitle: {
-    color: "white",
-  },
   content: {
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
   },
   inputCard: {
     padding: theme.paddings.md,
     gap: theme.margins.lg,
+    marginVertical: theme.margins.md,
   },
   avatarPicker: {
     alignItems: "center",
@@ -234,51 +191,6 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: "center",
     borderWidth: 2,
     borderColor: "transparent",
-  },
-  nameInputContainer: {
-    gap: theme.margins.xs,
-  },
-  inputLabel: {
-    color: theme.colors.mutedForeground,
-  },
-  nameInput: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: theme.colors.foreground,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    paddingVertical: 8,
-  },
-  friendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: theme.paddings.md,
-    paddingHorizontal: theme.paddings.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border + "10",
-  },
-  friendInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  friendAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.muted,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
-    alignItems: "center",
-    justifyContent: "center",
   },
   createButton: {
     marginTop: theme.margins.lg,

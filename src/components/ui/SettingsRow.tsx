@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, ViewStyle } from "react-native";
+import { View, ViewStyle, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Feather } from "@expo/vector-icons";
 import { Text } from "./Text";
@@ -7,7 +7,7 @@ import { Text } from "./Text";
 interface SettingsRowProps {
   label: string;
   description?: string;
-  icon?: keyof typeof Feather.glyphMap;
+  icon?: keyof typeof Feather.glyphMap | React.ReactNode;
   iconColor?: string;
   rightElement?: React.ReactNode;
   onPress?: () => void;
@@ -41,9 +41,9 @@ export const SettingsRow = ({
         style,
       ]}
     >
-      {icon && (
+      {icon && typeof icon === "string" ? (
         <Feather
-          name={icon}
+          name={icon as keyof typeof Feather.glyphMap}
           size={20}
           color={
             isDestructive
@@ -52,6 +52,8 @@ export const SettingsRow = ({
           }
           style={styles.icon}
         />
+      ) : (
+        icon
       )}
       <View style={styles.textContainer}>
         <Text
@@ -86,13 +88,7 @@ export const SettingsRow = ({
   return (
     <View>
       {showSeparator && <View style={styles.separator} />}
-      {onPress ? (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-          {content}
-        </TouchableOpacity>
-      ) : (
-        content
-      )}
+      {onPress ? <Pressable onPress={onPress}>{content}</Pressable> : content}
     </View>
   );
 };

@@ -3,15 +3,84 @@ import { TextInput, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
-import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { RootStackParamList } from "../navigation/types";
+import { Header } from "../components/ui/Headers";
+import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
+import { Text } from "../components/ui/Text";
+import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useFinanceStore } from "../store";
+import { Group } from "../types";
+
+type GroupCardProps = {
+  group: Group;
+  onPress: () => void;
+};
+const GroupCard = ({ group, onPress }: GroupCardProps) => {
+  const { theme } = useUnistyles();
+  return (
+    <Card key={group.id} style={styles.groupCard} onPress={onPress}>
+      <View style={styles.groupCardHeader}>
+        <View style={styles.groupAvatar}>
+          <Text style={{ fontSize: 24 }}>{group.avatar}</Text>
+        </View>
+        <View style={styles.groupInfo}>
+          <View style={styles.groupTitleRow}>
+            <Text weight="bold" style={{ fontSize: 16 }}>
+              {group.name}
+            </Text>
+            <Feather
+              name="chevron-right"
+              size={20}
+              color={theme.colors.mutedForeground}
+            />
+          </View>
+          <View style={styles.groupMeta}>
+            <Feather
+              name="users"
+              size={12}
+              color={theme.colors.mutedForeground}
+            />
+            <Text variant="caption" style={styles.metaText}>
+              {group.members.length} members
+            </Text>
+            <Text variant="caption" style={styles.metaDivider}>
+              •
+            </Text>
+            <Text variant="caption" style={styles.metaText}>
+              {group.lastActivity}
+            </Text>
+          </View>
+          <View style={styles.groupBadges}>
+            {group.youOwe > 0 && (
+              <Badge variant="destructive">
+                <Text style={{ color: "white", fontSize: 10 }} weight="bold">
+                  You owe ${group.youOwe.toFixed(2)}
+                </Text>
+              </Badge>
+            )}
+            {group.youAreOwed > 0 && (
+              <Badge variant="success">
+                <Text style={{ color: "white", fontSize: 10 }} weight="bold">
+                  You're owed ${group.youAreOwed.toFixed(2)}
+                </Text>
+              </Badge>
+            )}
+            {group.youOwe === 0 && group.youAreOwed === 0 && (
+              <Badge variant="secondary">
+                <Text variant="caption" style={{ fontSize: 10 }}>
+                  All settled up
+                </Text>
+              </Badge>
+            )}
+          </View>
+        </View>
+      </View>
+    </Card>
+  );
+};
 
 export const GroupsScreen = () => {
   const { theme } = useUnistyles();
@@ -29,23 +98,11 @@ export const GroupsScreen = () => {
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
-      <LinearGradient
-        colors={[theme.colors.primary, theme.colors.primary + "CC"]}
-        style={styles.header}
-      >
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <Button
-              title=""
-              icon={<Feather name="arrow-left" size={24} color="white" />}
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={{ paddingHorizontal: 0, width: 40 }}
-            />
-            <Text variant="h2" style={styles.headerTitle}>
-              Split Bills
-            </Text>
-          </View>
+      {/* header */}
+      <Header
+        title="Split Bill"
+        onBack={() => navigation.goBack()}
+        right={
           <Button
             title="New Group"
             icon={<Feather name="plus" size={16} color="white" />}
@@ -55,8 +112,8 @@ export const GroupsScreen = () => {
             textStyle={{ color: "white" }}
             onPress={() => navigation.navigate("CreateGroup")}
           />
-        </View>
-
+        }
+      >
         {/* Balance Summary Card */}
         <Card style={styles.summaryCard}>
           <View style={styles.summaryGrid}>
@@ -106,8 +163,7 @@ export const GroupsScreen = () => {
             </View>
           </View>
         </Card>
-      </LinearGradient>
-
+      </Header>
       <View style={styles.content}>
         {/* Search Bar */}
         <View style={styles.searchBar}>
@@ -135,13 +191,13 @@ export const GroupsScreen = () => {
             <View
               style={[
                 styles.actionIcon,
-                { backgroundColor: theme.colors.success + "15" },
+                { backgroundColor: theme.colors.success },
               ]}
             >
               <Feather
                 name="dollar-sign"
                 size={20}
-                color={theme.colors.success}
+                color={theme.colors.background}
               />
             </View>
             <View>
@@ -160,10 +216,10 @@ export const GroupsScreen = () => {
             <View
               style={[
                 styles.actionIcon,
-                { backgroundColor: theme.colors.primary + "15" },
+                { backgroundColor: theme.colors.primary },
               ]}
             >
-              <Feather name="users" size={20} color={theme.colors.primary} />
+              <Feather name="users" size={20} color={theme.colors.background} />
             </View>
             <View>
               <Text weight="semiBold" style={{ fontSize: 13 }}>
@@ -182,76 +238,13 @@ export const GroupsScreen = () => {
         </Text>
         {filteredGroups.length > 0 ? (
           filteredGroups.map((group) => (
-            <Card
+            <GroupCard
               key={group.id}
-              style={styles.groupCard}
+              group={group}
               onPress={() =>
                 navigation.navigate("GroupDetail", { id: group.id })
               }
-            >
-              <View style={styles.groupCardHeader}>
-                <View style={styles.groupAvatar}>
-                  <Text style={{ fontSize: 24 }}>{group.avatar}</Text>
-                </View>
-                <View style={styles.groupInfo}>
-                  <View style={styles.groupTitleRow}>
-                    <Text weight="bold" style={{ fontSize: 16 }}>
-                      {group.name}
-                    </Text>
-                    <Feather
-                      name="chevron-right"
-                      size={20}
-                      color={theme.colors.mutedForeground}
-                    />
-                  </View>
-                  <View style={styles.groupMeta}>
-                    <Feather
-                      name="users"
-                      size={12}
-                      color={theme.colors.mutedForeground}
-                    />
-                    <Text variant="caption" style={styles.metaText}>
-                      {group.members.length} members
-                    </Text>
-                    <Text variant="caption" style={styles.metaDivider}>
-                      •
-                    </Text>
-                    <Text variant="caption" style={styles.metaText}>
-                      {group.lastActivity}
-                    </Text>
-                  </View>
-                  <View style={styles.groupBadges}>
-                    {group.youOwe > 0 && (
-                      <Badge variant="destructive">
-                        <Text
-                          style={{ color: "white", fontSize: 10 }}
-                          weight="bold"
-                        >
-                          You owe ${group.youOwe.toFixed(2)}
-                        </Text>
-                      </Badge>
-                    )}
-                    {group.youAreOwed > 0 && (
-                      <Badge variant="success">
-                        <Text
-                          style={{ color: "white", fontSize: 10 }}
-                          weight="bold"
-                        >
-                          You're owed ${group.youAreOwed.toFixed(2)}
-                        </Text>
-                      </Badge>
-                    )}
-                    {group.youOwe === 0 && group.youAreOwed === 0 && (
-                      <Badge variant="secondary">
-                        <Text variant="caption" style={{ fontSize: 10 }}>
-                          All settled up
-                        </Text>
-                      </Badge>
-                    )}
-                  </View>
-                </View>
-              </View>
-            </Card>
+            />
           ))
         ) : (
           <View style={styles.emptyState}>
@@ -286,28 +279,11 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: theme.margins.lg,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  headerTitle: {
-    color: "white",
-  },
   summaryCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: theme.colors.card,
     padding: theme.paddings.md,
     borderRadius: theme.radius.lg,
+    marginVertical: theme.margins.lg,
   },
   summaryGrid: {
     flexDirection: "row",
@@ -323,7 +299,7 @@ const styles = StyleSheet.create((theme) => ({
     borderColor: "rgba(255, 255, 255, 0.1)",
   },
   summaryLabel: {
-    color: "rgba(255, 255, 255, 0.7)",
+    color: theme.colors.foreground,
     fontSize: 10,
     marginBottom: 4,
   },
@@ -332,7 +308,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   content: {
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
     gap: theme.margins.md,
   },
   searchBar: {
@@ -383,8 +358,9 @@ const styles = StyleSheet.create((theme) => ({
   groupAvatar: {
     width: 50,
     height: 50,
+    borderColor: theme.colors.primary,
+    borderWidth: 1,
     borderRadius: 25,
-    backgroundColor: theme.colors.primary + "10",
     alignItems: "center",
     justifyContent: "center",
   },

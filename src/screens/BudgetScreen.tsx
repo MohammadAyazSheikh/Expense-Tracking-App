@@ -235,7 +235,7 @@ const styles = StyleSheet.create((theme) => ({
   },
 
   summaryCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: theme.colors.primaryLight,
     padding: theme.paddings.lg,
     borderRadius: theme.radius.lg,
     marginVertical: theme.margins.lg,
