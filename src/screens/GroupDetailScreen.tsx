@@ -27,7 +27,7 @@ type GroupExpenseCardProps = {
   onPress?: () => void;
 };
 
-const GroupExpenseCard = ({
+export const GroupExpenseCard = ({
   title,
   description,
   amount,

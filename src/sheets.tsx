@@ -20,6 +20,7 @@ import {
   MultiSelectOption,
 } from "./components/sheets/MultiSelectSheet";
 import { AddFriendSheet } from "./components/friends/AddFriendSheet";
+import { RecordPaymentSheet } from "./components/groups/RecordPaymentSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -84,6 +85,18 @@ declare module "react-native-actions-sheet" {
       };
       returnValue: string[] | undefined;
     }>;
+    "record-payment-sheet": SheetDefinition<{
+      payload: {
+        settlement: {
+          id: string;
+          from: string;
+          to: string;
+          amount: number;
+          groupName?: string;
+        };
+        onConfirm: (amount: number, method: string) => void;
+      };
+    }>;
   }
 }
 
@@ -100,6 +113,7 @@ export const Sheets = () => {
         "select-sheet": SelectSheet,
         "multi-select-sheet": MultiSelectSheet,
         "add-friend-sheet": AddFriendSheet,
+        "record-payment-sheet": RecordPaymentSheet,
       }}
     />
   );
