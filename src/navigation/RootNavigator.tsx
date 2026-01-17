@@ -7,7 +7,6 @@ import { OnboardingScreen } from "../screens/OnboardingScreen";
 import { AuthScreen } from "../screens/AuthScreen";
 import { NotFoundScreen } from "../screens/Placeholders";
 import { ProfileScreen } from "../screens/ProfileScreen";
-import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { WalletsScreen } from "../screens/WalletsScreen";
 import { SecurityScreen } from "../screens/SecurityScreen";
 import { HelpSupportScreen } from "../screens/HelpSupportScreen";
@@ -37,6 +36,8 @@ import { AddWalletScreen } from "../screens/AddWalletScreen";
 import { useTranslation } from "react-i18next";
 import { EditWalletScreen } from "../screens/EditWalletScreen";
 import { TransferScreen } from "../screens/TransferScreen";
+import { NotificationsScreen } from "../screens/NotificationsScreen";
+import { NotificationSettingsScreen } from "../screens/NotificationSettingsScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -60,6 +61,10 @@ const mainRoutes = () => {
       <Stack.Screen name="MainTab" component={TabNavigator} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+      />
       <Stack.Screen name="Security" component={SecurityScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />

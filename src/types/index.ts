@@ -116,9 +116,8 @@ export interface Notification {
   title: string;
   message: string;
   time: string;
-  iconName?: string; // Changed from icon: any to iconName: string for RN compatibility
+  iconName?: string;
   color: string;
-  bgColor: string;
   read: boolean;
   action: string;
   actionButtons?: NotificationActionType;

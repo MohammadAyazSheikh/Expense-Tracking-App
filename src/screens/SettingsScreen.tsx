@@ -1,16 +1,14 @@
 import React from "react";
-import { View, ScrollView, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
 import { Switch } from "../components/ui/Switch";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Feather } from "@expo/vector-icons";
 import { SettingsGroup } from "../components/ui/SettingsGroup";
 import { SettingsRow } from "../components/ui/SettingsRow";
 import { useAppSettingsStore, useAuthStore } from "../store";
@@ -43,7 +41,7 @@ export const SettingsScreen = () => {
           icon: "bell",
           label: t("settings.notifications"),
           badge: "3 New",
-          path: "Notifications",
+          path: "NotificationSettings",
         },
         {
           icon: "lock",

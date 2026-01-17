@@ -1,215 +1,207 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useState } from "react";
+import { View, ScrollView } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
-import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
-import { Badge } from "../components/ui/Badge";
-import { Switch } from "../components/ui/Switch";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Header } from "../components/ui/Headers";
+import { TabView } from "../components/ui/TabView";
+import { NotificationCard } from "../components/notifications/NotificationCard";
+import { Notification } from "../types";
+import { Button } from "../components/ui/Button";
+import { Text } from "../components/ui/Text";
 import { Feather } from "@expo/vector-icons";
-import { SettingsGroup } from "../components/ui/SettingsGroup";
-import { SettingsRow } from "../components/ui/SettingsRow";
+import { useNavigation } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
 
-const notificationCategories = [
+// Mock Data
+const MOCK_NOTIFICATIONS: Notification[] = [
   {
-    title: "Transaction Alerts",
-    icon: "dollar-sign",
-    color: "success",
-    items: [
-      {
-        label: "Large expense alerts",
-        description: "Notify when expense exceeds $100",
-        enabled: true,
-      },
-      {
-        label: "Daily summary",
-        description: "Daily spending recap at 9 PM",
-        enabled: true,
-      },
-      {
-        label: "Weekly reports",
-        description: "Weekly financial overview",
-        enabled: false,
-      },
-    ],
-  },
-  {
-    title: "Budget & Goals",
-    icon: "target",
-    color: "warning",
-    items: [
-      {
-        label: "Budget warnings",
-        description: "Alert at 80% of budget limit",
-        enabled: true,
-      },
-      {
-        label: "Budget exceeded",
-        description: "Notify when over budget",
-        enabled: true,
-      },
-      {
-        label: "Savings milestones",
-        description: "Celebrate savings achievements",
-        enabled: true,
-      },
-    ],
-  },
-  {
-    title: "AI Insights",
-    icon: "zap", // sparkles -> zap
+    id: 1,
+    type: "friend_request",
+    title: "New Friend Request",
+    message: "Sarah Miller wants to connect with you",
+    time: "2 min ago",
+    iconName: "user-plus",
     color: "primary",
-    items: [
-      {
-        label: "SmartSense™ tips",
-        description: "Personalized saving suggestions",
-        enabled: true,
-      },
-      {
-        label: "Spending patterns",
-        description: "Unusual activity detection",
-        enabled: true,
-      },
-      {
-        label: "Monthly insights",
-        description: "End of month AI analysis",
-        enabled: false,
-      },
-    ],
+    read: false,
+    action: "Friends",
+    actionButtons: "accept_decline",
+    actionData: { primaryLabel: "Accept", secondaryLabel: "Decline" },
   },
   {
-    title: "Analytics",
-    icon: "trending-up",
-    color: "accent",
-    items: [
-      {
-        label: "Income received",
-        description: "Notify on new income",
-        enabled: true,
-      },
-      {
-        label: "Bill reminders",
-        description: "Upcoming bill notifications",
-        enabled: true,
-      },
-    ],
+    id: 4,
+    type: "group_added",
+    title: "Added to Group",
+    message: "You were added to 'Weekend Trip' group",
+    time: "30 min ago",
+    iconName: "users",
+    color: "primary",
+    read: false,
+    action: "Groups",
+    actionButtons: "view",
+    actionData: { primaryLabel: "View Group" },
+  },
+  {
+    id: 8,
+    type: "budget_warning",
+    title: "Budget Warning",
+    message: "You've used 80% of your Food budget this month",
+    time: "1 day ago",
+    iconName: "alert-triangle",
+    color: "warning",
+    read: false,
+    action: "Budget",
+    actionButtons: "view",
+    actionData: { primaryLabel: "View Budget", secondaryLabel: "Adjust Limit" },
+  },
+  {
+    id: 9,
+    type: "budget_exceeded",
+    title: "Budget Exceeded",
+    message: "Entertainment budget exceeded by $45.00",
+    time: "2 days ago",
+    iconName: "target",
+    color: "destructive",
+    read: true,
+    action: "Budget",
+    actionButtons: "view",
+    actionData: {
+      primaryLabel: "View Budget",
+      secondaryLabel: "Increase Limit",
+    },
+  },
+  {
+    id: 14,
+    type: "income_received",
+    title: "Income Received",
+    message: "Salary of $3,500.00 credited to your account",
+    time: "3 days ago",
+    iconName: "dollar-sign",
+    color: "success",
+    read: true,
+    action: "MainTab",
+    actionButtons: "view",
+    actionData: { primaryLabel: "View Transaction" },
   },
 ];
 
 export const NotificationsScreen = () => {
   const { theme } = useUnistyles();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<any>();
+  const [notifications, setNotifications] =
+    useState<Notification[]>(MOCK_NOTIFICATIONS);
 
-  const getColor = (colorName: string) => {
-    return theme.colors[colorName as keyof typeof theme.colors] as string;
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAsRead = (id: number) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
   };
 
-  return (
-    <ScreenWrapper style={styles.container} scrollable>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <Button
-              title=""
-              icon={<Feather name="arrow-left" size={24} color="white" />}
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={{ paddingHorizontal: 0, width: 40 }}
-            />
-            <Text variant="h2" style={styles.headerTitle}>
-              Notifications
-            </Text>
-          </View>
-          <Badge
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              borderWidth: 0,
-            }}
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    Toast.show({
+      type: "success",
+      text1: "Marked all as read",
+    });
+  };
+
+  const deleteNotification = (id: number) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleAction = (type: string, notification: Notification) => {
+    markAsRead(notification.id);
+    if (type === "primary") {
+      // Handle navigation based on action
+      // Simplified for now
+      if (notification.action) {
+        // Check if action refers to a tab route or stack route
+        if (notification.action === "MainTab") {
+          navigation.navigate("MainTab", { screen: "Transactions" }); // Default for MainTab
+        } else {
+          navigation.navigate(notification.action);
+        }
+      }
+    } else {
+      // Secondary action
+      if (notification.actionButtons === "accept_decline") {
+        deleteNotification(notification.id);
+        Toast.show({ type: "info", text1: "Request Declined" });
+      } else {
+        // Handle other secondary
+      }
+    }
+  };
+
+  const renderList = (data: Notification[]) => (
+    <ScrollView contentContainerStyle={styles.listContent}>
+      {data.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Feather
+            name="bell-off"
+            size={48}
+            color={theme.colors.mutedForeground}
+          />
+          <Text
+            variant="caption"
+            style={{ marginTop: 16, textAlign: "center" }}
           >
-            <Text style={{ color: "white", fontSize: 12 }}>3 New</Text>
-          </Badge>
+            No notifications found
+          </Text>
         </View>
-
-        <SettingsGroup
-          containerStyle={{ marginBottom: 0 }}
-          cardStyle={{
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
-            borderRadius: theme.radius.lg,
-          }}
-        >
-          <SettingsRow
-            label="Push Notifications"
-            description="Receive all app notifications"
-            icon="bell"
-            iconColor="white"
-            variant="toggle"
-            rightElement={<Switch value={true} onValueChange={() => {}} />}
-            style={{ paddingHorizontal: theme.paddings.md }}
+      ) : (
+        data.map((notification) => (
+          <NotificationCard
+            key={notification.id}
+            notification={notification}
+            onPress={() => markAsRead(notification.id)}
+            onAction={(type) => handleAction(type, notification)}
+            onDelete={() => deleteNotification(notification.id)}
           />
-        </SettingsGroup>
-      </View>
+        ))
+      )}
+    </ScrollView>
+  );
 
-      <View style={styles.content}>
-        {/* Notification Categories */}
-        <View style={{ gap: theme.margins.md }}>
-          {notificationCategories.map((category) => (
-            <SettingsGroup
-              key={category.title}
-              cardStyle={{ padding: theme.paddings.lg }}
-            >
-              <View style={styles.categoryHeader}>
-                <View style={styles.categoryIcon}>
-                  <Feather
-                    name={category.icon as any}
-                    size={20}
-                    color={getColor(category.color)}
-                  />
-                </View>
-                <Text variant="h3">{category.title}</Text>
-              </View>
+  const AllTab = () => renderList(notifications);
+  const UnreadTab = () => renderList(notifications.filter((n) => !n.read));
 
-              <View>
-                {category.items.map((item, index) => (
-                  <SettingsRow
-                    key={item.label}
-                    label={item.label}
-                    description={item.description}
-                    variant="toggle"
-                    showSeparator={index > 0}
-                    rightElement={
-                      <Switch value={item.enabled} onValueChange={() => {}} />
-                    }
-                  />
-                ))}
-              </View>
-            </SettingsGroup>
-          ))}
-        </View>
-
-        {/* Email Preferences */}
-        <SettingsGroup
-          title="Email Notifications"
-          cardStyle={{ padding: theme.paddings.lg / 2 }}
-        >
-          <SettingsRow
-            label="Monthly Reports"
-            description="Detailed financial summary"
-            variant="toggle"
-            rightElement={<Switch value={true} onValueChange={() => {}} />}
-          />
-          <SettingsRow
-            label="Product Updates"
-            description="New features and improvements"
-            variant="toggle"
-            showSeparator
-            rightElement={<Switch value={false} onValueChange={() => {}} />}
-          />
-        </SettingsGroup>
-      </View>
+  return (
+    <ScreenWrapper style={styles.container}>
+      <Header
+        title="Notifications"
+        onBack={() => navigation.goBack()}
+        right={
+          notifications.length > 0 && (
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Button
+                title="Mark All Read"
+                variant="ghost"
+                size="sm"
+                onPress={markAllAsRead}
+                textStyle={{ color: "white", fontSize: 12 }}
+                style={{ height: 32, paddingHorizontal: 0 }}
+              />
+            </View>
+          )
+        }
+      />
+      <TabView
+        routes={[
+          { key: "all", title: "All" },
+          {
+            key: "unread",
+            title: "Unread",
+            badge: unreadCount > 0,
+            badgeVariant: "destructive",
+          },
+        ]}
+        screens={{
+          all: AllTab,
+          unread: UnreadTab,
+        }}
+      />
     </ScreenWrapper>
   );
 };
@@ -219,47 +211,13 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: theme.margins.lg,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  headerTitle: {
-    color: "white",
-  },
-  content: {
+  listContent: {
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
-    gap: theme.margins.md,
-    maxWidth: {
-      md: 800,
-    },
-    alignSelf: "center",
-    width: "100%",
+    paddingBottom: 80,
   },
-  categoryHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-    marginBottom: theme.margins.md,
-  },
-  categoryIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.muted,
+  emptyState: {
     alignItems: "center",
     justifyContent: "center",
+    paddingTop: 100,
   },
 }));

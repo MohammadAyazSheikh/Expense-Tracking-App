@@ -8,6 +8,7 @@ export type RootStackParamList = {
   MainTab: NavigatorScreenParams<MainTabParamList>;
   Profile: undefined;
   Notifications: undefined;
+  NotificationSettings: undefined;
   Security: undefined;
   HelpSupport: undefined;
   NotFound: undefined;

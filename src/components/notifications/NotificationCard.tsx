@@ -22,28 +22,7 @@ export const NotificationCard = ({
 }: NotificationCardProps) => {
   const { theme } = useUnistyles();
 
-  const getIconColor = (colorClass: string) => {
-    // Map tailwind classes to theme colors
-    if (colorClass.includes("primary")) return theme.colors.primary;
-    if (colorClass.includes("success")) return theme.colors.success;
-    if (colorClass.includes("destructive")) return theme.colors.destructive;
-    if (colorClass.includes("warning")) return theme.colors.warning;
-    if (colorClass.includes("accent")) return theme.colors.accent;
-    return theme.colors.foreground;
-  };
-
-  const getBgColor = (bgClass: string) => {
-    // Map tailwind bg classes to theme colors with opacity
-    if (bgClass.includes("primary")) return theme.colors.primary + "1A"; // 10%
-    if (bgClass.includes("success")) return theme.colors.success + "1A";
-    if (bgClass.includes("destructive")) return theme.colors.destructive + "1A";
-    if (bgClass.includes("warning")) return theme.colors.warning + "1A";
-    if (bgClass.includes("accent")) return theme.colors.accent + "1A";
-    return theme.colors.muted;
-  };
-
-  const iconColor = getIconColor(notification.color);
-  const bgColor = getBgColor(notification.bgColor);
+  styles.useVariants({ variant: notification.color as any });
 
   return (
     <Pressable onPress={onPress}>
@@ -53,21 +32,16 @@ export const NotificationCard = ({
           !notification.read && {
             borderLeftWidth: 4,
             borderLeftColor: theme.colors.primary,
-            backgroundColor: theme.colors.primary + "05",
           },
         ]}
       >
         <View style={styles.contentRow}>
-          <View style={[styles.iconContainer, { backgroundColor: bgColor }]}>
-            {/* We will need to map lucide icons generic way or pass icon component */}
-            {/* For now assuming notification.icon is a valid Feather icon name or similar */}
-            {/* Since web uses Lucide components directly, we might need a mapper or change data structure */}
-            {/* For this MVP I will use a generic Bell if icon mapping fails, or expect valid names in data */}
+          <View style={[styles.iconContainer]}>
             <Icon
               type="Feather"
               name={(notification.iconName || "bell") as any}
               size={20}
-              color={iconColor}
+              color={theme.colors.background}
             />
           </View>
           <View style={styles.textContainer}>
@@ -147,6 +121,28 @@ const styles = StyleSheet.create((theme) => ({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+    variants: {
+      variant: {
+        primary: {
+          backgroundColor: theme.colors.primary,
+        },
+        success: {
+          backgroundColor: theme.colors.success,
+        },
+        destructive: {
+          backgroundColor: theme.colors.destructive,
+        },
+        warning: {
+          backgroundColor: theme.colors.warning,
+        },
+        accent: {
+          backgroundColor: theme.colors.accent,
+        },
+        muted: {
+          backgroundColor: theme.colors.muted,
+        },
+      },
+    },
   },
   textContainer: {
     flex: 1,
