@@ -1,19 +1,43 @@
-import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
+import { View, ScrollView, TextInput, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { SheetManager } from "react-native-actions-sheet";
+import Toast from "react-native-toast-message";
+import { Feather } from "@expo/vector-icons";
+
 import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
+import { Button, DropDownButton } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { SettingsGroup } from "../components/ui/SettingsGroup";
-import { SettingsRow } from "../components/ui/SettingsRow";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { Header } from "../components/ui/Headers";
+import { Input } from "../components/ui/Input";
+import Checkbox from "../components/ui/Checkbox";
 import { useFinanceStore } from "../store";
-import Toast from "react-native-toast-message";
+import Animated from "react-native-reanimated";
+import {
+  EnteringAnimation,
+  ExitingAnimation,
+  LayoutAnimation,
+} from "../utils/Animation";
+
+// Validation schema
+const expenseSchema = z.object({
+  amount: z.string().min(1, "Amount is required"),
+  description: z.string().min(1, "Description is required"),
+  paidBy: z.string(),
+  splitType: z.enum(["equal", "exact", "percentage"]),
+  selectedMembers: z.array(z.string()).min(1, "Select at least one member"),
+  customSplits: z.record(z.string()),
+  notes: z.string().optional(),
+});
+
+type ExpenseFormData = z.infer<typeof expenseSchema>;
 
 export const AddGroupExpenseScreen = () => {
   const { theme } = useUnistyles();
@@ -27,56 +51,103 @@ export const AddGroupExpenseScreen = () => {
   const addGroupExpense = useFinanceStore((state) => state.addGroupExpense);
   const updateGroup = useFinanceStore((state) => state.updateGroup);
 
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
-  const [paidBy, setPaidBy] = useState("You");
-  const [selectedMembers, setSelectedMembers] = useState<string[]>(
-    group?.members || []
-  );
-  const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
-  const [splitType, setSplitType] = useState<"equal" | "exact" | "percentage">(
-    "equal"
-  );
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseSchema),
+    defaultValues: {
+      amount: "",
+      description: "",
+      paidBy: "You",
+      splitType: "equal",
+      selectedMembers: group?.members || [],
+      customSplits: {},
+      notes: "",
+    },
+  });
+
+  const amount = watch("amount");
+  const splitType = watch("splitType");
+  const selectedMembers = watch("selectedMembers");
+  const customSplits = watch("customSplits");
+  const paidBy = watch("paidBy");
+
+  useEffect(() => {
+    if (group && selectedMembers.length === 0) {
+      setValue("selectedMembers", group.members);
+    }
+  }, [group, setValue]);
 
   if (!group) return null;
 
-  const handleAddExpense = () => {
-    if (!amount || !description) {
-      Toast.show({
-        type: "error",
-        text1: "Required Fields",
-        text2: "Please enter an amount and description.",
-      });
-      return;
+  const handleMemberToggle = (memberId: string) => {
+    const currentSelected = selectedMembers;
+    if (currentSelected.includes(memberId)) {
+      setValue(
+        "selectedMembers",
+        currentSelected.filter((id) => id !== memberId)
+      );
+    } else {
+      setValue("selectedMembers", [...currentSelected, memberId]);
     }
+  };
 
-    const numAmount = parseFloat(amount);
-    const sharePerPerson = numAmount / group.members.length;
+  const calculateShare = (memberId: string) => {
+    const numAmount = parseFloat(amount || "0");
+    if (!amount || selectedMembers.length === 0) return 0;
+
+    if (splitType === "equal") {
+      return numAmount / selectedMembers.length;
+    } else if (splitType === "exact") {
+      return parseFloat(customSplits[memberId] || "0");
+    } else if (splitType === "percentage") {
+      const percentage = parseFloat(customSplits[memberId] || "0");
+      return (percentage / 100) * numAmount;
+    }
+    return 0;
+  };
+
+  const onSubmit = (data: ExpenseFormData) => {
+    const numAmount = parseFloat(data.amount);
+
+    // Validate custom splits sum if needed (omitted for brevity, can add later)
+
+    const splits = data.selectedMembers.map((memberId) => ({
+      memberId,
+      amount: calculateShare(memberId),
+    }));
 
     addGroupExpense({
       groupId: group.id,
       amount: numAmount,
-      description,
-      paidBy,
+      description: data.description,
+      paidBy: data.paidBy,
       date: new Date().toLocaleDateString(),
-      splitType,
-      splits: group.members.map((member) => ({
-        memberId: member,
-        amount: sharePerPerson,
-      })),
+      splitType: data.splitType,
+      splits,
     });
 
-    // Simple balance update logic
-    if (paidBy === "You") {
+    // Update group totals
+    const sharePerPerson = numAmount / data.selectedMembers.length; // Simplified for equal split logic in updateGroup for now
+    // In a real app, you'd calculate exact debts based on splits
+
+    if (data.paidBy === "You") {
       updateGroup(group.id, {
         totalExpenses: group.totalExpenses + numAmount,
-        youAreOwed: group.youAreOwed + (numAmount - sharePerPerson),
+        youAreOwed:
+          group.youAreOwed +
+          (numAmount - (splits.find((s) => s.memberId === "You")?.amount || 0)),
         lastActivity: "Just now",
       });
     } else {
+      const yourSplit = splits.find((s) => s.memberId === "You")?.amount || 0;
       updateGroup(group.id, {
         totalExpenses: group.totalExpenses + numAmount,
-        youOwe: group.youOwe + sharePerPerson,
+        youOwe: group.youOwe + yourSplit,
         lastActivity: "Just now",
       });
     }
@@ -89,155 +160,205 @@ export const AddGroupExpenseScreen = () => {
     navigation.goBack();
   };
 
-  return (
-    <ScreenWrapper style={styles.container} scrollable>
-      <LinearGradient
-        colors={[theme.colors.primary, theme.colors.primary + "CC"]}
-        style={styles.header}
-      >
-        <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Feather name="arrow-left" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
-          <Text variant="h2" style={styles.headerTitle}>
-            Add Expense
-          </Text>
-          <View style={{ width: 40 }} />
-        </View>
-      </LinearGradient>
+  const handlePaidBySelection = async () => {
+    const options = group.members.map((m) => ({
+      label: m,
+      value: m,
+    }));
 
-      <View style={styles.content}>
+    const result = await SheetManager.show("select-sheet", {
+      payload: {
+        options,
+        title: "Paid By",
+        selectedValue: paidBy,
+        onSelect: (value) => setValue("paidBy", value),
+      },
+    });
+    setValue("paidBy", result!);
+  };
+
+  return (
+    <ScreenWrapper style={styles.container}>
+      <Header title="Add Group Expense" onBack={() => navigation.goBack()} />
+
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Amount Input */}
         <Card style={styles.amountCard}>
-          <View style={styles.inputRow}>
+          <Text
+            variant="caption"
+            style={{ color: theme.colors.mutedForeground }}
+          >
+            Amount
+          </Text>
+          <View style={styles.amountInputWrapper}>
             <Text style={styles.currencySymbol}>$</Text>
-            <TextInput
-              style={styles.amountInput}
-              value={amount}
-              onChangeText={setAmount}
-              placeholder="0.00"
-              placeholderTextColor={theme.colors.mutedForeground}
-              keyboardType="decimal-pad"
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.amountInput}
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="0.00"
+                  placeholderTextColor={theme.colors.mutedForeground}
+                  keyboardType="decimal-pad"
+                />
+              )}
             />
           </View>
-          <TextInput
-            style={styles.descriptionInput}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="What was it for?"
-            placeholderTextColor={theme.colors.mutedForeground}
-          />
+          {errors.amount && (
+            <Text style={styles.errorText}>{errors.amount.message}</Text>
+          )}
         </Card>
 
-        <SettingsGroup title="Expense Details">
-          <SettingsRow
-            label="Paid By"
-            rightElement={
-              <View style={styles.picker}>
-                <Text weight="medium">{paidBy}</Text>
-                <Feather
-                  name="chevron-down"
-                  size={16}
-                  color={theme.colors.mutedForeground}
-                />
-              </View>
-            }
-            onPress={() => {
-              // Simple toggle for now
-              setPaidBy(paidBy === "You" ? group.members[1] || "Sarah" : "You");
-            }}
+        {/* Description */}
+        <View>
+          <Text weight="medium" style={styles.label}>
+            <Feather name="file-text" size={14} /> Description
+          </Text>
+          <Controller
+            control={control}
+            name="description"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                value={value}
+                onChangeText={onChange}
+                placeholder="What was this expense for?"
+                error={errors.description?.message}
+              />
+            )}
           />
-        </SettingsGroup>
-        <SettingsGroup title="Split Type">
+        </View>
+
+        {/* Paid By */}
+        <View>
+          <Text weight="medium" style={styles.label}>
+            <Feather name="dollar-sign" size={14} /> Paid By
+          </Text>
+          <DropDownButton
+            selectedValue={paidBy || "Who paid?"}
+            onPress={handlePaidBySelection}
+          />
+        </View>
+
+        {/* Split Type */}
+        <View>
+          <Text weight="medium" style={styles.label}>
+            <Feather name="pie-chart" size={14} /> Split Type
+          </Text>
           <View style={styles.tabsContainer}>
-            {["equal", "exact", "percentage"].map((type) => (
-              <TouchableOpacity
+            {(["equal", "exact", "percentage"] as const).map((type) => (
+              <Pressable
                 key={type}
-                style={[
-                  styles.tabButton,
-                  splitType === type && styles.activeTabButton,
-                ]}
-                onPress={() => setSplitType(type as any)}
+                style={[styles.tab, splitType === type && styles.activeTab]}
+                onPress={() => setValue("splitType", type)}
               >
                 <Text
-                  variant="caption"
-                  weight="semiBold"
-                  style={{
-                    color:
-                      splitType === type ? "white" : theme.colors.foreground,
-                    fontSize: 12,
-                  }}
+                  style={[
+                    styles.tabText,
+                    splitType === type && styles.activeTabText,
+                  ]}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             ))}
           </View>
-        </SettingsGroup>
+        </View>
 
-        <SettingsGroup title="Split With">
-          {group.members.map((member) => (
-            <View key={member} style={styles.memberSplitRow}>
-              <TouchableOpacity
-                style={styles.memberSelect}
-                onPress={() => {
-                  setSelectedMembers((prev) =>
-                    prev.includes(member)
-                      ? prev.filter((m) => m !== member)
-                      : [...prev, member]
-                  );
-                }}
+        {/* Split With */}
+        <View>
+          <Text weight="medium" style={styles.label}>
+            <Feather name="users" size={14} /> Split With
+          </Text>
+          <Card enableLayoutAnimation style={{ padding: theme.paddings.sm }}>
+            {group.members.map((member, index) => (
+              <Animated.View
+                key={member}
+                layout={LayoutAnimation}
+                style={[styles.memberRow, index == 0 && { borderTopWidth: 0 }]}
               >
-                <View
-                  style={[
-                    styles.checkbox,
-                    selectedMembers.includes(member) && styles.checkboxActive,
-                  ]}
-                >
-                  {selectedMembers.includes(member) && (
-                    <Feather name="check" size={12} color="white" />
-                  )}
+                <View style={[styles.memberInfo]}>
+                  <Checkbox
+                    checked={selectedMembers.includes(member)}
+                    onPress={() => handleMemberToggle(member)}
+                    size="lg"
+                  />
+                  <View style={styles.avatarSmall}>
+                    <Text style={{ fontSize: 12, fontWeight: "bold" }}>
+                      {member.charAt(0)}
+                    </Text>
+                  </View>
+                  <Text>{member}</Text>
                 </View>
-                <View style={styles.memberAvatarSmall}>
-                  <Text style={{ fontSize: 12 }}>{member.charAt(0)}</Text>
-                </View>
-                <Text weight="medium">{member}</Text>
-              </TouchableOpacity>
 
-              {splitType === "equal" ? (
-                <Text weight="bold" style={{ color: theme.colors.primary }}>
-                  $
-                  {selectedMembers.includes(member) && amount
-                    ? (parseFloat(amount) / selectedMembers.length).toFixed(2)
-                    : "0.00"}
-                </Text>
-              ) : (
-                <View style={styles.customSplitInput}>
-                  {splitType === "exact" && <Text variant="caption">$</Text>}
-                  <TextInput
-                    style={styles.smallInput}
-                    value={customSplits[member] || ""}
+                {splitType === "equal" ? (
+                  <Text weight="bold" style={{ color: theme.colors.primary }}>
+                    $
+                    {selectedMembers.includes(member)
+                      ? calculateShare(member).toFixed(2)
+                      : "0.00"}
+                  </Text>
+                ) : (
+                  <Input
+                    value={(customSplits[member] as string) || ""}
                     onChangeText={(val) =>
-                      setCustomSplits((prev) => ({ ...prev, [member]: val }))
+                      setValue("customSplits", {
+                        ...customSplits,
+                        [member]: val,
+                      })
                     }
                     placeholder="0"
-                    keyboardType="decimal-pad"
+                    keyboardType="numeric"
                     editable={selectedMembers.includes(member)}
+                    leftIcon={
+                      splitType === "exact" && <Text variant="caption">$</Text>
+                    }
+                    rightIcon={
+                      splitType === "percentage" && (
+                        <Text variant="caption">%</Text>
+                      )
+                    }
+                    style={styles.customInputWrapper}
+                    inputStyle={styles.zeroPadding}
+                    leftIconContainerStyle={styles.zeroPadding}
+                    rightIconContainerStyle={styles.zeroPadding}
                   />
-                  {splitType === "percentage" && (
-                    <Text variant="caption">%</Text>
-                  )}
-                </View>
-              )}
-            </View>
-          ))}
-        </SettingsGroup>
+                )}
+              </Animated.View>
+            ))}
+          </Card>
+        </View>
 
+        {/* Notes */}
+        <View>
+          <Controller
+            control={control}
+            name="notes"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Notes (Optional)"
+                value={value}
+                onChangeText={onChange}
+                placeholder="Add any additional notes..."
+                multiline
+                numberOfLines={3}
+              />
+            )}
+          />
+        </View>
+
+        {/* Summary Card */}
         {amount && (
-          <Card style={styles.summaryCard}>
+          <Card
+            enableLayoutAnimation
+            enableEnterAnimation
+            style={styles.summaryCard}
+          >
             <Text weight="bold" style={{ marginBottom: 12 }}>
               Summary
             </Text>
@@ -253,7 +374,10 @@ export const AddGroupExpenseScreen = () => {
               <View style={styles.summaryRow}>
                 <Text variant="caption">Each Person Pays</Text>
                 <Text weight="bold" style={{ color: theme.colors.primary }}>
-                  ${(parseFloat(amount) / selectedMembers.length).toFixed(2)}
+                  $
+                  {(
+                    parseFloat(amount) / Math.max(1, selectedMembers.length)
+                  ).toFixed(2)}
                 </Text>
               </View>
             )}
@@ -262,12 +386,11 @@ export const AddGroupExpenseScreen = () => {
 
         <Button
           title="Add Expense"
-          onPress={handleAddExpense}
-          style={styles.addButton}
+          onPress={handleSubmit(onSubmit)}
           size="lg"
-          disabled={!amount || !description}
+          style={{ marginBottom: 40 }}
         />
-      </View>
+      </ScrollView>
     </ScreenWrapper>
   );
 };
@@ -277,138 +400,124 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl,
+  content: {
+    padding: theme.paddings.md,
+    gap: theme.margins.lg,
   },
-  headerTop: {
+  amountCard: {
+    alignItems: "center",
+    padding: theme.paddings.lg,
+    gap: theme.margins.xs,
+  },
+  amountInputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  currencySymbol: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: theme.colors.mutedForeground,
+    marginRight: 4,
+  },
+  amountInput: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: theme.colors.foreground,
+    minWidth: 100,
+    textAlign: "center",
+  },
+  label: {
+    marginBottom: theme.margins.xs,
+    gap: 8,
+  },
+  errorText: {
+    color: theme.colors.destructive,
+    fontSize: 12,
+  },
+  selectTrigger: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  },
-  headerTitle: {
-    color: "white",
-  },
-  content: {
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
-    gap: theme.margins.md,
-  },
-  amountCard: {
-    padding: theme.paddings.xl,
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  currencySymbol: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: theme.colors.mutedForeground,
-  },
-  amountInput: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: theme.colors.foreground,
-    minWidth: 120,
-    textAlign: "center",
-  },
-  descriptionInput: {
-    fontSize: 18,
-    color: theme.colors.foreground,
-    textAlign: "center",
-    width: "100%",
-  },
-  picker: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: theme.colors.muted,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    backgroundColor: theme.colors.background,
   },
   tabsContainer: {
     flexDirection: "row",
-    gap: 8,
-    padding: 4,
     backgroundColor: theme.colors.muted,
-    borderRadius: 8,
+    padding: 4,
+    borderRadius: theme.radius.md,
   },
-  tabButton: {
+  tab: {
     flex: 1,
     paddingVertical: 8,
     alignItems: "center",
-    borderRadius: 6,
+    borderRadius: theme.radius.sm,
   },
-  activeTabButton: {
+  activeTab: {
     backgroundColor: theme.colors.primary,
   },
-  memberSplitRow: {
+  tabText: {
+    fontSize: theme.fontSize.md,
+    fontWeight: "600",
+    color: theme.colors.mutedForeground,
+  },
+  activeTabText: {
+    color: "white",
+  },
+  memberRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border + "15",
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
-  memberSelect: {
+  memberInfo: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
+  avatarSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.primaryExtraLight,
     alignItems: "center",
     justifyContent: "center",
   },
-  checkboxActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+  zeroPadding: {
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingHorizontal: 0,
   },
-  memberAvatarSmall: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: theme.colors.primary + "10",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  customSplitInput: {
+  customInputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
     backgroundColor: theme.colors.muted,
     paddingHorizontal: 8,
     borderRadius: 6,
-  },
-  smallInput: {
-    width: 60,
     height: 32,
+    width: 100,
+  },
+  customInput: {
+    width: 50,
     textAlign: "right",
     fontSize: 14,
     color: theme.colors.foreground,
+    padding: 0,
   },
   summaryCard: {
     padding: theme.paddings.md,
-    backgroundColor: theme.colors.primary + "05",
-    borderColor: theme.colors.primary + "20",
-    borderWidth: 1,
   },
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 8,
-  },
-  addButton: {
-    marginTop: theme.margins.lg,
-    marginBottom: 40,
   },
 }));

@@ -94,7 +94,11 @@ export const SelectSheet = (props: SheetProps) => {
         <Text weight="bold" style={styles.title}>
           {title}
         </Text>
-        <Pressable onPress={() => SheetManager.hide("select-sheet")}>
+        <Pressable
+          onPress={() =>
+            SheetManager.hide("select-sheet", { payload: selectedValue })
+          }
+        >
           <Icon
             type="Feather"
             name="x"

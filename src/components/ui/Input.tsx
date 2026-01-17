@@ -10,6 +10,8 @@ import {
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "./Text";
 import { useFonts } from "../../hooks/useFonts";
+import Animated from "react-native-reanimated";
+import { LayoutAnimation } from "../../utils/Animation";
 
 export interface InputProps extends TextInputProps {
   label?: string;
@@ -17,6 +19,8 @@ export interface InputProps extends TextInputProps {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
+  leftIconContainerStyle?: StyleProp<ViewStyle>;
+  rightIconContainerStyle?: StyleProp<ViewStyle>;
   inputStyle?: StyleProp<TextStyle>;
 }
 
@@ -28,6 +32,8 @@ export const Input = ({
   rightIcon,
   containerStyle,
   inputStyle,
+  leftIconContainerStyle,
+  rightIconContainerStyle,
   ...props
 }: InputProps) => {
   const { fonts } = useFonts();
@@ -50,14 +56,21 @@ export const Input = ({
   };
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <Animated.View
+      layout={LayoutAnimation}
+      style={[styles.container, containerStyle]}
+    >
       {label && (
         <Text style={styles.label} weight="medium">
           {label}
         </Text>
       )}
       <View style={[styles.inputWrapper, style]}>
-        {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+        {leftIcon && (
+          <View style={[styles.leftIcon, leftIconContainerStyle]}>
+            {leftIcon}
+          </View>
+        )}
         <TextInput
           style={[styles.input, { fontFamily: fonts.regular }, inputStyle]}
           placeholderTextColor={theme.colors.mutedForeground}
@@ -65,10 +78,14 @@ export const Input = ({
           onBlur={handleBlur}
           {...props}
         />
-        {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
+        {rightIcon && (
+          <View style={[styles.rightIcon, rightIconContainerStyle]}>
+            {rightIcon}
+          </View>
+        )}
       </View>
       {error && <Text style={styles.error}>{error}</Text>}
-    </View>
+    </Animated.View>
   );
 };
 
