@@ -13,7 +13,10 @@ import {
 } from "react-native-unistyles";
 import { Text } from "./Text";
 import { Feather } from "@expo/vector-icons";
+import Animated from "react-native-reanimated";
+import { LayoutAnimation } from "../../utils/Animation";
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 type ButtonVariants = UnistylesVariants<typeof styles>;
 
 type ButtonProps = ButtonVariants & {
@@ -45,7 +48,8 @@ export const Button = ({
   });
 
   return (
-    <Pressable
+    <AnimatedPressable
+      layout={LayoutAnimation}
       onPress={onPress}
       disabled={disabled || loading}
       style={[styles.container, style]}
@@ -67,7 +71,7 @@ export const Button = ({
           )}
         </>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 };
 

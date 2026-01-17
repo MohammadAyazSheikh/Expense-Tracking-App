@@ -3,6 +3,12 @@ import { View, ViewStyle, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Feather } from "@expo/vector-icons";
 import { Text } from "./Text";
+import Animated from "react-native-reanimated";
+import {
+  EnteringAnimation,
+  ExitingAnimation,
+  LayoutAnimation,
+} from "../../utils/Animation";
 
 interface SettingsRowProps {
   label: string;
@@ -86,10 +92,14 @@ export const SettingsRow = ({
   );
 
   return (
-    <View>
+    <Animated.View
+      layout={LayoutAnimation}
+      entering={EnteringAnimation}
+      exiting={ExitingAnimation}
+    >
       {showSeparator && <View style={styles.separator} />}
       {onPress ? <Pressable onPress={onPress}>{content}</Pressable> : content}
-    </View>
+    </Animated.View>
   );
 };
 

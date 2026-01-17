@@ -15,6 +15,10 @@ import { DatePickerSheet } from "./components/sheets/DatePickerSheet";
 import { WalletSelectorSheet } from "./components/Wallets/WalletSelectorSheet";
 import { MenuSheet, MenuItem } from "./components/sheets/MenuSheet";
 import { SelectSheet, SelectorOption } from "./components/sheets/SelectSheet";
+import {
+  MultiSelectSheet,
+  MultiSelectOption,
+} from "./components/sheets/MultiSelectSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -68,6 +72,14 @@ declare module "react-native-actions-sheet" {
       };
       returnValue: string | undefined;
     }>;
+    "multi-select-sheet": SheetDefinition<{
+      payload: {
+        options: MultiSelectOption[];
+        title?: string;
+        selectedValues?: string[];
+      };
+      returnValue: string[] | undefined;
+    }>;
   }
 }
 
@@ -82,6 +94,7 @@ export const Sheets = () => {
         "wallet-selector-sheet": WalletSelectorSheet,
         "menu-sheet": MenuSheet,
         "select-sheet": SelectSheet,
+        "multi-select-sheet": MultiSelectSheet,
       }}
     />
   );

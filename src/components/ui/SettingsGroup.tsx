@@ -3,12 +3,15 @@ import { View, ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { Text } from "./Text";
 import { Card } from "./Card";
+import Animated from "react-native-reanimated";
+import { LayoutAnimation } from "../../utils/Animation";
 
 interface SettingsGroupProps {
   title?: string;
   children: React.ReactNode;
   containerStyle?: ViewStyle;
   cardStyle?: ViewStyle;
+  rightElement?: React.ReactNode;
 }
 
 export const SettingsGroup = ({
@@ -16,22 +19,34 @@ export const SettingsGroup = ({
   children,
   containerStyle,
   cardStyle,
+  rightElement,
 }: SettingsGroupProps) => {
   return (
-    <View style={[styles.container, containerStyle]}>
+    <Animated.View
+      layout={LayoutAnimation}
+      style={[styles.container, containerStyle]}
+    >
       {title && (
-        <Text variant="caption" weight="semiBold" style={styles.title}>
-          {title.toUpperCase()}
-        </Text>
+        <View style={styles.titleContainer}>
+          <Text variant="caption" weight="semiBold" style={styles.title}>
+            {title.toUpperCase()}
+          </Text>
+          {rightElement}
+        </View>
       )}
       <Card style={[styles.card, cardStyle]}>{children}</Card>
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create((theme) => ({
   container: {
     marginBottom: theme.margins.lg,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     color: theme.colors.mutedForeground,
