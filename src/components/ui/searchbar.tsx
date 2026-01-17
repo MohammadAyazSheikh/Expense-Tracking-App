@@ -8,14 +8,16 @@ import { Text } from "./Text";
 interface SearchBarProps extends InputProps {
   badgeNumber?: number;
   onPressFilter?: () => void;
+  elevated?: boolean;
 }
 
 export const SearchBar = (props: SearchBarProps) => {
   const { theme } = useUnistyles();
-
+  styles.useVariants({ elevated: props.elevated });
   return (
     <Input
       placeholder="Search..."
+      style={styles.container}
       leftIcon={
         <Feather name="search" size={20} color={theme.colors.mutedForeground} />
       }
@@ -37,6 +39,17 @@ export const SearchBar = (props: SearchBarProps) => {
 };
 
 const styles = StyleSheet.create((theme) => ({
+  container: {
+    variants: {
+      elevated: {
+        true: {
+          ...theme.shadows.sm,
+          borderWidth: 0,
+          backgroundColor: theme.colors.card,
+        },
+      },
+    },
+  },
   filterButton: {
     padding: theme.paddings.xs,
     position: "relative",

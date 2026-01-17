@@ -63,6 +63,7 @@ export interface Friend {
   id: string;
   name: string;
   email?: string;
+  phone?: string;
   avatar?: string;
 }
 
@@ -95,4 +96,35 @@ export interface Tag {
   id: string;
   name: string;
   color: string;
+}
+
+export type NotificationActionType =
+  | "accept_decline"
+  | "pay"
+  | "view"
+  | "review_security"
+  | "add_funds"
+  | "view_insight"
+  | "view_report"
+  | "invite_friend"
+  | "explore"
+  | null;
+
+export interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  time: string;
+  iconName?: string; // Changed from icon: any to iconName: string for RN compatibility
+  color: string;
+  bgColor: string;
+  read: boolean;
+  action: string;
+  actionButtons?: NotificationActionType;
+  actionData?: {
+    primaryLabel?: string;
+    secondaryLabel?: string;
+    amount?: string;
+  };
 }

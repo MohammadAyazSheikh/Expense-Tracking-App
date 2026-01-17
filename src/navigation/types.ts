@@ -26,8 +26,9 @@ export type RootStackParamList = {
   CreateGroup: undefined;
   GroupDetail: { id: string };
   AddGroupExpense: { groupId: string };
-  SettleUp: { groupId?: string };
+  SettleUp: { groupId?: string; friendId?: string };
   Friends: undefined;
+  FriendDetail: { friendId: string };
   Wallets: undefined;
   AddWallet: undefined;
   EditWallet: { walletId: string };

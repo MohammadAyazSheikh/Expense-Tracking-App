@@ -54,9 +54,11 @@ export const Header = ({
 
   return (
     <LinearGradient
-      colors={[theme.colors.primary, theme.colors.primaryLight]}
-      start={{ x: 0.5, y: 0.5 }}
-      end={{ x: 0, y: 0 }}
+      colors={[theme.colors.primary, "hsl(230, 75%, 70%)"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      // start={{ x: 0.5, y: 0.5 }}
+      // end={{ x: 0, y: 0 }}
       style={[
         styles.container,
         applySafeAreaPadding && { marginTop: safeAreaInsets.top },

@@ -29,12 +29,12 @@ import { GroupDetailScreen } from "../screens/GroupDetailScreen";
 import { AddGroupExpenseScreen } from "../screens/AddGroupExpenseScreen";
 import { SettleUpScreen } from "../screens/SettleUpScreen";
 import { FriendsScreen } from "../screens/FriendsScreen";
+import { FriendDetailScreen } from "../screens/FriendDetailScreen";
 import { BudgetScreen } from "../screens/BudgetScreen";
 import WalletDetailScreen from "../screens/WalletDetailScreen";
 import WalletStatementScreen from "../screens/WalletStatementScreen";
 import { AddWalletScreen } from "../screens/AddWalletScreen";
 import { useTranslation } from "react-i18next";
-import { Header } from "../components/ui/Headers";
 import { EditWalletScreen } from "../screens/EditWalletScreen";
 import { TransferScreen } from "../screens/TransferScreen";
 
@@ -79,6 +79,7 @@ const mainRoutes = () => {
       <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
       <Stack.Screen name="SettleUp" component={SettleUpScreen} />
       <Stack.Screen name="Friends" component={FriendsScreen} />
+      <Stack.Screen name="FriendDetail" component={FriendDetailScreen} />
       <Stack.Screen name="Wallets" component={WalletsScreen} />
       <Stack.Screen name="AddWallet" component={AddWalletScreen} />
       <Stack.Screen name="EditWallet" component={EditWalletScreen} />

@@ -19,9 +19,13 @@ import {
   MultiSelectSheet,
   MultiSelectOption,
 } from "./components/sheets/MultiSelectSheet";
+import { AddFriendSheet } from "./components/friends/AddFriendSheet";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
+    "add-friend-sheet": SheetDefinition<{
+      payload: undefined;
+    }>;
     "filter-sheet": SheetDefinition<{
       payload: { initialFilters: FilterState };
       returnValue: FilterState | undefined;
@@ -95,6 +99,7 @@ export const Sheets = () => {
         "menu-sheet": MenuSheet,
         "select-sheet": SelectSheet,
         "multi-select-sheet": MultiSelectSheet,
+        "add-friend-sheet": AddFriendSheet,
       }}
     />
   );

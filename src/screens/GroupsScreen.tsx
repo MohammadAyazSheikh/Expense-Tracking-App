@@ -13,6 +13,7 @@ import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
 import { useFinanceStore } from "../store";
 import { Group } from "../types";
+import { SearchBar } from "../components/ui/searchbar";
 
 type GroupCardProps = {
   group: Group;
@@ -165,22 +166,12 @@ export const GroupsScreen = () => {
         </Card>
       </Header>
       <View style={styles.content}>
-        {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <Feather
-            name="search"
-            size={18}
-            color={theme.colors.mutedForeground}
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search groups..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor={theme.colors.mutedForeground}
-          />
-        </View>
+        <SearchBar
+          elevated
+          placeholder="Search groups..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
@@ -309,22 +300,6 @@ const styles = StyleSheet.create((theme) => ({
   content: {
     padding: theme.paddings.md,
     gap: theme.margins.md,
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.radius.md,
-    paddingHorizontal: theme.paddings.md,
-    ...theme.shadows.sm,
-  },
-  searchIcon: {
-    marginRight: theme.margins.sm,
-  },
-  searchInput: {
-    height: 44,
-    flex: 1,
-    color: theme.colors.foreground,
   },
   quickActions: {
     flexDirection: "row",

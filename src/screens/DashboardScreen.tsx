@@ -119,23 +119,39 @@ export const DashboardScreen = () => {
           <Text variant="caption">Welcome back</Text>
           <Text variant="h2">Alex Johnson</Text>
         </View>
-        <Button
-          title=""
-          icon={<Feather name="zap" size={20} color={theme.colors.primary} />}
-          variant="outline"
-          onPress={() => {}}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            paddingHorizontal: 0,
-            paddingVertical: 0,
-            padding: 0,
-            gap: 0,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        />
+        <View>
+          <Button
+            title=""
+            icon={
+              <Feather name="bell" size={20} color={theme.colors.primary} />
+            }
+            variant="outline"
+            onPress={() => navigation.navigate("Notifications")}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              paddingHorizontal: 0,
+              paddingVertical: 0,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          />
+          {/* Mock Badge */}
+          <View
+            style={{
+              position: "absolute",
+              top: -2,
+              right: -2,
+              width: 10,
+              height: 10,
+              borderRadius: 5,
+              backgroundColor: theme.colors.destructive,
+              borderWidth: 1.5,
+              borderColor: theme.colors.background,
+            }}
+          />
+        </View>
       </View>
 
       {/* Balance Card */}
