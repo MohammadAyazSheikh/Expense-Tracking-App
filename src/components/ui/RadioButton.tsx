@@ -1,9 +1,9 @@
 import { Pressable, StyleProp, TextStyle, ViewStyle } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
-type CheckboxProps = {
-  checked: boolean;
+type RadioButtonProps = {
+  selected: boolean;
   onPress?: () => void;
   containerStyle?: StyleProp<ViewStyle>;
   icon?: React.ReactNode;
@@ -12,8 +12,8 @@ type CheckboxProps = {
   uncheckedColor?: string;
   size?: "sm" | "md" | "lg";
 };
-const Checkbox = ({
-  checked,
+const RadioButton = ({
+  selected,
   onPress,
   containerStyle,
   icon,
@@ -21,8 +21,8 @@ const Checkbox = ({
   checkedColor,
   uncheckedColor,
   size = "md",
-}: CheckboxProps) => {
-  styles.useVariants({ size, checked });
+}: RadioButtonProps) => {
+  styles.useVariants({ size, selected });
   return (
     <Pressable onPress={onPress} style={[styles.checkbox, containerStyle]}>
       {icon || (
@@ -33,14 +33,14 @@ const Checkbox = ({
             checkedColor && { color: checkedColor },
             uncheckedColor && { color: uncheckedColor },
           ]}
-          name={checked ? "checkbox" : "square-outline"}
+          name={selected ? "radio-button-on" : "radio-button-off"}
         />
       )}
     </Pressable>
   );
 };
 
-export default Checkbox;
+export default RadioButton;
 
 const styles = StyleSheet.create((theme) => ({
   checkbox: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   icon: {
     variants: {
-      checked: {
+      selected: {
         true: {
           color: theme.colors.primary,
         },

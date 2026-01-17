@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Pressable } from "react-native";
 import ActionSheet, {
   FlatList,
   SheetProps,
@@ -13,6 +13,8 @@ import { SearchBar } from "../ui/searchbar";
 import { Text } from "../ui/Text";
 import { Icon } from "../ui/Icon";
 import { TabView } from "../ui/TabView";
+import Checkbox from "../ui/Checkbox";
+import RadioButton from "../ui/RadioButton";
 
 type ItemProps = {
   item: {
@@ -30,13 +32,8 @@ type ItemProps = {
 
 // Item Component
 const Item = ({ item, isSelected, onPress, multiSelect }: ItemProps) => {
-  const { theme } = useUnistyles();
-
   return (
-    <TouchableOpacity
-      style={[styles.item, isSelected && styles.itemSelected]}
-      onPress={onPress}
-    >
+    <Pressable style={[styles.item]} onPress={onPress}>
       <View style={styles.itemLeft}>
         {item.icon ? (
           <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
@@ -50,27 +47,14 @@ const Item = ({ item, isSelected, onPress, multiSelect }: ItemProps) => {
         ) : (
           <View style={[styles.dot, { backgroundColor: item.color }]} />
         )}
-        <Text style={[styles.itemName, isSelected && styles.itemNameSelected]}>
-          {item.name}
-        </Text>
+        <Text style={[styles.itemName]}>{item.name}</Text>
       </View>
-      <Icon
-        type="Ionicons"
-        name={
-          multiSelect
-            ? isSelected
-              ? "checkbox"
-              : "square-outline"
-            : isSelected
-            ? "radio-button-on"
-            : "radio-button-off"
-        }
-        size={22}
-        color={
-          isSelected ? theme.colors.background : theme.colors.mutedForeground
-        }
-      />
-    </TouchableOpacity>
+      {multiSelect ? (
+        <Checkbox checked={isSelected} />
+      ) : (
+        <RadioButton selected={isSelected} />
+      )}
+    </Pressable>
   );
 };
 
@@ -322,9 +306,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     borderRadius: theme.radius.md,
     marginBottom: 4,
   },
-  itemSelected: {
-    backgroundColor: theme.colors.primary + "10",
-  },
   itemLeft: {
     flexDirection: "row",
     alignItems: "center",
@@ -347,9 +328,5 @@ const styles = StyleSheet.create((theme, rt) => ({
   itemName: {
     fontSize: theme.fontSize.md,
     color: theme.colors.foreground,
-  },
-  itemNameSelected: {
-    color: theme.colors.background,
-    fontWeight: "600",
   },
 }));
