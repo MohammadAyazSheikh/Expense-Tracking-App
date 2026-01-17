@@ -9,6 +9,7 @@ const styles = StyleSheet.create((theme) => ({
     padding: theme.paddings.lg,
     variants: {
       variant: {
+        flat: {},
         primary: {
           ...theme.shadows.xs,
         },

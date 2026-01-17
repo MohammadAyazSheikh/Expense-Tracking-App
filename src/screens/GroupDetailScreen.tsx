@@ -1,456 +1,450 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { View, ScrollView, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { SheetManager } from "react-native-actions-sheet";
+import { Feather } from "@expo/vector-icons";
 import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { useFinanceStore } from "../store";
+import { Header } from "../components/ui/Headers";
+import { TabView } from "../components/ui/TabView";
+import { useAuthStore, useFinanceStore } from "../store";
+import { Badge } from "../components/ui/Badge";
+import { FriendsCard } from "./FriendsScreen";
+
+type GroupExpenseCardProps = {
+  icon?: React.ReactNode;
+  title: string;
+  description?: string;
+  amount?: number;
+  amountColor?: string;
+  rightText?: string;
+  badgeText?: string;
+  onPress?: () => void;
+};
+
+const GroupExpenseCard = ({
+  title,
+  description,
+  amount,
+  amountColor,
+  rightText,
+  icon,
+  badgeText,
+  onPress,
+}: GroupExpenseCardProps) => {
+  const { theme } = useUnistyles();
+
+  return (
+    <Card onPress={onPress} style={styles.expenseCard}>
+      <View style={styles.expenseHeader}>
+        {icon || (
+          <View style={[styles.iconContainer]}>
+            <Feather
+              name="file-text"
+              size={18}
+              color={theme.colors.background}
+            />
+          </View>
+        )}
+        <View style={{ flex: 1 }}>
+          <Text weight="bold">{title}</Text>
+          {description && <Text variant="caption">{description}</Text>}
+        </View>
+        <View style={{ alignItems: "flex-end" }}>
+          {amount && (
+            <Text
+              weight="bold"
+              style={[
+                { fontSize: 18 },
+                amountColor ? { color: amountColor } : {},
+              ]}
+            >
+              ${amount.toFixed(2)}
+            </Text>
+          )}
+          {rightText && <Text variant="caption">{rightText}</Text>}
+        </View>
+      </View>
+      {badgeText && (
+        <Badge style={{ marginTop: 10 }} variant="outline">
+          {badgeText}
+        </Badge>
+      )}
+    </Card>
+  );
+};
 
 export const GroupDetailScreen = () => {
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, "GroupDetail">>();
   const { id } = route.params;
+  const { user } = useAuthStore();
+  const {
+    groups,
+    updateGroup,
+    friends,
+    groupExpenses: allExpenses,
+  } = useFinanceStore();
 
-  const group = useFinanceStore((state) =>
-    state.groups.find((g) => g.id === id)
-  );
-  const allExpenses = useFinanceStore((state) => state.groupExpenses);
+  const group = groups.find((g) => g.id === id);
   const groupExpenses = allExpenses.filter((e) => e.groupId === id);
 
-  const [activeTab, setActiveTab] = useState<
-    "expenses" | "balances" | "members"
-  >("expenses");
+  const [routes] = useState([
+    { key: "expenses", title: "Expenses" },
+    { key: "balances", title: "Balances" },
+    { key: "members", title: "Members" },
+  ]);
+
+  const handleAddMember = async () => {
+    if (!group) return;
+
+    const availableFriends = friends.filter(
+      (f) => !group.members.includes(f.name) && f.name !== "You"
+    );
+
+    const memberOptions = availableFriends.map((friend) => ({
+      label: friend.name,
+      value: friend.id,
+      avatar: friend.avatar,
+    }));
+
+    if (memberOptions.length === 0) {
+      // Show proper feedback
+      return;
+    }
+
+    const result = await SheetManager.show("multi-select-sheet", {
+      payload: {
+        options: memberOptions,
+        title: "Add Members",
+        selectedValues: [], // We are adding NEW members
+      },
+    });
+
+    if (result) {
+      const newMemberIds = result as string[];
+      const newMemberNames = friends
+        .filter((f) => newMemberIds.includes(f.id))
+        .map((f) => f.name);
+
+      const updatedMembers = [...group.members, ...newMemberNames];
+      updateGroup(group.id, { members: updatedMembers });
+    }
+  };
+
+  const ExpensesTab = useCallback(
+    () => (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.tabContent}
+      >
+        {groupExpenses.length > 0 ? (
+          groupExpenses.map((expense) => {
+            const myShare = expense.splits.find((s) => s.memberId === user?.id);
+            const badgeText = `Your share: $${myShare?.amount || 23.5}`;
+            return (
+              <GroupExpenseCard
+                key={expense.id}
+                title={expense.description}
+                description={expense.paidBy}
+                amount={expense.amount}
+                rightText={expense.splitType}
+                badgeText={badgeText}
+                onPress={() => {}}
+              />
+            );
+          })
+        ) : (
+          <View style={styles.emptyState}>
+            <Feather
+              name="file-text"
+              size={48}
+              color={theme.colors.mutedForeground}
+              style={{ marginBottom: 16 }}
+            />
+            <Text weight="bold">No expenses yet</Text>
+            <Text
+              variant="caption"
+              style={{ textAlign: "center", marginTop: 8 }}
+            >
+              Add an expense to start splitting with the group.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    ),
+    [groupExpenses, group, theme]
+  );
+
+  const BalancesTab = useCallback(
+    () => (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.tabContent}
+      >
+        {/* Suggested Settlements */}
+        <Card style={styles.suggestionsCard}>
+          <Text weight="semiBold" style={{ marginBottom: 12 }}>
+            Suggested Settlements
+          </Text>
+          <View style={{ gap: 12 }}>
+            {group && group.youOwe > 0 && (
+              <View style={styles.settlementRow}>
+                <View style={styles.settlementAvatars}>
+                  <View
+                    style={[
+                      styles.avatarSmall,
+                      { backgroundColor: theme.colors.primary + "10" },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 10 }}>Y</Text>
+                  </View>
+                  <Feather
+                    name="arrow-right"
+                    size={12}
+                    color={theme.colors.mutedForeground}
+                  />
+                  <View
+                    style={[
+                      styles.avatarSmall,
+                      { backgroundColor: theme.colors.success + "10" },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 10 }}>S</Text>
+                  </View>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text weight="bold">${group.youOwe.toFixed(2)}</Text>
+                  <Text variant="caption">You → Sarah</Text>
+                </View>
+              </View>
+            )}
+            {/* Mocking another settlement if needed or empty state */}
+            {(!group || group.youOwe <= 0) && (
+              <Text variant="caption">No pending settlements.</Text>
+            )}
+          </View>
+        </Card>
+
+        <Text weight="semiBold" style={{ marginTop: 8, marginBottom: 4 }}>
+          Individual Balances
+        </Text>
+        {group?.members.map((member) => {
+          const balance =
+            member === "You"
+              ? group.youAreOwed - group.youOwe
+              : member === "Sarah"
+              ? 120
+              : -74.5;
+
+          return (
+            <GroupExpenseCard
+              key={member}
+              title={member}
+              description={balance >= 0 ? "is owed money" : "owes money"}
+              amount={balance >= 0 ? balance : -balance}
+              rightText={balance >= 0 ? "You → Sarah" : "Sarah → You"}
+              amountColor={
+                balance >= 0 ? theme.colors.success : theme.colors.destructive
+              }
+              icon={
+                <View
+                  style={[
+                    styles.avatar,
+                    { width: 40, height: 40, borderRadius: 20 },
+                  ]}
+                >
+                  <Text>{member.charAt(0)}</Text>
+                </View>
+              }
+            />
+          );
+        })}
+      </ScrollView>
+    ),
+    [group, theme]
+  );
+
+  const MembersTab = useCallback(
+    () => (
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.tabContent}
+      >
+        {group?.members.map((member) => (
+          <FriendsCard
+            key={member}
+            friend={{ name: member, id: member, avatar: member.charAt(0) }}
+            onPress={() => {}}
+          />
+        ))}
+
+        <TouchableOpacity
+          style={styles.addMemberButton}
+          onPress={handleAddMember}
+        >
+          <Feather name="plus" size={16} color={theme.colors.primary} />
+          <Text style={{ color: theme.colors.primary, fontWeight: "600" }}>
+            Add Member
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    ),
+    [group, theme]
+  );
 
   if (!group) return null;
 
   return (
     <ScreenWrapper style={styles.container}>
-      <LinearGradient
-        colors={[theme.colors.primary, theme.colors.primary + "CC"]}
-        style={styles.header}
-      >
-        <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Feather name="arrow-left" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
-          <View style={styles.headerCenter}>
-            <View style={styles.headerAvatar}>
-              <Text style={{ fontSize: 20 }}>{group.avatar}</Text>
+      <Header title="Group Details" onBack={() => navigation.goBack()}>
+        {/* Header Content */}
+        <View style={styles.headerContent}>
+          <View style={styles.groupInfo}>
+            <View style={styles.groupAvatar}>
+              <Text style={{ fontSize: 40 }}>{group.avatar}</Text>
             </View>
-            <Text variant="h3" style={styles.headerTitle}>
-              {group.name}
-            </Text>
+            <View>
+              <Text variant="h2" style={{ color: "white" }}>
+                {group.name}
+              </Text>
+              <Text style={{ color: "rgba(255,255,255,0.8)" }}>
+                {group.members.length} members
+              </Text>
+            </View>
           </View>
-          <Button
-            title=""
-            icon={<Feather name="settings" size={20} color="white" />}
-            variant="ghost"
-            onPress={() => {}}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
-        </View>
 
-        {/* Summary Cards */}
-        <View style={styles.summaryCards}>
-          <Card style={styles.summaryCardSmall}>
-            <Text variant="caption" style={styles.summaryLabel}>
-              Total Expenses
-            </Text>
-            <Text style={styles.summaryCardValue} weight="bold">
-              ${group.totalExpenses.toLocaleString()}
-            </Text>
-          </Card>
-          <Card style={styles.summaryCardSmall}>
-            <Text variant="caption" style={styles.summaryLabel}>
-              Your Share
-            </Text>
-            <Text style={styles.summaryCardValue} weight="bold">
-              ${(group.totalExpenses / group.members.length).toFixed(2)}
-            </Text>
-          </Card>
+          <View style={styles.summaryRow}>
+            <Card variant="flat" style={styles.summaryCard}>
+              <Text style={{ color: "rgba(255,255,255,0.8)" }}>
+                Total Expenses
+              </Text>
+              <Text variant="h3" style={{ color: "white" }}>
+                ${group.totalExpenses.toLocaleString()}
+              </Text>
+            </Card>
+            <Card variant="flat" style={styles.summaryCard}>
+              <Text
+                variant="caption"
+                style={{ color: "rgba(255,255,255,0.8)" }}
+              >
+                Your Share
+              </Text>
+              <Text variant="h3" style={{ color: "white" }}>
+                ${(group.totalExpenses / group.members.length).toFixed(2)}
+              </Text>
+            </Card>
+          </View>
         </View>
+      </Header>
 
-        {/* Quick Actions at Top */}
-        <View style={styles.quickActionsRow}>
+      <View style={styles.body}>
+        {/* Quick Actions */}
+        <View style={styles.quickActions}>
           <Button
             title="Add Expense"
-            icon={<Feather name="plus" size={16} color="white" />}
+            icon={
+              <Feather name="plus" size={16} color={theme.colors.foreground} />
+            }
+            style={styles.actionButton}
+            variant="outline"
+            textStyle={{ color: theme.colors.foreground }}
             onPress={() =>
               navigation.navigate("AddGroupExpense", { groupId: group.id })
             }
-            style={{ flex: 1, height: 48 }}
           />
           <Button
             title="Settle Up"
-            variant="outline"
             icon={
               <Feather
                 name="dollar-sign"
                 size={16}
-                color={theme.colors.primary}
+                color={theme.colors.foreground}
               />
             }
+            style={styles.actionButton}
+            variant="outline"
+            textStyle={{ color: theme.colors.foreground }}
             onPress={() =>
               navigation.navigate("SettleUp", { groupId: group.id })
             }
-            style={{ flex: 1, height: 48 }}
           />
         </View>
 
-        {/* Tabs */}
-        <View style={styles.tabContainer}>
-          {["expenses", "balances", "members"].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setActiveTab(tab as any)}
-              style={[styles.tab, activeTab === tab && styles.activeTab]}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </LinearGradient>
-
-      <View style={styles.content}>
-        {activeTab === "expenses" ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              gap: theme.margins.md,
-              paddingBottom: 40,
-            }}
-          >
-            {groupExpenses.length > 0 ? (
-              groupExpenses.map((expense) => (
-                <Card key={expense.id} style={styles.expenseCard}>
-                  <View style={styles.expenseHeader}>
-                    <View style={styles.expenseIcon}>
-                      <Feather
-                        name="file-text"
-                        size={18}
-                        color={theme.colors.primary}
-                      />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text weight="bold">{expense.description}</Text>
-                      <Text variant="caption">
-                        Paid by {expense.paidBy} • {expense.date}
-                      </Text>
-                    </View>
-                    <View style={{ alignItems: "flex-end" }}>
-                      <Text weight="bold" style={{ fontSize: 18 }}>
-                        ${expense.amount.toFixed(2)}
-                      </Text>
-                      <Text variant="caption" style={{ fontSize: 10 }}>
-                        Split {group.members.length} ways
-                      </Text>
-                    </View>
-                  </View>
-                </Card>
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Feather
-                  name="file-text"
-                  size={48}
-                  color={theme.colors.mutedForeground}
-                  style={{ marginBottom: 16 }}
-                />
-                <Text weight="bold">No expenses yet</Text>
-                <Text
-                  variant="caption"
-                  style={{ textAlign: "center", marginTop: 8 }}
-                >
-                  Add an expense to start splitting with the group.
-                </Text>
-              </View>
-            )}
-          </ScrollView>
-        ) : activeTab === "balances" ? (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
-              gap: theme.margins.md,
-              paddingBottom: 40,
-            }}
-          >
-            {/* Suggested Settlements - Visual like web */}
-            <Card
-              style={[
-                styles.balanceCard,
-                {
-                  backgroundColor: theme.colors.primary + "05",
-                  borderColor: theme.colors.primary + "20",
-                  borderWidth: 1,
-                },
-              ]}
-            >
-              <Text weight="bold" style={{ marginBottom: 16 }}>
-                Suggested Settlements
-              </Text>
-              <View style={{ gap: 12 }}>
-                {group.youOwe > 0 && (
-                  <View style={styles.suggestedSettlementRow}>
-                    <View style={styles.settlementAvatars}>
-                      <View
-                        style={[
-                          styles.smallAvatar,
-                          { backgroundColor: theme.colors.primary + "10" },
-                        ]}
-                      >
-                        <Text style={{ fontSize: 10 }}>Y</Text>
-                      </View>
-                      <Feather
-                        name="arrow-right"
-                        size={14}
-                        color={theme.colors.mutedForeground}
-                      />
-                      <View
-                        style={[
-                          styles.smallAvatar,
-                          { backgroundColor: theme.colors.success + "10" },
-                        ]}
-                      >
-                        <Text style={{ fontSize: 10 }}>S</Text>
-                      </View>
-                    </View>
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text weight="bold" style={{ fontSize: 14 }}>
-                        ${group.youOwe.toFixed(2)}
-                      </Text>
-                      <Text variant="caption">You → Sarah</Text>
-                    </View>
-                  </View>
-                )}
-                {group.youAreOwed > 0 && (
-                  <View style={styles.suggestedSettlementRow}>
-                    <View style={styles.settlementAvatars}>
-                      <View
-                        style={[
-                          styles.smallAvatar,
-                          { backgroundColor: theme.colors.primary + "10" },
-                        ]}
-                      >
-                        <Text style={{ fontSize: 10 }}>M</Text>
-                      </View>
-                      <Feather
-                        name="arrow-right"
-                        size={14}
-                        color={theme.colors.mutedForeground}
-                      />
-                      <View
-                        style={[
-                          styles.smallAvatar,
-                          { backgroundColor: theme.colors.success + "10" },
-                        ]}
-                      >
-                        <Text style={{ fontSize: 10 }}>Y</Text>
-                      </View>
-                    </View>
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text weight="bold" style={{ fontSize: 14 }}>
-                        ${group.youAreOwed.toFixed(2)}
-                      </Text>
-                      <Text variant="caption">Mike → You</Text>
-                    </View>
-                  </View>
-                )}
-              </View>
-            </Card>
-
-            <Text weight="bold" style={{ marginTop: 8 }}>
-              Individual Balances
-            </Text>
-            {group.members.map((member) => {
-              const balance =
-                member === "You"
-                  ? group.youAreOwed - group.youOwe
-                  : member === "Sarah"
-                  ? 120.0
-                  : -74.5; // Mock data for demo
-              return (
-                <Card key={member} style={styles.balanceCardSmall}>
-                  <View style={styles.memberRow}>
-                    <View style={styles.memberInfo}>
-                      <View style={styles.memberAvatar}>
-                        <Text style={{ fontSize: 14 }}>{member.charAt(0)}</Text>
-                      </View>
-                      <View>
-                        <Text weight="bold">{member}</Text>
-                        <Text variant="caption">
-                          {balance >= 0 ? "is owed money" : "owes money"}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text
-                      weight="bold"
-                      style={{
-                        color:
-                          balance >= 0
-                            ? theme.colors.success
-                            : theme.colors.destructive,
-                      }}
-                    >
-                      {balance >= 0 ? "+" : ""}${Math.abs(balance).toFixed(2)}
-                    </Text>
-                  </View>
-                </Card>
-              );
-            })}
-          </ScrollView>
-        ) : (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: theme.margins.md, paddingBottom: 40 }}
-          >
-            {group.members.map((member) => (
-              <Card key={member} style={styles.expenseCard}>
-                <View style={[styles.memberRow, { borderBottomWidth: 0 }]}>
-                  <View style={styles.memberInfo}>
-                    <View
-                      style={[
-                        styles.memberAvatar,
-                        { width: 44, height: 44, borderRadius: 22 },
-                      ]}
-                    >
-                      <Text style={{ fontSize: 18 }}>{member.charAt(0)}</Text>
-                    </View>
-                    <View>
-                      <Text weight="bold">{member}</Text>
-                      <Text variant="caption">Member</Text>
-                    </View>
-                  </View>
-                  <Feather
-                    name="chevron-right"
-                    size={20}
-                    color={theme.colors.mutedForeground}
-                  />
-                </View>
-              </Card>
-            ))}
-            <Button
-              title="Add Member"
-              variant="outline"
-              icon={
-                <Feather name="plus" size={16} color={theme.colors.primary} />
-              }
-              onPress={() => {}}
-              style={{ marginTop: 8 }}
-            />
-          </ScrollView>
-        )}
+        <TabView
+          routes={routes}
+          screens={{
+            expenses: ExpensesTab,
+            balances: BalancesTab,
+            members: MembersTab,
+          }}
+          style={{ flex: 1 }}
+        />
       </View>
-
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() =>
-          navigation.navigate("AddGroupExpense", { groupId: group.id })
-        }
-      >
-        <Feather name="plus" size={24} color="white" />
-      </TouchableOpacity>
     </ScreenWrapper>
   );
 };
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    paddingTop: theme.paddings.lg,
-    paddingHorizontal: theme.paddings.lg,
+  headerContent: {
+    paddingTop: theme.paddings.md,
+    gap: theme.margins.lg,
   },
-  headerTop: {
+  groupInfo: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: theme.margins.lg,
+    gap: theme.margins.md,
   },
-  headerCenter: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.sm,
-  },
-  headerAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    alignItems: "center",
+  groupAvatar: {
+    borderRadius: 2000,
+    width: rt.screen.width * 0.18,
+    aspectRatio: 1,
+    padding: theme.paddings.xs,
     justifyContent: "center",
-  },
-  headerTitle: {
-    color: "white",
-  },
-  summaryCards: {
-    flexDirection: "row",
-    gap: theme.margins.md,
-    marginBottom: theme.margins.lg,
-  },
-  summaryCardSmall: {
-    flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    padding: theme.paddings.md,
-    borderRadius: theme.radius.md,
-  },
-  summaryLabel: {
-    color: "rgba(255, 255, 255, 0.7)",
-    marginBottom: 4,
-  },
-  summaryCardValue: {
-    color: "white",
-    fontSize: 20,
-  },
-  quickActionsRow: {
-    flexDirection: "row",
-    gap: theme.margins.md,
-    marginBottom: theme.margins.lg,
-  },
-  tabContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
     alignItems: "center",
-    borderBottomWidth: 3,
-    borderBottomColor: "transparent",
+    backgroundColor: "rgba(255,255,255,0.2)",
   },
-  activeTab: {
-    borderBottomColor: "white",
+  summaryRow: {
+    flexDirection: "row",
+    gap: theme.margins.md,
   },
-  tabText: {
-    color: "rgba(255, 255, 255, 0.6)",
-    fontWeight: "bold",
-  },
-  activeTabText: {
-    color: "white",
-  },
-  content: {
+  summaryCard: {
     flex: 1,
+    backgroundColor: "rgba(255,255,255,0.2)",
     padding: theme.paddings.md,
-    marginTop: -theme.margins.sm,
+  },
+  body: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    paddingVertical: theme.paddings.md,
+  },
+  quickActions: {
+    flexDirection: "row",
+    gap: theme.margins.md,
+    paddingHorizontal: theme.paddings.md,
+    marginBottom: theme.margins.lg,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: theme.colors.card,
+    borderColor: theme.colors.border,
+    borderWidth: 0,
+    ...theme.shadows.sm,
+  },
+  tabContent: {
+    padding: theme.paddings.md,
+    gap: theme.margins.md,
+    paddingBottom: 80,
   },
   expenseCard: {
     padding: theme.paddings.md,
@@ -460,74 +454,60 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     gap: theme.margins.md,
   },
-  expenseIcon: {
+  iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: theme.colors.primary + "10",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primaryLight,
+  },
+  emptyState: {
+    padding: theme.paddings.xl,
     alignItems: "center",
     justifyContent: "center",
   },
-  balanceCard: {
+  suggestionsCard: {
     padding: theme.paddings.md,
+    backgroundColor: theme.colors.card,
+    borderColor: theme.colors.primary + "30",
+    borderWidth: 1,
   },
-  balanceCardSmall: {
-    padding: theme.paddings.md,
-  },
-  suggestedSettlementRow: {
+  settlementRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.card,
-    padding: 12,
-    borderRadius: 8,
+    gap: theme.margins.md,
+    padding: theme.paddings.sm,
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.radius.sm,
   },
   settlementAvatars: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
   },
-  smallAvatar: {
+  avatarSmall: {
     width: 24,
     height: 24,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
-  memberRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-  },
-  memberInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-  },
-  memberAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  avatar: {
     backgroundColor: theme.colors.muted,
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyState: {
-    paddingTop: 60,
+  addMemberButton: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: theme.paddings.xl,
-  },
-  fab: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    ...theme.shadows.md,
+    padding: theme.paddings.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderStyle: "dashed",
+    marginTop: theme.margins.sm,
+    gap: 8,
   },
 }));

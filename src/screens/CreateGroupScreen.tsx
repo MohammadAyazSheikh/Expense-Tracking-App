@@ -164,19 +164,19 @@ export const CreateGroupScreen = () => {
               contentContainerStyle={styles.iconScroll}
             >
               {ICONS.map((icon) => (
-                <TouchableOpacity
+                <Pressable
                   key={icon}
                   onPress={() => setValue("avatar", icon)}
                   style={[
                     styles.iconItem,
                     avatar === icon && {
                       borderColor: theme.colors.primary,
-                      backgroundColor: theme.colors.primary + "10",
+                      backgroundColor: theme.colors.primaryExtraLight,
                     },
                   ]}
                 >
                   <Text style={{ fontSize: 24 }}>{icon}</Text>
-                </TouchableOpacity>
+                </Pressable>
               ))}
             </ScrollView>
           </View>
@@ -216,8 +216,9 @@ export const CreateGroupScreen = () => {
           {selectedMembers.length === 0 ? (
             <SelectUserCard />
           ) : (
-            selectedMembers.map((member) => (
+            selectedMembers.map((member, index) => (
               <SettingsRow
+                showSeparator={index != 0}
                 key={member.id}
                 label={member.name}
                 icon={
@@ -273,11 +274,11 @@ const styles = StyleSheet.create((theme) => ({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: theme.colors.primary + "10",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: theme.colors.primary + "20",
+    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.primaryExtraLight,
   },
   iconScroll: {
     gap: theme.margins.sm,

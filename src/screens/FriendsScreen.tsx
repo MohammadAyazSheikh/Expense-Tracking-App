@@ -19,9 +19,10 @@ import { Friend } from "../types";
 type Props = {
   onPress: () => void;
   friend: Friend;
+  badgeText?: "settled" | "owed" | "you_owe";
 };
 
-const FriendsCard = ({ friend, onPress }: Props) => {
+export const FriendsCard = ({ friend, onPress, badgeText }: Props) => {
   const { theme } = useUnistyles();
   return (
     <Pressable key={friend.id} onPress={onPress}>
@@ -48,10 +49,20 @@ const FriendsCard = ({ friend, onPress }: Props) => {
               <Text variant="caption">{friend.email}</Text>
             </View>
           )}
-          {/* Mock Balance Badge */}
-          <Badge variant={"success"} style={styles.badge}>
-            Settled up
-          </Badge>
+          {badgeText && (
+            <Badge
+              variant={
+                badgeText === "settled"
+                  ? "success"
+                  : badgeText === "owed"
+                  ? "warning"
+                  : "destructive"
+              }
+              style={styles.badge}
+            >
+              {badgeText}
+            </Badge>
+          )}
         </View>
       </Card>
     </Pressable>

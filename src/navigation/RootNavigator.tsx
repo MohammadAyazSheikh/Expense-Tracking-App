@@ -80,6 +80,7 @@ const mainRoutes = () => {
       <Stack.Screen name="Budget" component={BudgetScreen} />
       <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
       <Stack.Screen name="Groups" component={GroupsScreen} />
+      <Stack.Screen name="AddGroupExpense" component={AddGroupExpenseScreen} />
       <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
       <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
       <Stack.Screen name="SettleUp" component={SettleUpScreen} />
