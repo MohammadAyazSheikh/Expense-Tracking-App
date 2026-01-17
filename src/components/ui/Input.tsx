@@ -86,7 +86,7 @@ const styles = StyleSheet.create((theme) => ({
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.background,
+    // backgroundColor: theme.colors.background,
     height: 50,
     variants: {
       focused: {

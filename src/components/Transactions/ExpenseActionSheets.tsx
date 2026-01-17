@@ -5,7 +5,7 @@ import ActionSheet, {
   SheetProps,
   SheetManager,
 } from "react-native-actions-sheet";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { StyleSheet } from "react-native-unistyles";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useFinanceStore } from "../../store";
 import { Category, Tag } from "../../types";
@@ -23,15 +23,14 @@ type ItemProps = {
     color: string;
     icon?: string;
     iconFamily?: string;
-    group?: string;
   };
-  isSelected: boolean;
+  selected: boolean;
   onPress: () => void;
   multiSelect?: boolean;
 };
 
 // Item Component
-const Item = ({ item, isSelected, onPress, multiSelect }: ItemProps) => {
+const Item = ({ item, selected, onPress, multiSelect }: ItemProps) => {
   return (
     <Pressable style={[styles.item]} onPress={onPress}>
       <View style={styles.itemLeft}>
@@ -50,9 +49,9 @@ const Item = ({ item, isSelected, onPress, multiSelect }: ItemProps) => {
         <Text style={[styles.itemName]}>{item.name}</Text>
       </View>
       {multiSelect ? (
-        <Checkbox checked={isSelected} />
+        <Checkbox checked={selected} />
       ) : (
-        <RadioButton selected={isSelected} />
+        <RadioButton selected={selected} />
       )}
     </Pressable>
   );
@@ -94,7 +93,7 @@ export const ExpenseCategorySheet = (
     return (
       <Item
         item={item}
-        isSelected={isSelected}
+        selected={isSelected}
         onPress={() => handleSelect(item.id)}
         multiSelect={false}
       />
@@ -201,7 +200,7 @@ export const ExpenseTagSheet = (props: SheetProps<"expense-tag-sheet">) => {
     return (
       <Item
         item={item}
-        isSelected={isSelected}
+        selected={isSelected}
         onPress={() => toggleSelect(item.id)}
         multiSelect={true}
       />

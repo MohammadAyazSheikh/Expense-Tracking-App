@@ -1,20 +1,69 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, ScrollView, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import ActionSheet, {
   SheetProps,
   SheetManager,
   useSheetPayload,
+  FlatList,
 } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "../ui/Text";
 import { Icon } from "../ui/Icon";
 import { Input } from "../ui/Input";
+import Checkbox from "../ui/Checkbox";
 
 export interface SelectorOption {
   label: string;
   value: string;
-  icon?: string;
+  leftIcon?: React.ReactNode;
 }
+
+type ItemProps = {
+  title: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  selected: boolean;
+  onPress: () => void;
+  multiSelect?: boolean;
+};
+
+// Item Component
+export const SelectItem = ({
+  title,
+  leftIcon,
+  rightIcon,
+  selected,
+  onPress,
+  multiSelect,
+}: ItemProps) => {
+  const { theme } = useUnistyles();
+  return (
+    <Pressable
+      style={[styles.item, selected && styles.selected]}
+      onPress={onPress}
+    >
+      <View style={[styles.itemLeft]}>
+        {leftIcon}
+        <Text weight={selected ? "bold" : "regular"} style={[styles.itemName]}>
+          {title}
+        </Text>
+        {rightIcon}
+      </View>
+      {multiSelect ? (
+        <Checkbox checked={selected} />
+      ) : (
+        selected && (
+          <Icon
+            type="Feather"
+            name="check"
+            size={20}
+            color={theme.colors.primary}
+          />
+        )
+      )}
+    </Pressable>
+  );
+};
 
 export const SelectSheet = (props: SheetProps) => {
   const { theme } = useUnistyles();
@@ -70,40 +119,22 @@ export const SelectSheet = (props: SheetProps) => {
           }
         />
       </View>
-
-      <ScrollView contentContainerStyle={styles.content}>
-        {filteredOptions.length === 0 ? (
+      <FlatList
+        contentContainerStyle={styles.content}
+        data={filteredOptions}
+        ListEmptyComponent={
           <Text style={styles.emptyText}>No options found</Text>
-        ) : (
-          filteredOptions.map((item) => (
-            <TouchableOpacity
-              key={item.value}
-              style={[
-                styles.optionItem,
-                selectedValue === item.value && styles.selectedOption,
-              ]}
-              onPress={() => handleSelect(item.value)}
-            >
-              <Text
-                style={[
-                  styles.optionLabel,
-                  selectedValue === item.value && styles.selectedLabel,
-                ]}
-              >
-                {item.label}
-              </Text>
-              {selectedValue === item.value && (
-                <Icon
-                  type="Feather"
-                  name="check"
-                  size={20}
-                  color={theme.colors.primary}
-                />
-              )}
-            </TouchableOpacity>
-          ))
+        }
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        renderItem={({ item }) => (
+          <SelectItem
+            title={item.label}
+            selected={selectedValue === item.value}
+            onPress={() => handleSelect(item.value)}
+            leftIcon={item.leftIcon}
+          />
         )}
-      </ScrollView>
+      />
     </ActionSheet>
   );
 };
@@ -114,6 +145,10 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.card,
     borderTopLeftRadius: theme.radius.xl,
     borderTopRightRadius: theme.radius.xl,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: theme.colors.border,
   },
   header: {
     flexDirection: "row",
@@ -133,30 +168,30 @@ const styles = StyleSheet.create((theme, rt) => ({
     paddingHorizontal: theme.paddings.md,
     paddingBottom: 40,
   },
-  optionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: theme.paddings.md,
-    paddingHorizontal: theme.paddings.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  selectedOption: {
-    backgroundColor: theme.colors.primary + "10",
-    borderBottomWidth: 0,
-  },
-  optionLabel: {
-    fontSize: theme.fontSize.md,
-    color: theme.colors.foreground,
-  },
-  selectedLabel: {
-    color: theme.colors.background,
-    fontWeight: "bold",
-  },
+
   emptyText: {
     textAlign: "center",
     color: theme.colors.mutedForeground,
     marginTop: theme.margins.lg,
+  },
+  // Item Component Styles
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  selected: {
+    // backgroundColor: theme.colors.border,
+  },
+  itemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  itemName: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.foreground,
   },
 }));
