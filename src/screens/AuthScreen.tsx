@@ -214,56 +214,6 @@ export const AuthScreen = () => {
               />
             </Animated.View>
           </Animated.View>
-          {/* ----------------------------------------- */}
-          <Input
-            label="Email"
-            placeholder="your@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={""}
-            error={errors.email?.message as string}
-          />
-          <Input
-            label="Email"
-            placeholder="your@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={""}
-            error={errors.email?.message as string}
-          />
-          <Input
-            label="Email"
-            placeholder="your@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={""}
-            error={errors.email?.message as string}
-          />
-          <Input
-            label="Email"
-            placeholder="your@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={""}
-            error={errors.email?.message as string}
-          />
-          <Input
-            label="Email"
-            placeholder="your@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={""}
-            error={errors.email?.message as string}
-          />
-          <Input
-            label="Email"
-            placeholder="your@email.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={""}
-            error={errors.email?.message as string}
-          />
-          {/* ----------------------------------------- */}
           <Animated.View layout={LayoutAnimation} style={styles.socialSection}>
             <View style={styles.divider}>
               <View style={styles.line} />

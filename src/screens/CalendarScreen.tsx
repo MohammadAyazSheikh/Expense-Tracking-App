@@ -18,6 +18,7 @@ import Animated from "react-native-reanimated";
 import { EnteringAnimation, ExitingAnimation } from "../utils/Animation";
 import { useFonts } from "../hooks/useFonts";
 import Fab from "../components/ui/Fab";
+import { Header } from "../components/ui/Headers";
 
 // Custom Day Component
 const CustomDay = ({
@@ -223,18 +224,11 @@ export const CalendarScreen = () => {
   return (
     <ScreenWrapper style={styles.container}>
       {/* Fixed Layout Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
-          <Text variant="h2" style={styles.headerTitle}>
-            {t("calendar.title", "Calendar")}
-          </Text>
-          <View style={styles.headerSpacer} />
-        </View>
-      </View>
-
+      <Header
+        onBack={() => navigation.goBack()}
+        title={t("calendar.title", "Calendar")}
+        right
+      />
       <SectionList
         sections={[
           {
@@ -319,24 +313,6 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.paddings.lg,
-    paddingTop: theme.paddings.xl,
-    paddingBottom: theme.paddings.lg,
-    zIndex: 10,
-  },
-  headerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  headerTitle: {
-    color: "white",
-  },
-  headerSpacer: {
-    width: 40,
   },
   listContent: {
     paddingBottom: 100,

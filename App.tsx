@@ -11,6 +11,7 @@ import { CustomAlert } from "./src/components/ui/CustomAlert";
 
 import { SheetProvider } from "react-native-actions-sheet";
 import { Sheets } from "./src/sheets";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 
 export default function App() {
   const { initialize, effectiveTheme } = useAppSettingsStore();
@@ -20,19 +21,21 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <SheetProvider>
-        <Sheets />
-        <NavigationContainer>
-          <StatusBar
-            style={effectiveTheme == "dark" ? "dark" : "light"}
-            backgroundColor={effectiveTheme == "dark" ? "white" : "black"}
-          />
-          <RootNavigator />
-          <Toast config={ToastConfig} />
-          <CustomAlert />
-        </NavigationContainer>
-      </SheetProvider>
-    </SafeAreaProvider>
+    <KeyboardProvider>
+      <SafeAreaProvider>
+        <SheetProvider>
+          <Sheets />
+          <NavigationContainer>
+            <StatusBar
+              style={effectiveTheme == "dark" ? "dark" : "light"}
+              backgroundColor={effectiveTheme == "dark" ? "white" : "black"}
+            />
+            <RootNavigator />
+            <Toast config={ToastConfig} />
+            <CustomAlert />
+          </NavigationContainer>
+        </SheetProvider>
+      </SafeAreaProvider>
+    </KeyboardProvider>
   );
 }

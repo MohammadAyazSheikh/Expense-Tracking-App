@@ -12,7 +12,6 @@ import { Text } from "./Text";
 import { useFonts } from "../../hooks/useFonts";
 import Animated from "react-native-reanimated";
 import { LayoutAnimation } from "../../utils/Animation";
-import { useRegisterFocusedInput } from "../../hooks/keybaord";
 
 export interface InputProps extends TextInputProps {
   label?: string;
@@ -40,7 +39,6 @@ export const Input = ({
   const { fonts } = useFonts();
   const { theme } = useUnistyles();
   const [isFocused, setIsFocused] = useState(false);
-  const { onFocus, onBlur } = useRegisterFocusedInput();
 
   styles.useVariants({
     focused: isFocused,
@@ -48,13 +46,11 @@ export const Input = ({
   });
 
   const handleFocus: TextInputProps["onFocus"] = (e) => {
-    onFocus(e);
     setIsFocused(true);
     props.onFocus?.(e);
   };
 
   const handleBlur: TextInputProps["onBlur"] = (e) => {
-    onBlur(e);
     setIsFocused(false);
     props.onBlur?.(e);
   };
