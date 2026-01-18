@@ -2,7 +2,9 @@ import React from "react";
 import { View, ScrollView, StatusBar, ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native-unistyles";
-
+import { useKeyboardAnimatedOffsetStyle } from "../../hooks/keybaord";
+import Animated from "react-native-reanimated";
+const AnimatedSafeAreaView = Animated.createAnimatedComponent(SafeAreaView);
 interface ScreenWrapperProps {
   children: React.ReactNode;
   scrollable?: boolean;
@@ -10,7 +12,7 @@ interface ScreenWrapperProps {
   contentContainerStyle?: ViewStyle;
 }
 
-const styles = StyleSheet.create((theme) => ({
+const styles = StyleSheet.create((theme, rt) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -24,10 +26,14 @@ export const ScreenWrapper = ({
   style,
   contentContainerStyle,
 }: ScreenWrapperProps) => {
+  const animatedStyle = useKeyboardAnimatedOffsetStyle();
   const Content = <View style={[styles.content, style]}>{children}</View>;
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+    <AnimatedSafeAreaView
+      style={[styles.container, animatedStyle]}
+      edges={["top", "left", "right"]}
+    >
       <StatusBar barStyle="dark-content" />
       {scrollable ? (
         <ScrollView
@@ -40,6 +46,6 @@ export const ScreenWrapper = ({
       ) : (
         Content
       )}
-    </SafeAreaView>
+    </AnimatedSafeAreaView>
   );
 };

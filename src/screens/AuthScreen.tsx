@@ -126,26 +126,21 @@ export const AuthScreen = () => {
             )}
 
             {activeTab === "signup" && (
-              <Animated.View
-                entering={EnteringAnimation}
-                exiting={ExitingAnimation}
-              >
-                <Controller
-                  control={control}
-                  name="name"
-                  rules={{ required: "Name is required" }}
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="Full Name"
-                      placeholder="John Doe"
-                      autoCapitalize="words"
-                      value={value}
-                      onChangeText={onChange}
-                      error={errors.name?.message as string}
-                    />
-                  )}
-                />
-              </Animated.View>
+              <Controller
+                control={control}
+                name="name"
+                rules={{ required: "Name is required" }}
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Full Name"
+                    placeholder="John Doe"
+                    autoCapitalize="words"
+                    value={value}
+                    onChangeText={onChange}
+                    error={errors.name?.message as string}
+                  />
+                )}
+              />
             )}
 
             <Controller
@@ -159,17 +154,15 @@ export const AuthScreen = () => {
                 },
               }}
               render={({ field: { onChange, value } }) => (
-                <Animated.View layout={LayoutAnimation}>
-                  <Input
-                    label="Email"
-                    placeholder="your@email.com"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={value}
-                    onChangeText={onChange}
-                    error={errors.email?.message as string}
-                  />
-                </Animated.View>
+                <Input
+                  label="Email"
+                  placeholder="your@email.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={value}
+                  onChangeText={onChange}
+                  error={errors.email?.message as string}
+                />
               )}
             />
 
@@ -184,16 +177,14 @@ export const AuthScreen = () => {
                 },
               }}
               render={({ field: { onChange, value } }) => (
-                <Animated.View layout={LayoutAnimation}>
-                  <Input
-                    label="Password"
-                    placeholder="••••••••"
-                    secureTextEntry
-                    value={value}
-                    onChangeText={onChange}
-                    error={errors.password?.message as string}
-                  />
-                </Animated.View>
+                <Input
+                  label="Password"
+                  placeholder="••••••••"
+                  secureTextEntry
+                  value={value}
+                  onChangeText={onChange}
+                  error={errors.password?.message as string}
+                />
               )}
             />
 
@@ -223,7 +214,56 @@ export const AuthScreen = () => {
               />
             </Animated.View>
           </Animated.View>
-
+          {/* ----------------------------------------- */}
+          <Input
+            label="Email"
+            placeholder="your@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={""}
+            error={errors.email?.message as string}
+          />
+          <Input
+            label="Email"
+            placeholder="your@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={""}
+            error={errors.email?.message as string}
+          />
+          <Input
+            label="Email"
+            placeholder="your@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={""}
+            error={errors.email?.message as string}
+          />
+          <Input
+            label="Email"
+            placeholder="your@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={""}
+            error={errors.email?.message as string}
+          />
+          <Input
+            label="Email"
+            placeholder="your@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={""}
+            error={errors.email?.message as string}
+          />
+          <Input
+            label="Email"
+            placeholder="your@email.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={""}
+            error={errors.email?.message as string}
+          />
+          {/* ----------------------------------------- */}
           <Animated.View layout={LayoutAnimation} style={styles.socialSection}>
             <View style={styles.divider}>
               <View style={styles.line} />

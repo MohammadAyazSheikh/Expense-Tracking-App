@@ -33,7 +33,6 @@ import { BudgetScreen } from "../screens/BudgetScreen";
 import WalletDetailScreen from "../screens/WalletDetailScreen";
 import WalletStatementScreen from "../screens/WalletStatementScreen";
 import { AddWalletScreen } from "../screens/AddWalletScreen";
-import { useTranslation } from "react-i18next";
 import { EditWalletScreen } from "../screens/EditWalletScreen";
 import { TransferScreen } from "../screens/TransferScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
@@ -55,7 +54,6 @@ const authRoutes = () => {
 };
 
 const mainRoutes = () => {
-  const { t } = useTranslation();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTab" component={TabNavigator} />
