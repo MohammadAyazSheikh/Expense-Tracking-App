@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 type HeaderProps = {
   title?: string;
@@ -61,11 +62,12 @@ export const Header = ({
       // end={{ x: 0, y: 0 }}
       style={[
         styles.container,
-        applySafeAreaPadding && { marginTop: safeAreaInsets.top },
+        applySafeAreaPadding && { paddingTop: safeAreaInsets.top },
         { backgroundColor: bgColor },
         style,
       ]}
     >
+      <StatusBar style="light" />
       <View style={styles.topRow}>
         <View style={styles.leftContainer}>
           {left ? (

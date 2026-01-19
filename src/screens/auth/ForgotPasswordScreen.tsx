@@ -12,6 +12,7 @@ import { Text } from "../../components/ui/Text";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Card } from "../../components/ui/Card";
+import { SafeArea } from "../../components/ui/SafeArea";
 
 export const ForgotPasswordScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -41,19 +42,7 @@ export const ForgotPasswordScreen = () => {
   };
 
   return (
-    <ScreenWrapper style={styles.container}>
-      <View style={styles.header}>
-        <Button
-          title=""
-          variant="ghost"
-          icon={
-            <Feather name="arrow-left" size={24} color={styles.icon.color} />
-          }
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        />
-      </View>
-
+    <SafeArea style={styles.container}>
       <View style={styles.content}>
         <View style={styles.titleContainer}>
           <Text variant="h2">Reset Password</Text>
@@ -102,7 +91,7 @@ export const ForgotPasswordScreen = () => {
           </View>
         </Card>
       </View>
-    </ScreenWrapper>
+    </SafeArea>
   );
 };
 
@@ -110,9 +99,6 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    padding: theme.paddings.md,
   },
   backButton: {
     width: 40,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Platform } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import {
   CodeField,
@@ -9,12 +9,11 @@ import {
 } from "react-native-confirmation-code-field";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Feather } from "@expo/vector-icons";
 import { RootStackParamList } from "../../navigation/types";
 import { useAuthStore } from "../../store";
-import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
 import { Text } from "../../components/ui/Text";
 import { Button } from "../../components/ui/Button";
+import { SafeArea } from "../../components/ui/SafeArea";
 
 type ScreenRouteProp = RouteProp<RootStackParamList, "OTPVerification">;
 
@@ -71,20 +70,7 @@ export const OTPVerificationScreen = () => {
     }
   };
   return (
-    <ScreenWrapper style={styles.container}>
-      <View style={styles.header}>
-        <Button
-          title=""
-          variant="ghost"
-          icon={
-            <Feather name="arrow-left" size={24} color={styles.icon.color} />
-          }
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        />
-        <Text variant="h2">Verification</Text>
-      </View>
-
+    <SafeArea style={styles.container}>
       <View style={styles.content}>
         <Text variant="body" style={styles.subtitle}>
           Enter the verification code sent to{"\n"}
@@ -144,7 +130,7 @@ export const OTPVerificationScreen = () => {
           disabled={value.length !== CELL_COUNT}
         />
       </View>
-    </ScreenWrapper>
+    </SafeArea>
   );
 };
 
@@ -152,12 +138,6 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    padding: theme.paddings.md,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
   },
   backButton: {
     width: 40,

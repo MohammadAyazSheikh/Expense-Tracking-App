@@ -37,17 +37,43 @@ import { EditWalletScreen } from "../screens/EditWalletScreen";
 import { TransferScreen } from "../screens/TransferScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "../screens/NotificationSettingsScreen";
+import { Header } from "../components/ui/Headers";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 const authRoutes = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        header: ({ route, navigation, options }) => (
+          <Header
+            title={options.title || route.name}
+            applySafeAreaPadding
+            onBack={navigation.goBack}
+          />
+        ),
+      }}
+    >
       <Stack.Screen name="Index" component={IndexScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
-      <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen
+        name="OTPVerification"
+        component={OTPVerificationScreen}
+        options={{
+          headerShown: true,
+          title: "Verification",
+        }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{
+          headerShown: true,
+          title: "Forgot Password",
+        }}
+      />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </Stack.Navigator>
   );
@@ -55,7 +81,18 @@ const authRoutes = () => {
 
 const mainRoutes = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        header: ({ route, navigation, options }) => (
+          <Header
+            title={options.title || route.name}
+            applySafeAreaPadding
+            onBack={navigation.goBack}
+          />
+        ),
+      }}
+    >
       <Stack.Screen name="MainTab" component={TabNavigator} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
