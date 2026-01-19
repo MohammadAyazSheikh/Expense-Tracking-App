@@ -4,15 +4,13 @@ import { StyleSheet } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useForm, Controller } from "react-hook-form";
-import { Feather } from "@expo/vector-icons";
 import { RootStackParamList } from "../../navigation/types";
 import { useAuthStore } from "../../store";
-import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
-import { Text } from "../../components/ui/Text";
-import { Button } from "../../components/ui/Button";
-import { Input } from "../../components/ui/Input";
-import { Card } from "../../components/ui/Card";
-import { SafeArea } from "../../components/ui/SafeArea";
+import { Text } from "@/components/ui/Text";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card } from "@/components/ui/Card";
+import { SafeArea } from "@/components/ui/SafeArea";
 
 export const ForgotPasswordScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
