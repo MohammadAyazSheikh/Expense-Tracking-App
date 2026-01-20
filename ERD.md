@@ -16,10 +16,9 @@ erDiagram
     User {
         uuid id PK
         string email
-        string password_hash
         string name
         string avatar_url
-        string fcm_token
+        string device_token
         datetime created_at
         datetime updated_at
     }

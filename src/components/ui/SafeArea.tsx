@@ -1,9 +1,6 @@
 import React, { useMemo } from "react";
-import { View, StatusBar, ViewStyle } from "react-native";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { View, ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native-unistyles";
 import {
   KeyboardAwareScrollView,
@@ -70,7 +67,7 @@ export const SafeArea = ({
     );
   }
 
-  return <View style={[styles.container, padding]}>{children}</View>;
+  return <View style={[styles.container, style, padding]}>{children}</View>;
 };
 
 const styles = StyleSheet.create((theme, rt) => ({
