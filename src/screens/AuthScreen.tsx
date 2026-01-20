@@ -13,12 +13,30 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ApiLoader } from "../components/ui/ApiLoader";
 import {
   DAMPING,
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
 } from "../utils/Animation";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const signupSchema = z.object({
+  firstName: z.string().min(1, "First Name is required"),
+  lastName: z.string().min(1, "Last Name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginSchema = z.infer<typeof loginSchema>;
+type SignupSchema = z.infer<typeof signupSchema>;
 
 export const AuthScreen = () => {
   const { theme } = useUnistyles();
@@ -30,24 +48,43 @@ export const AuthScreen = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+    reset,
+  } = useForm<any>({
+    resolver: zodResolver(activeTab === "login" ? loginSchema : signupSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
     },
   });
+
+  // Reset form when switching tabs
+  React.useEffect(() => {
+    reset({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+    });
+  }, [activeTab, reset]);
 
   const onSubmit = async (data: any) => {
     try {
       if (activeTab === "login") {
         await login(data.email, data.password);
       } else {
-        await sendOTP(data.email, "signup");
-        navigation.navigate("OTPVerification", {
-          email: data.email,
-          type: "signup",
-        });
+        // Check if data is signup data
+        if ("firstName" in data) {
+          await sendOTP(data.email, "signup");
+          navigation.navigate("OTPVerification", {
+            email: data.email,
+            type: "signup",
+            firstName: data.firstName,
+            lastName: data.lastName,
+            password: data.password,
+          });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -126,33 +163,43 @@ export const AuthScreen = () => {
             )}
 
             {activeTab === "signup" && (
-              <Controller
-                control={control}
-                name="name"
-                rules={{ required: "Name is required" }}
-                render={({ field: { onChange, value } }) => (
-                  <Input
-                    label="Full Name"
-                    placeholder="John Doe"
-                    autoCapitalize="words"
-                    value={value}
-                    onChangeText={onChange}
-                    error={errors.name?.message as string}
-                  />
-                )}
-              />
+              <View style={styles.nameContainer}>
+                <Controller
+                  control={control}
+                  name="firstName"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="First Name"
+                      placeholder="John"
+                      autoCapitalize="words"
+                      containerStyle={styles.halfInput}
+                      value={value}
+                      onChangeText={onChange}
+                      error={errors.firstName?.message as string}
+                    />
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="lastName"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      label="Last Name"
+                      placeholder="Doe"
+                      autoCapitalize="words"
+                      containerStyle={styles.halfInput}
+                      value={value}
+                      onChangeText={onChange}
+                      error={errors.lastName?.message as string}
+                    />
+                  )}
+                />
+              </View>
             )}
 
             <Controller
               control={control}
               name="email"
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
-              }}
               render={({ field: { onChange, value } }) => (
                 <Input
                   label="Email"
@@ -169,13 +216,6 @@ export const AuthScreen = () => {
             <Controller
               control={control}
               name="password"
-              rules={{
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
-              }}
               render={({ field: { onChange, value } }) => (
                 <Input
                   label="Password"
@@ -244,6 +284,11 @@ export const AuthScreen = () => {
           By continuing, you agree to our Terms & Privacy Policy
         </Text>
       </Animated.View>
+
+      <ApiLoader
+        isLoading={isLoading}
+        message={activeTab === "login" ? "Logging in..." : "Sending OTP..."}
+      />
     </ScreenWrapper>
   );
 };
@@ -326,6 +371,13 @@ const styles = StyleSheet.create((theme) => ({
   },
   form: {
     gap: theme.margins.md,
+  },
+  nameContainer: {
+    flexDirection: "row",
+    gap: theme.margins.md,
+  },
+  halfInput: {
+    flex: 1,
   },
   txtForget: {
     fontSize: theme.fontSize.md,

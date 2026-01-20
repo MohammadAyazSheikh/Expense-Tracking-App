@@ -18,7 +18,13 @@ export type RootStackParamList = {
   TagManager: undefined;
   TransactionDetail: { id: string, category: Category };
   EditExpense: { transactionId?: string; date?: string } | undefined;
-  OTPVerification: { email: string; type: 'signup' | 'forgot_password' };
+  OTPVerification: {
+    email: string;
+    type: 'signup' | 'forgot_password';
+    firstName?: string;
+    lastName?: string;
+    password?: string;
+  };
   ForgotPassword: undefined;
   ResetPassword: { email: string; code: string };
   Budget: undefined;

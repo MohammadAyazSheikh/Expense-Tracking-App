@@ -14,6 +14,7 @@ import { useAuthStore } from "../../store";
 import { Text } from "../../components/ui/Text";
 import { Button } from "../../components/ui/Button";
 import { SafeArea } from "../../components/ui/SafeArea";
+import { ApiLoader } from "../../components/ui/ApiLoader";
 
 type ScreenRouteProp = RouteProp<RootStackParamList, "OTPVerification">;
 
@@ -22,7 +23,7 @@ const CELL_COUNT = 6;
 export const OTPVerificationScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<ScreenRouteProp>();
-  const { email, type } = route.params;
+  const { email, type, firstName, lastName, password } = route.params;
   const { verifyOTP, sendOTP, isLoading, error, clearError } = useAuthStore();
 
   const [value, setValue] = useState("");
@@ -47,7 +48,9 @@ export const OTPVerificationScreen = () => {
     if (value.length !== CELL_COUNT) return;
     try {
       clearError();
-      const isValid = await verifyOTP(email, value, type);
+      const name =
+        firstName && lastName ? `${firstName} ${lastName}` : undefined;
+      const isValid = await verifyOTP(email, value, type, name);
       if (isValid) {
         if (type === "signup") {
         } else {
@@ -130,6 +133,7 @@ export const OTPVerificationScreen = () => {
           disabled={value.length !== CELL_COUNT}
         />
       </View>
+      <ApiLoader isLoading={isLoading} message="Verifying code..." />
     </SafeArea>
   );
 };

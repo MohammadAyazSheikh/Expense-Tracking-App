@@ -27,7 +27,7 @@ interface AuthState {
   clearError: () => void;
   setLoading: (loading: boolean) => void;
   sendOTP: (email: string, type: 'signup' | 'forgot_password') => Promise<void>;
-  verifyOTP: (email: string, code: string, type: 'signup' | 'forgot_password') => Promise<boolean>;
+  verifyOTP: (email: string, code: string, type: 'signup' | 'forgot_password', name?: string) => Promise<boolean>;
   resetPassword: (email: string, newPass: string, code: string) => Promise<void>;
 }
 
@@ -196,7 +196,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      verifyOTP: async (email: string, code: string, type: 'signup' | 'forgot_password') => {
+      verifyOTP: async (email: string, code: string, type: 'signup' | 'forgot_password', name?: string) => {
         set({ isLoading: true, error: null });
         try {
           await new Promise(resolve => setTimeout(resolve, 1500));
@@ -206,7 +206,7 @@ export const useAuthStore = create<AuthState>()(
               const mockUser: User = {
                 id: "123",
                 email: email,
-                name: "New User",
+                name: name || "New User",
               };
               set({
                 user: mockUser,
