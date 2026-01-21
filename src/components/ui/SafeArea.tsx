@@ -57,8 +57,8 @@ export const SafeArea = ({
   if (scrollable) {
     return (
       <KeyboardAwareScrollView
-        style={[styles.container, padding, style]}
-        contentContainerStyle={[styles.content, contentContainerStyle]}
+        style={[styles.container, style]}
+        contentContainerStyle={[styles.content, padding, contentContainerStyle]}
         showsVerticalScrollIndicator={false}
         {...scrollProps}
       >

@@ -3,96 +3,30 @@ import { useAuthStore } from "../store";
 import { Text } from "../components/ui/Text";
 import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
-import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
 import { View, TouchableOpacity } from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import { RootStackParamList } from "../navigation/types";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ApiLoader } from "../components/ui/ApiLoader";
+import { LoginForm } from "../components/auth/LoginForm";
+import { SignupForm } from "../components/auth/SignupForm";
 import {
   DAMPING,
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
 } from "../utils/Animation";
-
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-const signupSchema = z.object({
-  firstName: z.string().min(1, "First Name is required"),
-  lastName: z.string().min(1, "Last Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginSchema = z.infer<typeof loginSchema>;
-type SignupSchema = z.infer<typeof signupSchema>;
+import { SafeArea } from "@/components/ui/SafeArea";
 
 export const AuthScreen = () => {
   const { theme } = useUnistyles();
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
-  const { login, sendOTP, isLoading, error } = useAuthStore();
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<any>({
-    resolver: zodResolver(activeTab === "login" ? loginSchema : signupSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-    },
-  });
-
-  // Reset form when switching tabs
-  React.useEffect(() => {
-    reset({
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-    });
-  }, [activeTab, reset]);
-
-  const onSubmit = async (data: any) => {
-    try {
-      if (activeTab === "login") {
-        await login(data.email, data.password);
-      } else {
-        // Check if data is signup data
-        if ("firstName" in data) {
-          await sendOTP(data.email, "signup");
-          navigation.navigate("OTPVerification", {
-            email: data.email,
-            type: "signup",
-            firstName: data.firstName,
-            lastName: data.lastName,
-            password: data.password,
-          });
-        }
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const { isLoading, error } = useAuthStore();
 
   return (
-    <ScreenWrapper
+    <SafeArea
+      applyVerticalInsets
       style={styles.container}
       contentContainerStyle={styles.contentContainerStyle}
       scrollable
@@ -162,98 +96,9 @@ export const AuthScreen = () => {
               </Animated.View>
             )}
 
-            {activeTab === "signup" && (
-              <View style={styles.nameContainer}>
-                <Controller
-                  control={control}
-                  name="firstName"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="First Name"
-                      placeholder="John"
-                      autoCapitalize="words"
-                      containerStyle={styles.halfInput}
-                      value={value}
-                      onChangeText={onChange}
-                      error={errors.firstName?.message as string}
-                    />
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name="lastName"
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      label="Last Name"
-                      placeholder="Doe"
-                      autoCapitalize="words"
-                      containerStyle={styles.halfInput}
-                      value={value}
-                      onChangeText={onChange}
-                      error={errors.lastName?.message as string}
-                    />
-                  )}
-                />
-              </View>
-            )}
-
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  label="Email"
-                  placeholder="your@email.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.email?.message as string}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, value } }) => (
-                <Input
-                  label="Password"
-                  placeholder="••••••••"
-                  secureTextEntry
-                  value={value}
-                  onChangeText={onChange}
-                  error={errors.password?.message as string}
-                />
-              )}
-            />
-
-            {activeTab === "login" && (
-              <Animated.View
-                entering={EnteringAnimation}
-                exiting={ExitingAnimation}
-                layout={LayoutAnimation}
-              >
-                <Button
-                  title="Forgot password?"
-                  variant="ghost"
-                  size="sm"
-                  textStyle={styles.txtForget}
-                  onPress={() => navigation.navigate("ForgotPassword")}
-                  style={{ alignSelf: "flex-end", paddingHorizontal: 0 }}
-                />
-              </Animated.View>
-            )}
-
-            <Animated.View layout={LayoutAnimation}>
-              <Button
-                title={activeTab === "login" ? "Login" : "Sign Up"}
-                onPress={handleSubmit(onSubmit)}
-                loading={isLoading}
-                size="lg"
-              />
-            </Animated.View>
+            {activeTab === "login" ? <LoginForm /> : <SignupForm />}
           </Animated.View>
+
           <Animated.View layout={LayoutAnimation} style={styles.socialSection}>
             <View style={styles.divider}>
               <View style={styles.line} />
@@ -289,7 +134,7 @@ export const AuthScreen = () => {
         isLoading={isLoading}
         message={activeTab === "login" ? "Logging in..." : "Sending OTP..."}
       />
-    </ScreenWrapper>
+    </SafeArea>
   );
 };
 
@@ -371,16 +216,6 @@ const styles = StyleSheet.create((theme) => ({
   },
   form: {
     gap: theme.margins.md,
-  },
-  nameContainer: {
-    flexDirection: "row",
-    gap: theme.margins.md,
-  },
-  halfInput: {
-    flex: 1,
-  },
-  txtForget: {
-    fontSize: theme.fontSize.md,
   },
   socialSection: {
     marginTop: theme.margins.xl,
