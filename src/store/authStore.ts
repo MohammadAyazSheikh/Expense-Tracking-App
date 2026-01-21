@@ -1,11 +1,15 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
+import { supabase } from '@/utils/supabase';
+import Toast from 'react-native-toast-message';
 
 interface User {
   id: string;
   email: string;
-  name: string;
+  username: string;
+  firstName: string;
+  lastName: string
   avatar?: string;
 }
 
@@ -19,8 +23,8 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  login: (data: { user: { email: string, password: string }, onSuccess?: () => void }) => Promise<void>;
+  register: (data: { user: { email: string, password: string, firstName: string; lastName: string }, onSuccess: () => void }) => Promise<void>;
   logout: () => void;
   refreshAuth: () => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
@@ -45,6 +49,8 @@ const data = {
   error: null,
 }
 
+
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -57,26 +63,48 @@ export const useAuthStore = create<AuthState>()(
       error: null,
 
       // Login action
-      login: async (email: string, password: string) => {
+      login: async (data: { user: { email: string, password: string }, onSuccess?: () => void }) => {
         set({ isLoading: true, error: null });
         try {
-          // // Replace with your actual API call
-          // const response = await fetch('YOUR_API_URL/auth/login', {
-          //   method: 'POST',
-          //   headers: { 'Content-Type': 'application/json' },
-          //   body: JSON.stringify({ email, password }),
-          // });
+          const {
+            data: { session, user },
+            error,
+          } = await supabase.auth.signInWithPassword({
+            email: data.user.email,
+            password: data.user.password,
+          })
+          console.log({
+            user,
+            session,
+            error
+          })
+          if (error) {
+            throw error
+          }
+          if (session) {
 
-          // if (!response.ok) {
-          //   throw new Error('Login failed');
-          // }
-
-          // const data = await response.json();
-
-          set(data);
+            set({
+              isLoading: false,
+              user: {
+                id: "123",
+                email: "test@email.com",
+                username: "John",
+                firstName: "John",
+                lastName: "Doe",
+                avatar: "https://example.com/avatar.jpg",
+              },
+              isAuthenticated: true,
+            })
+          }
         } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : 'Registration failed';
+          Toast.show({
+            type: "error",
+            text1: "Error",
+            text2: errorMsg!,
+          });
           set({
-            error: error instanceof Error ? error.message : 'Login failed',
+            error: errorMsg,
             isLoading: false,
           });
           throw error;
@@ -84,28 +112,49 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Register action
-      register: async (email: string, password: string, name: string) => {
+      register: async ({ onSuccess, user: userData }) => {
+
         set({ isLoading: true, error: null });
         try {
-          // // Replace with your actual API call
-          // const response =
+          const {
+            data: { session, user },
+            error,
+          } = await supabase.auth.signUp({
+            email: userData.email,
+            password: userData.password,
+            options: {
+              emailRedirectTo: 'hisaabbee://user-verification'
+            }
+          })
+          console.log({
+            user,
+            session,
+            error
+          })
+          if (error) {
+            throw error
+          }
+          if (!session) {
+            Toast.show({
+              type: "success",
+              text1: "Success",
+              text2: "Please check your inbox for email verification!",
+            });
 
-          //   await fetch('YOUR_API_URL/auth/register', {
-          //     method: 'POST',
-          //     headers: { 'Content-Type': 'application/json' },
-          //     body: JSON.stringify({ email, password, name }),
-          //   });
-
-          // if (!response.ok) {
-          //   throw new Error('Registration failed');
-          // }
-
-          // const data = await response.json();
-
-          set(data);
+            set({
+              isLoading: false,
+            })
+            onSuccess();
+          }
         } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : 'Registration failed';
+          Toast.show({
+            type: "error",
+            text1: "Error",
+            text2: errorMsg!,
+          });
           set({
-            error: error instanceof Error ? error.message : 'Registration failed',
+            error: errorMsg,
             isLoading: false,
           });
           throw error;
@@ -113,14 +162,29 @@ export const useAuthStore = create<AuthState>()(
       },
 
       // Logout action
-      logout: () => {
-        set({
-          user: null,
-          token: null,
-          refreshToken: null,
-          isAuthenticated: false,
-          error: null,
-        });
+      logout: async () => {
+        const { error } = await supabase.auth.signOut()
+        if (error) {
+          Toast.show({
+            type: "error",
+            text1: "Error",
+            text2: error.message,
+          });
+        }
+        else {
+          Toast.show({
+            type: "success",
+            text1: "Success",
+            text2: "Logged out successfully!",
+          });
+          set({
+            user: null,
+            token: null,
+            refreshToken: null,
+            isAuthenticated: false,
+            error: null,
+          });
+        }
       },
 
       // Refresh authentication
@@ -197,37 +261,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       verifyOTP: async (email: string, code: string, type: 'signup' | 'forgot_password', name?: string) => {
-        set({ isLoading: true, error: null });
-        try {
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          if (code === "123456") {
-            if (type === 'signup') {
-              // Mock successful signup login
-              const mockUser: User = {
-                id: "123",
-                email: email,
-                name: name || "New User",
-              };
-              set({
-                user: mockUser,
-                token: "mock-jwt-token",
-                isAuthenticated: true,
-                isLoading: false,
-              });
-            } else {
-              set({ isLoading: false });
-            }
-            return true;
-          } else {
-            throw new Error("Invalid OTP");
-          }
-        } catch (error) {
-          set({
-            error: error instanceof Error ? error.message : "Invalid OTP",
-            isLoading: false,
-          });
-          throw error;
-        }
+        return Promise.reject("Not implemented")
       },
 
       resetPassword: async (email: string, newPass: string, code: string) => {

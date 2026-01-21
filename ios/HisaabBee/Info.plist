@@ -32,6 +32,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>hisaabBee</string>
           <string>com.anonymous.HisaabBee</string>
         </array>
       </dict>

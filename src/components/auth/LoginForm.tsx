@@ -17,7 +17,7 @@ import {
 } from "../../utils/Animation";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -45,8 +45,12 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
-      onSuccess?.();
+      await login({
+        user: {
+          password: data.password,
+          email: data.email,
+        },
+      });
     } catch (err) {
       console.error("Login error:", err);
     }

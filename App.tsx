@@ -12,12 +12,23 @@ import { CustomAlert } from "./src/components/ui/CustomAlert";
 import { SheetProvider } from "react-native-actions-sheet";
 import { Sheets } from "./src/sheets";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { supabase } from "./src/utils/supabase";
+import { Linking } from "react-native";
 
 export default function App() {
   const { initialize, effectiveTheme } = useAppSettingsStore();
 
   useEffect(() => {
     initialize();
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user && !session.user.email_confirmed_at) {
+      }
+      if (session?.user && session.user.email_confirmed_at) {
+      }
+    });
   }, []);
 
   return (

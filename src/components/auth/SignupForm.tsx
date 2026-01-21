@@ -35,7 +35,7 @@ interface SignupFormProps {
 
 export const SignupForm = ({ onSuccess }: SignupFormProps) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { sendOTP, isLoading } = useAuthStore();
+  const { register, isLoading } = useAuthStore();
 
   const {
     control,
@@ -54,15 +54,25 @@ export const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
   const onSubmit = async (data: SignupFormData) => {
     try {
-      await sendOTP(data.email, "signup");
-      navigation.navigate("OTPVerification", {
-        email: data.email,
-        type: "signup",
-        firstName: data.firstName,
-        lastName: data.lastName,
-        password: data.password,
+      register({
+        user: {
+          email: data.email,
+          password: data.password,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        },
+        onSuccess: () => {
+          setTimeout(() => {
+            navigation.navigate("OTPVerification", {
+              email: data.email,
+              type: "signup",
+              firstName: data.firstName,
+              lastName: data.lastName,
+              password: data.password,
+            });
+          }, 3000);
+        },
       });
-      onSuccess?.();
     } catch (err) {
       console.error("Signup error:", err);
     }

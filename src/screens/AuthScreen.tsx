@@ -5,7 +5,6 @@ import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
 import { Button } from "../components/ui/Button";
 import { View, TouchableOpacity } from "react-native";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
 import { ApiLoader } from "../components/ui/ApiLoader";
