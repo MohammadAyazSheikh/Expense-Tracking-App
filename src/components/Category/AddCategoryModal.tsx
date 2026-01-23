@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
-import { alertService } from "../../utils/AlertService";
+import { alertService } from "../../utils/alertService";
 import { useTranslation } from "../../hooks/useTranslation";
 import { Text } from "../ui/Text";
 import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";

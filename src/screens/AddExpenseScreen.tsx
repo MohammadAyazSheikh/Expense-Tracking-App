@@ -23,7 +23,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { Icon, IconType } from "../components/ui/Icon";
 import { SheetManager } from "react-native-actions-sheet";
 import Animated from "react-native-reanimated";
-import { LayoutAnimation } from "../utils/Animation";
+import { LayoutAnimation } from "../utils/animation";
 import { Header } from "../components/ui/Headers";
 
 const PressAbleAnimated = Animated.createAnimatedComponent(Pressable);
@@ -111,7 +111,7 @@ export const AddExpenseScreen = () => {
   const isEditMode = !!editId;
   const existingTransaction = useMemo(
     () => (editId ? transactions.find((t) => t.id === editId) : null),
-    [editId, transactions]
+    [editId, transactions],
   );
 
   const {
@@ -148,7 +148,7 @@ export const AddExpenseScreen = () => {
 
     if (isEditMode && existingTransaction) {
       const cat = categories.find(
-        (c) => c.name === existingTransaction.category
+        (c) => c.name === existingTransaction.category,
       );
 
       reset({
@@ -225,7 +225,7 @@ export const AddExpenseScreen = () => {
     // Separate selected and unselected tags
     const selectedTagObjs = tags.filter((t) => selectedTags.includes(t.id));
     const unselectedTagObjs = sortedTags.filter(
-      (t) => !selectedTags.includes(t.id)
+      (t) => !selectedTags.includes(t.id),
     );
 
     // Show all selected tags, plus fill up to 5 with unselected tags
@@ -268,7 +268,7 @@ export const AddExpenseScreen = () => {
     if (current.includes(tagId)) {
       setValue(
         "tags",
-        current.filter((id: string) => id !== tagId)
+        current.filter((id: string) => id !== tagId),
       );
     } else {
       setValue("tags", [...current, tagId]);

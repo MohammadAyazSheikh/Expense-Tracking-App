@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
-import { alertService } from '../utils/AlertService';
+import { alertService } from '../utils/alertService';
 import { SupportedLocale, isRTL } from '../i18n/types';
 import { changeLanguage, getDeviceLocale } from '../i18n';
 import * as Updates from 'expo-updates';

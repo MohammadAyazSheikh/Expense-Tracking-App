@@ -1,186 +1,198 @@
-import React, { useEffect, useState } from 'react';
-import { View, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import { AlertButton, AlertConfig, alertService } from '../../utils/AlertService';
-import { StyleSheet } from 'react-native-unistyles';
-import { Text } from './Text';
-
-
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Modal,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from "react-native";
+import {
+  AlertButton,
+  AlertConfig,
+  alertService,
+} from "../../utils/alertService";
+import { StyleSheet } from "react-native-unistyles";
+import { Text } from "./Text";
 
 type AlertButtonProps = {
-    btn: AlertButton,
-    index: number,
-    totalButtons: number,
-    onPress: () => void
-}
+  btn: AlertButton;
+  index: number;
+  totalButtons: number;
+  onPress: () => void;
+};
 
 const AlertButtonComponent = ({
-    btn,
-    index,
-    totalButtons,
-    onPress
+  btn,
+  index,
+  totalButtons,
+  onPress,
 }: AlertButtonProps) => {
-    styles.useVariants({
-        variant: btn.style
-    });
+  styles.useVariants({
+    variant: btn.style,
+  });
 
-    const isVertical = totalButtons > 2;
-    const hasBorderTop = index > 0 && isVertical;
-    const hasBorderLeft = index > 0 && !isVertical;
+  const isVertical = totalButtons > 2;
+  const hasBorderTop = index > 0 && isVertical;
+  const hasBorderLeft = index > 0 && !isVertical;
 
-    return (
-        <TouchableOpacity
-            style={[
-                styles.button,
-                hasBorderTop && styles.buttonBorderTop,
-                hasBorderLeft && styles.buttonBorderLeft,
-                isVertical ? { width: '100%', borderLeftWidth: 0, borderTopWidth: index === 0 ? 0 : 0.5 } : {}
-            ]}
-            onPress={onPress}
-        >
-            <Text style={styles.buttonText}>
-                {btn.text}
-            </Text>
-        </TouchableOpacity>
-    );
+  return (
+    <TouchableOpacity
+      style={[
+        styles.button,
+        hasBorderTop && styles.buttonBorderTop,
+        hasBorderLeft && styles.buttonBorderLeft,
+        isVertical
+          ? {
+              width: "100%",
+              borderLeftWidth: 0,
+              borderTopWidth: index === 0 ? 0 : 0.5,
+            }
+          : {},
+      ]}
+      onPress={onPress}
+    >
+      <Text style={styles.buttonText}>{btn.text}</Text>
+    </TouchableOpacity>
+  );
 };
 
 export const CustomAlert = () => {
-    const [visible, setVisible] = useState(false);
-    const [config, setConfig] = useState<AlertConfig | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [config, setConfig] = useState<AlertConfig | null>(null);
 
-    useEffect(() => {
-        alertService.setListener((newConfig) => {
-            if (newConfig) {
-                setConfig(newConfig);
-                setVisible(true);
-            } else {
-                setVisible(false);
-                setConfig(null);
-            }
-        });
-
-        return () => {
-            alertService.setListener(() => { });
-        };
-    }, []);
-
-    const handleClose = () => {
-        if (config?.options?.cancelable) {
-            setVisible(false);
-            config.options.onDismiss?.();
-        }
-    };
-
-    const handleButtonPress = (btn: AlertButton) => {
+  useEffect(() => {
+    alertService.setListener((newConfig) => {
+      if (newConfig) {
+        setConfig(newConfig);
+        setVisible(true);
+      } else {
         setVisible(false);
-        btn.onPress?.();
+        setConfig(null);
+      }
+    });
+
+    return () => {
+      alertService.setListener(() => {});
     };
+  }, []);
 
-    if (!config) return null;
+  const handleClose = () => {
+    if (config?.options?.cancelable) {
+      setVisible(false);
+      config.options.onDismiss?.();
+    }
+  };
 
-    const buttons = config.buttons || [{ text: 'OK', onPress: () => { } }];
+  const handleButtonPress = (btn: AlertButton) => {
+    setVisible(false);
+    btn.onPress?.();
+  };
 
-    return (
-        <Modal
-            transparent
-            visible={visible}
-            animationType="fade"
-            onRequestClose={handleClose}
-        >
-            <TouchableWithoutFeedback onPress={handleClose}>
-                <View style={styles.overlay}>
-                    <TouchableWithoutFeedback>
-                        <View style={styles.alertContainer}>
-                            <View style={styles.contentContainer}>
-                                <Text style={styles.title}>{config.title}</Text>
-                                {config.message && <Text style={styles.message}>{config.message}</Text>}
-                            </View>
+  if (!config) return null;
 
-                            <View style={styles.buttonContainer}>
-                                {buttons.map((btn, index) => (
-                                    <AlertButtonComponent
-                                        key={index}
-                                        btn={btn}
-                                        index={index}
-                                        totalButtons={buttons.length}
-                                        onPress={() => handleButtonPress(btn)}
-                                    />
-                                ))}
-                            </View>
-                        </View>
-                    </TouchableWithoutFeedback>
-                </View>
-            </TouchableWithoutFeedback>
-        </Modal>
-    );
+  const buttons = config.buttons || [{ text: "OK", onPress: () => {} }];
+
+  return (
+    <Modal
+      transparent
+      visible={visible}
+      animationType="fade"
+      onRequestClose={handleClose}
+    >
+      <TouchableWithoutFeedback onPress={handleClose}>
+        <View style={styles.overlay}>
+          <TouchableWithoutFeedback>
+            <View style={styles.alertContainer}>
+              <View style={styles.contentContainer}>
+                <Text style={styles.title}>{config.title}</Text>
+                {config.message && (
+                  <Text style={styles.message}>{config.message}</Text>
+                )}
+              </View>
+
+              <View style={styles.buttonContainer}>
+                {buttons.map((btn, index) => (
+                  <AlertButtonComponent
+                    key={index}
+                    btn={btn}
+                    index={index}
+                    totalButtons={buttons.length}
+                    onPress={() => handleButtonPress(btn)}
+                  />
+                ))}
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
 };
 
-
 const styles = StyleSheet.create((theme) => ({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  alertContainer: {
+    width: 270,
+    backgroundColor: theme.colors.card,
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  contentContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: theme.colors.foreground,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  message: {
+    fontSize: 13,
+    color: theme.colors.foreground,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    borderTopWidth: 0.5,
+    borderTopColor: theme.colors.border,
+    flexWrap: "wrap",
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonBorderLeft: {
+    borderLeftWidth: 0.5,
+    borderLeftColor: theme.colors.border,
+  },
+  buttonBorderTop: {
+    borderTopWidth: 0.5,
+    borderTopColor: theme.colors.border,
+  },
+  buttonText: {
+    fontSize: 17,
+    color: theme.colors.primary, // Or system blue
+    fontWeight: "600",
+    variants: {
+      variant: {
+        default: {
+          color: theme.colors.primary,
+        },
+        destructive: {
+          color: theme.colors.destructive,
+        },
+        cancel: {
+          color: theme.colors.secondary,
+        },
+      },
     },
-    alertContainer: {
-        width: 270,
-        backgroundColor: theme.colors.card,
-        borderRadius: 14,
-        overflow: 'hidden',
-    },
-    contentContainer: {
-        padding: 20,
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 17,
-        fontWeight: '600',
-        color: theme.colors.foreground,
-        textAlign: 'center',
-        marginBottom: 4,
-    },
-    message: {
-        fontSize: 13,
-        color: theme.colors.foreground,
-        textAlign: 'center',
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        borderTopWidth: 0.5,
-        borderTopColor: theme.colors.border,
-        flexWrap: 'wrap',
-    },
-    button: {
-        flex: 1,
-        paddingVertical: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    buttonBorderLeft: {
-        borderLeftWidth: 0.5,
-        borderLeftColor: theme.colors.border,
-    },
-    buttonBorderTop: {
-        borderTopWidth: 0.5,
-        borderTopColor: theme.colors.border,
-    },
-    buttonText: {
-        fontSize: 17,
-        color: theme.colors.primary, // Or system blue
-        fontWeight: '600',
-        variants: {
-            variant: {
-                default: {
-                    color: theme.colors.primary
-                },
-                destructive: {
-                    color: theme.colors.destructive
-                },
-                cancel: {
-                    color: theme.colors.secondary
-                }
-            }
-        }
-    },
+  },
 }));

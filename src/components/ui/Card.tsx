@@ -6,7 +6,7 @@ import {
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
-} from "../../utils/Animation";
+} from "../../utils/animation";
 
 const AnimatedPressable = createAnimatedComponent(Pressable);
 

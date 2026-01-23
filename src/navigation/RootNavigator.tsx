@@ -18,9 +18,12 @@ import { CalendarScreen } from "../screens/CalendarScreen";
 import { TagsScreen } from "../screens/TagsScreen";
 import { AddExpenseScreen } from "../screens/AddExpenseScreen";
 
+import { Header } from "../components/ui/Headers";
 import { OTPVerificationScreen } from "../screens/auth/OTPVerificationScreen";
 import { ForgotPasswordScreen } from "../screens/auth/ForgotPasswordScreen";
 import { ResetPasswordScreen } from "../screens/auth/ResetPasswordScreen";
+import { EmailVerificationPendingScreen } from "../screens/auth/EmailVerificationPendingScreen";
+import { ProfileSetupScreen } from "../screens/ProfileSetupScreen";
 import { CreateBudgetScreen } from "../screens/CreateBudgetScreen";
 import { GroupsScreen } from "../screens/GroupsScreen";
 import { CreateGroupScreen } from "../screens/CreateGroupScreen";
@@ -37,7 +40,6 @@ import { EditWalletScreen } from "../screens/EditWalletScreen";
 import { TransferScreen } from "../screens/TransferScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "../screens/NotificationSettingsScreen";
-import { Header } from "../components/ui/Headers";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -75,6 +77,42 @@ const authRoutes = () => {
         }}
       />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+    </Stack.Navigator>
+  );
+};
+
+const verificationPendingRoutes = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen
+        name="EmailVerificationPending"
+        component={EmailVerificationPendingScreen}
+        options={{
+          gestureEnabled: false,
+        }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const profileSetupRoutes = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen
+        name="ProfileSetup"
+        component={ProfileSetupScreen}
+        options={{
+          gestureEnabled: false,
+        }}
+      />
     </Stack.Navigator>
   );
 };
@@ -132,6 +170,27 @@ const mainRoutes = () => {
 };
 
 export const RootNavigator = () => {
-  const { isAuthenticated } = useAuthStore();
-  return isAuthenticated ? mainRoutes() : authRoutes();
+  const { isAuthenticated, verificationStatus, user } = useAuthStore();
+  // Routing logic
+  if (!isAuthenticated && verificationStatus === "unverified") {
+    // No session → Auth screens
+    return authRoutes();
+  }
+
+  if (!isAuthenticated && verificationStatus === "pending") {
+    // Session but email not verified → Email verification screen
+    return verificationPendingRoutes();
+  }
+
+  if (
+    isAuthenticated &&
+    verificationStatus === "verified" &&
+    !user?.firstName
+  ) {
+    // Session + verified but no profile → Profile setup
+    return profileSetupRoutes();
+  }
+
+  // Session + verified + profile complete → Main app
+  return mainRoutes();
 };

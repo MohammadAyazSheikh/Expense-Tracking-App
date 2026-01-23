@@ -17,7 +17,7 @@ import { useFinanceStore } from "../../../store";
 import { useTranslation } from "../../../hooks/useTranslation";
 import { CategorySelectSheet, TagsSelectSheet } from "./MultiSelectSheet";
 import Animated from "react-native-reanimated";
-import { LayoutAnimation } from "../../../utils/Animation";
+import { LayoutAnimation } from "../../../utils/animation";
 
 export type DateRange = "today" | "week" | "month" | "year" | "all" | "custom";
 
@@ -93,11 +93,11 @@ const FilterSheet = ({
       categories: [],
       dateRange: "all",
       tags: [],
-    }
+    },
   );
 
   const selectedCategories = categories.filter((c) =>
-    filters.categories.includes(c.id)
+    filters.categories.includes(c.id),
   );
   const selectedTags = tags.filter((t) => filters.tags.includes(t.id));
 
@@ -267,7 +267,7 @@ const FilterSheet = ({
             <SelectedType
               key={type}
               title={t(
-                `transactions.${type === "expense" ? "expenses" : type}`
+                `transactions.${type === "expense" ? "expenses" : type}`,
               )}
               selected={filters.type === type}
               onPress={() => handleTypeSelect(type)}

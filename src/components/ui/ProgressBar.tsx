@@ -3,7 +3,7 @@ import { View, ViewStyle } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "./Text";
 import Animated from "react-native-reanimated";
-import { LayoutAnimation } from "../../utils/Animation";
+import { LayoutAnimation } from "../../utils/animation";
 interface ProgressBarProps {
   value: number;
   max: number;

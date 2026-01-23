@@ -5,17 +5,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../navigation/types";
 import { useAuthStore } from "../../store";
 import Animated from "react-native-reanimated";
-import { LayoutAnimation } from "../../utils/Animation";
+import { LayoutAnimation } from "../../utils/animation";
 
 const signupSchema = z
   .object({
-    firstName: z.string().min(1, "First Name is required"),
-    lastName: z.string().min(1, "Last Name is required"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z
@@ -34,8 +29,7 @@ interface SignupFormProps {
 }
 
 export const SignupForm = ({ onSuccess }: SignupFormProps) => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { register, isLoading } = useAuthStore();
+  const { signup, isLoading } = useAuthStore();
 
   const {
     control,
@@ -44,8 +38,6 @@ export const SignupForm = ({ onSuccess }: SignupFormProps) => {
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -54,25 +46,8 @@ export const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
   const onSubmit = async (data: SignupFormData) => {
     try {
-      register({
-        user: {
-          email: data.email,
-          password: data.password,
-          firstName: data.firstName,
-          lastName: data.lastName,
-        },
-        onSuccess: () => {
-          setTimeout(() => {
-            navigation.navigate("OTPVerification", {
-              email: data.email,
-              type: "signup",
-              firstName: data.firstName,
-              lastName: data.lastName,
-              password: data.password,
-            });
-          }, 3000);
-        },
-      });
+      await signup(data.email, data.password);
+      onSuccess?.();
     } catch (err) {
       console.error("Signup error:", err);
     }
@@ -80,39 +55,6 @@ export const SignupForm = ({ onSuccess }: SignupFormProps) => {
 
   return (
     <View style={{ gap: 16 }}>
-      <View style={{ flexDirection: "row", gap: 16 }}>
-        <Controller
-          control={control}
-          name="firstName"
-          render={({ field: { onChange, value } }) => (
-            <Input
-              label="First Name"
-              placeholder="John"
-              autoCapitalize="words"
-              containerStyle={{ flex: 1 }}
-              value={value}
-              onChangeText={onChange}
-              error={errors.firstName?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="lastName"
-          render={({ field: { onChange, value } }) => (
-            <Input
-              label="Last Name"
-              placeholder="Doe"
-              autoCapitalize="words"
-              containerStyle={{ flex: 1 }}
-              value={value}
-              onChangeText={onChange}
-              error={errors.lastName?.message}
-            />
-          )}
-        />
-      </View>
-
       <Controller
         control={control}
         name="email"

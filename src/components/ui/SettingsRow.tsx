@@ -8,7 +8,7 @@ import {
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
-} from "../../utils/Animation";
+} from "../../utils/animation";
 
 interface SettingsRowProps {
   label: string;

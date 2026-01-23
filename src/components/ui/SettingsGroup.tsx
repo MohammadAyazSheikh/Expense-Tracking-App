@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native-unistyles";
 import { Text } from "./Text";
 import { Card } from "./Card";
 import Animated from "react-native-reanimated";
-import { LayoutAnimation } from "../../utils/Animation";
+import { LayoutAnimation } from "../../utils/animation";
 
 interface SettingsGroupProps {
   title?: string;

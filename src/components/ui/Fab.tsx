@@ -1,7 +1,7 @@
 import Animated from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native-unistyles";
-import { EnteringAnimation } from "../../utils/Animation";
+import { EnteringAnimation } from "../../utils/animation";
 import { Pressable, TextStyle, ViewStyle } from "react-native";
 
 type fabProps = {

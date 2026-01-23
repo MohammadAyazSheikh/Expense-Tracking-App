@@ -11,7 +11,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "./Text";
 import { useFonts } from "../../hooks/useFonts";
 import Animated from "react-native-reanimated";
-import { LayoutAnimation } from "../../utils/Animation";
+import { LayoutAnimation } from "../../utils/animation";
 
 export interface InputProps extends TextInputProps {
   label?: string;

@@ -5,6 +5,8 @@ export type RootStackParamList = {
   Index: undefined;
   Onboarding: undefined;
   Auth: undefined;
+  EmailVerificationPending: undefined;
+  ProfileSetup: undefined;
   MainTab: NavigatorScreenParams<MainTabParamList>;
   Profile: undefined;
   Notifications: undefined;

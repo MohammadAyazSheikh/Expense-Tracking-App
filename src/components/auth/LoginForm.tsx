@@ -14,7 +14,7 @@ import {
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
-} from "../../utils/Animation";
+} from "../../utils/animation";
 
 const loginSchema = z.object({
   email: z.email("Invalid email address"),

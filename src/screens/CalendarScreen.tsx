@@ -15,7 +15,7 @@ import { useFinanceStore } from "../store";
 import { Transaction } from "../types";
 import { TransactionCard } from "../components/Transactions/TransactionCard";
 import Animated from "react-native-reanimated";
-import { EnteringAnimation, ExitingAnimation } from "../utils/Animation";
+import { EnteringAnimation, ExitingAnimation } from "../utils/animation";
 import { useFonts } from "../hooks/useFonts";
 import Fab from "../components/ui/Fab";
 import { Header } from "../components/ui/Headers";
@@ -63,8 +63,8 @@ const CustomDay = ({
             isSelected
               ? styles.selectedDayAmountText
               : maxType === "income"
-              ? styles.incomeAmountText
-              : styles.expenseAmountText,
+                ? styles.incomeAmountText
+                : styles.expenseAmountText,
           ]}
           numberOfLines={1}
         >
@@ -84,7 +84,7 @@ export const CalendarScreen = () => {
   const transactions = useFinanceStore((state) => state.transactions);
   const categories = useFinanceStore((state) => state.categories);
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
 
   // Process Data
@@ -168,7 +168,7 @@ export const CalendarScreen = () => {
         />
       );
     },
-    [categories, navigation]
+    [categories, navigation],
   );
 
   const renderSectionHeader = useCallback(() => {

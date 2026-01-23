@@ -4,7 +4,7 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useFinanceStore } from "../store/financeStore";
 import { AddCategoryModal } from "../components/Category/AddCategoryModal";
-import { alertService } from "../utils/AlertService";
+import { alertService } from "../utils/alertService";
 import { Category } from "../types";
 import { useTranslation } from "../hooks/useTranslation";
 import { Text } from "../components/ui/Text";
@@ -42,7 +42,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
           style: "destructive",
           onPress: () => deleteCategory(id),
         },
-      ]
+      ],
     );
   };
 

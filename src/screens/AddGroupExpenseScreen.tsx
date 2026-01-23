@@ -24,7 +24,7 @@ import {
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
-} from "../utils/Animation";
+} from "../utils/animation";
 
 // Validation schema
 const expenseSchema = z.object({
@@ -46,7 +46,7 @@ export const AddGroupExpenseScreen = () => {
   const { groupId } = route.params;
 
   const group = useFinanceStore((state) =>
-    state.groups.find((g) => g.id === groupId)
+    state.groups.find((g) => g.id === groupId),
   );
   const addGroupExpense = useFinanceStore((state) => state.addGroupExpense);
   const updateGroup = useFinanceStore((state) => state.updateGroup);
@@ -89,7 +89,7 @@ export const AddGroupExpenseScreen = () => {
     if (currentSelected.includes(memberId)) {
       setValue(
         "selectedMembers",
-        currentSelected.filter((id) => id !== memberId)
+        currentSelected.filter((id) => id !== memberId),
       );
     } else {
       setValue("selectedMembers", [...currentSelected, memberId]);

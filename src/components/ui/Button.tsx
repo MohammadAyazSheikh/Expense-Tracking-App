@@ -14,7 +14,7 @@ import {
 import { Text } from "./Text";
 import { Feather } from "@expo/vector-icons";
 import Animated from "react-native-reanimated";
-import { LayoutAnimation } from "../../utils/Animation";
+import { LayoutAnimation } from "../../utils/animation";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 type ButtonVariants = UnistylesVariants<typeof styles>;

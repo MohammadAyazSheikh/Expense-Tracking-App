@@ -15,7 +15,7 @@ import {
   EnteringAnimation,
   ExitingAnimation,
   LayoutAnimation,
-} from "../utils/Animation";
+} from "../utils/animation";
 import { SafeArea } from "@/components/ui/SafeArea";
 
 export const AuthScreen = () => {

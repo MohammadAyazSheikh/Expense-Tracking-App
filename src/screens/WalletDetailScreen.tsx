@@ -13,7 +13,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
 import { RootStackParamList } from "../navigation/types";
 import Toast from "react-native-toast-message";
-import { alertService } from "../utils/AlertService";
+import { alertService } from "../utils/alertService";
 import { Header } from "../components/ui/Headers";
 import { LineChart } from "react-native-gifted-charts";
 import { MenuItem } from "../components/sheets/MenuSheet";
@@ -67,14 +67,15 @@ export default function WalletDetailScreen() {
   const currentMonth = new Date().getMonth();
   const monthlyIncome = walletTransactions
     .filter(
-      (t) => t.type === "income" && new Date(t.date).getMonth() === currentMonth
+      (t) =>
+        t.type === "income" && new Date(t.date).getMonth() === currentMonth,
     )
     .reduce((sum, t) => sum + t.amount, 0);
 
   const monthlyExpense = walletTransactions
     .filter(
       (t) =>
-        t.type === "expense" && new Date(t.date).getMonth() === currentMonth
+        t.type === "expense" && new Date(t.date).getMonth() === currentMonth,
     )
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -164,7 +165,7 @@ export default function WalletDetailScreen() {
     type: "all" | "income" | "expense";
   }) => {
     const filtered = walletTransactions.filter((t) =>
-      type === "all" ? true : t.type === type
+      type === "all" ? true : t.type === type,
     );
 
     if (filtered.length === 0) {

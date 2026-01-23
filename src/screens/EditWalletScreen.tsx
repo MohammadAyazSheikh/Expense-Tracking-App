@@ -17,7 +17,7 @@ import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Icon } from "../components/ui/Icon";
-import { alertService } from "../utils/AlertService";
+import { alertService } from "../utils/alertService";
 import { styles } from "./AddWalletScreen";
 
 const walletTypes = [
@@ -193,10 +193,10 @@ export const EditWalletScreen = () => {
                       ? currency === "USD"
                         ? "$"
                         : currency === "EUR"
-                        ? "€"
-                        : currency === "GBP"
-                        ? "£"
-                        : currency
+                          ? "€"
+                          : currency === "GBP"
+                            ? "£"
+                            : currency
                       : "$"}
                   </Text>
                 }
