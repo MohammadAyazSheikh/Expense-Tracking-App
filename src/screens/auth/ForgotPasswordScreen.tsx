@@ -1,39 +1,40 @@
 import React from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useForm, Controller } from "react-hook-form";
-import { RootStackParamList } from "../../navigation/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useAuthStore } from "../../store";
 import { Text } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { SafeArea } from "@/components/ui/SafeArea";
+import { ApiLoader } from "@/components/ui/ApiLoader";
+
+const forgotPasswordSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+});
+
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export const ForgotPasswordScreen = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { sendOTP, isLoading, clearError, error } = useAuthStore();
+  const { isLoading, forgotPassword } = useAuthStore();
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
     },
   });
 
-  const onSubmit = async (data: { email: string }) => {
+  const onSubmit = async (formData: ForgotPasswordFormData) => {
     try {
-      clearError();
-      await sendOTP(data.email, "forgot_password");
-      navigation.navigate("OTPVerification", {
-        email: data.email,
-        type: "forgot_password",
-      });
+      await forgotPassword(formData.email);
     } catch (err) {
       console.error(err);
     }
@@ -43,29 +44,16 @@ export const ForgotPasswordScreen = () => {
     <SafeArea style={styles.container}>
       <View style={styles.content}>
         <View style={styles.titleContainer}>
-          <Text variant="h2">Reset Password</Text>
           <Text variant="body" style={styles.subtitle}>
-            Enter your email address and we'll send you a verification code.
+            Enter your email address and we'll send you a reset link.
           </Text>
         </View>
 
         <Card>
           <View style={styles.form}>
-            {error && (
-              <Text style={styles.errorText} align="center">
-                {error}
-              </Text>
-            )}
             <Controller
               control={control}
               name="email"
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
-                },
-              }}
               render={({ field: { onChange, value } }) => (
                 <Input
                   label="Email Address"
@@ -89,6 +77,7 @@ export const ForgotPasswordScreen = () => {
           </View>
         </Card>
       </View>
+      <ApiLoader isLoading={isLoading} />
     </SafeArea>
   );
 };
@@ -97,13 +86,6 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  backButton: {
-    width: 40,
-    paddingHorizontal: 0,
-  },
-  icon: {
-    color: theme.colors.foreground,
   },
   content: {
     padding: theme.paddings.lg,

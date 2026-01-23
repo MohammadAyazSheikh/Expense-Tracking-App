@@ -17,11 +17,9 @@ import { TransactionDetailScreen } from "../screens/TransactionDetailScreen";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { TagsScreen } from "../screens/TagsScreen";
 import { AddExpenseScreen } from "../screens/AddExpenseScreen";
-
 import { Header } from "../components/ui/Headers";
-import { OTPVerificationScreen } from "../screens/auth/OTPVerificationScreen";
 import { ForgotPasswordScreen } from "../screens/auth/ForgotPasswordScreen";
-import { ResetPasswordScreen } from "../screens/auth/ResetPasswordScreen";
+import { ChangePasswordScreen } from "../screens/auth/ResetPasswordScreen";
 import { EmailVerificationPendingScreen } from "../screens/auth/EmailVerificationPendingScreen";
 import { ProfileSetupScreen } from "../screens/ProfileSetupScreen";
 import { CreateBudgetScreen } from "../screens/CreateBudgetScreen";
@@ -46,6 +44,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const authRoutes = () => {
   return (
     <Stack.Navigator
+      initialRouteName="Index"
       screenOptions={{
         headerShown: false,
         header: ({ route, navigation, options }) => (
@@ -61,14 +60,6 @@ const authRoutes = () => {
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
       <Stack.Screen
-        name="OTPVerification"
-        component={OTPVerificationScreen}
-        options={{
-          headerShown: true,
-          title: "Verification",
-        }}
-      />
-      <Stack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
         options={{
@@ -76,7 +67,6 @@ const authRoutes = () => {
           title: "Forgot Password",
         }}
       />
-      <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </Stack.Navigator>
   );
 };
@@ -95,6 +85,35 @@ const verificationPendingRoutes = () => {
           gestureEnabled: false,
         }}
       />
+    </Stack.Navigator>
+  );
+};
+
+const resetPasswordRoutes = () => {
+  return (
+    <Stack.Navigator
+      initialRouteName="ChangePassword"
+      screenOptions={{
+        headerShown: false,
+        header: ({ route, navigation, options }) => (
+          <Header
+            title={options.title || route.name}
+            applySafeAreaPadding
+            onBack={navigation.goBack}
+          />
+        ),
+      }}
+    >
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          gestureEnabled: false,
+          headerShown: true,
+          title: "Change Password",
+        }}
+      />
+      <Stack.Screen name="Auth" component={AuthScreen} />
     </Stack.Navigator>
   );
 };
@@ -120,6 +139,7 @@ const profileSetupRoutes = () => {
 const mainRoutes = () => {
   return (
     <Stack.Navigator
+      initialRouteName="MainTab"
       screenOptions={{
         headerShown: false,
         header: ({ route, navigation, options }) => (
@@ -170,27 +190,33 @@ const mainRoutes = () => {
 };
 
 export const RootNavigator = () => {
-  const { isAuthenticated, verificationStatus, user } = useAuthStore();
+  const { verificationStatus, user } = useAuthStore();
+
   // Routing logic
-  if (!isAuthenticated && verificationStatus === "unverified") {
+  if (verificationStatus === "SINGED_OUT") {
     // No session → Auth screens
     return authRoutes();
   }
 
-  if (!isAuthenticated && verificationStatus === "pending") {
-    // Session but email not verified → Email verification screen
+  if (verificationStatus === "RESET_PASSWORD") {
+    //Logedin with reset password→ Reset password screen
+    return resetPasswordRoutes();
+  }
+
+  if (verificationStatus === "VERIFICATION_PENDING") {
+    // Session but email not VERIFIED → Email verification screen
     return verificationPendingRoutes();
   }
 
-  if (
-    isAuthenticated &&
-    verificationStatus === "verified" &&
-    !user?.firstName
-  ) {
-    // Session + verified but no profile → Profile setup
+  if (verificationStatus === "VERIFIED" && !user?.firstName) {
+    // Session + VERIFIED but no profile → Profile setup
     return profileSetupRoutes();
   }
 
-  // Session + verified + profile complete → Main app
-  return mainRoutes();
+  // Session + VERIFIED + profile complete → Main app
+  if (verificationStatus === "VERIFIED" && user?.firstName) {
+    return mainRoutes();
+  }
+
+  return authRoutes();
 };

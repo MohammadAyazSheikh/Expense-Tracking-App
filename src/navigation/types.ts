@@ -28,7 +28,7 @@ export type RootStackParamList = {
     password?: string;
   };
   ForgotPassword: undefined;
-  ResetPassword: { email: string; code: string };
+  ChangePassword: undefined;
   Budget: undefined;
   CreateBudget: undefined;
   Groups: undefined;

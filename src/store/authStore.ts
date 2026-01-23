@@ -3,6 +3,8 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
 import { supabase } from '@/utils/supabase';
 import Toast from 'react-native-toast-message';
+import { DEEP_LINKS } from '@/data/constants/deepLinks';
+import { translate } from '@/i18n';
 
 interface User {
   id: string;
@@ -13,12 +15,12 @@ interface User {
   fullName?: string;
   avatar?: string;
 }
+type VerificationStatus = "VERIFIED" | 'SINGED_OUT' | 'VERIFICATION_PENDING' | 'RESET_PASSWORD';
 
 interface AuthState {
   // State
   user: User | null;
-  verificationStatus: "verified" | 'unverified' | 'pending';
-  isAuthenticated: boolean;
+  verificationStatus: VerificationStatus;
   isLoading: boolean;
   error: string | null;
 
@@ -26,7 +28,16 @@ interface AuthState {
   logout: () => void;
   login: (data: { user: { email: string, password: string }, onSuccess?: () => void }) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
-  confirmEmail: (access_token: string, refresh_token: string, type: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  confirmEmail: (codes: {
+    access_token: string | null,
+    refresh_token: string | null,
+    type: string | null,
+    error?: string | null,
+    error_code?: string | null,
+    error_description?: string | null
+  }) => Promise<void>;
+  changePassword: (data: { password: string }) => Promise<void>;
   updateUser: (userData: Partial<User>) => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
@@ -40,10 +51,10 @@ export const useAuthStore = create<AuthState>()(
       {
         // Initial state
         user: null,
-        isAuthenticated: false,
         isLoading: false,
         error: null,
-        verificationStatus: "unverified",
+        verificationStatus: "SINGED_OUT",
+
         // Login action
         login: async (data: { user: { email: string, password: string }, onSuccess?: () => void }) => {
           set({ isLoading: true, error: null });
@@ -72,11 +83,11 @@ export const useAuthStore = create<AuthState>()(
                   avatar: userData?.avatar_url,
                   fullName: userData?.first_name + " " + userData?.last_name,
                 },
-                verificationStatus: session?.user?.confirmed_at ? "verified" : "pending",
-                isAuthenticated: true,
+                verificationStatus: session?.user?.confirmed_at ? "VERIFIED" : "VERIFICATION_PENDING",
+
               })
             }
-          } catch (error) {
+          } catch (error: any) {
             const errorMsg = error.message || 'Login failed';
             Toast.show({
               type: "error",
@@ -93,7 +104,7 @@ export const useAuthStore = create<AuthState>()(
           }
         },
 
-        // Signup action (simplified - just email/password)
+        // Signup action 
         signup: async (email: string, password: string) => {
           set({ isLoading: true, error: null });
           try {
@@ -101,7 +112,7 @@ export const useAuthStore = create<AuthState>()(
               email,
               password,
               options: {
-                emailRedirectTo: 'hisaabbee://user-verification'
+                emailRedirectTo: DEEP_LINKS.VERIFY_EMAIL
               }
             });
 
@@ -116,8 +127,8 @@ export const useAuthStore = create<AuthState>()(
                   id: data?.user?.id,
                   email: data?.user?.email!,
                 },
-                verificationStatus: "pending",
-                isAuthenticated: false,
+                verificationStatus: "VERIFICATION_PENDING",
+
               });
             }
 
@@ -143,8 +154,29 @@ export const useAuthStore = create<AuthState>()(
             set({ isLoading: false });
           }
         },
-        confirmEmail: async (access_token: string, refresh_token: string, type: string) => {
+        // Confirm email action
+        confirmEmail: async ({ access_token, refresh_token, error, error_code, error_description, type }) => {
+
+          if (error_code || error) {
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2: error_description || translate("errors.somethingWentWrong"),
+            });
+            return;
+          }
+
+          if (!access_token || !refresh_token) {
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2: "Access token or refresh token is missing",
+            });
+            return;
+          }
+
           set({ isLoading: true, error: null });
+
           try {
             const { data, error } = await supabase.auth.setSession({
               access_token,
@@ -154,16 +186,32 @@ export const useAuthStore = create<AuthState>()(
             if (error) throw error;
 
             if (data.session) {
+              // if user forgets password
               if (type === 'recovery') {
-                Toast.show({
-                  type: "waning",
-                  text1: "Success",
-                  text2: "Reset password feature not implemented yet!",
-                });
-              } else {
+
+                const { data: userData, error } =
+                  await supabase.from("profiles").select("*")
+                    .eq("id", data.session.user.id).single();
+
+                if (error) throw error;
+
                 set({
-                  isAuthenticated: true,
-                  verificationStatus: "verified",
+                  user: {
+                    id: data.session.user.id,
+                    email: data.session.user.email!,
+                    username: userData?.username,
+                    lastName: userData?.last_name,
+                    firstName: userData?.first_name,
+                    avatar: userData?.avatar_url,
+                    fullName: userData?.first_name + " " + userData?.last_name,
+                  },
+                  verificationStatus: "RESET_PASSWORD",
+                });
+
+              } else {
+                // if user verifies email after signup
+                set({
+                  verificationStatus: "VERIFIED",
                   user: {
                     ...get().user,
                     id: data.session.user.id,
@@ -173,7 +221,7 @@ export const useAuthStore = create<AuthState>()(
                 Toast.show({
                   type: "success",
                   text1: "Success",
-                  text2: "Email verified successfully!",
+                  text2: "Email VERIFIED successfully!",
                 });
               }
             }
@@ -183,6 +231,61 @@ export const useAuthStore = create<AuthState>()(
               type: "error",
               text1: "Error",
               text2: error.message || 'Failed to process verification link',
+            });
+          }
+          finally {
+            set({ isLoading: false });
+          }
+        },
+        // Forgot password action
+        forgotPassword: async (email) => {
+
+          set({ isLoading: true, error: null });
+          try {
+            const { error, data } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: DEEP_LINKS.VERIFY_EMAIL,
+            });
+            if (error) throw error;
+            Toast.show({
+              type: "success",
+              text1: "Success",
+              text2: "Password reset link sent successfully!",
+            });
+          } catch (error: any) {
+            set({ isLoading: false });
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2: error.message || 'Failed to send password reset link',
+            });
+          }
+          finally {
+            set({ isLoading: false });
+          }
+        },
+        // Reset password action
+        changePassword: async ({ password }) => {
+          set({ isLoading: true, error: null });
+          try {
+            const { error } = await supabase.auth.updateUser({
+              password,
+            });
+            if (error) throw error;
+            Toast.show({
+              type: "success",
+              text1: "Success",
+              text2: "Password changed successfully!",
+            });
+            set({
+              ...get(),
+              verificationStatus: "VERIFIED"
+            })
+          } catch (error: any) {
+            set({ isLoading: false });
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2: error.message || 'Failed to change password',
             });
           }
           finally {
@@ -210,10 +313,9 @@ export const useAuthStore = create<AuthState>()(
               });
               set({
                 user: null,
-                isAuthenticated: false,
                 isLoading: false,
                 error: null,
-                verificationStatus: "unverified",
+                verificationStatus: "SINGED_OUT",
               });
             }
           } catch (error: any) {
@@ -227,7 +329,6 @@ export const useAuthStore = create<AuthState>()(
             set({ isLoading: false });
           }
         },
-
 
         // Update user data
         updateUser: (userData: Partial<User>) => {
@@ -249,18 +350,12 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: loading });
         },
 
-
-
-        resetPassword: async (email: string, newPass: string, code: string) => {
-
-        },
       }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
         verificationStatus: state.verificationStatus,
       }),
     }

@@ -1,25 +1,17 @@
 import React from "react";
 import { View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useForm, Controller } from "react-hook-form";
-import { Feather } from "@expo/vector-icons";
-import { RootStackParamList } from "../../navigation/types";
 import { useAuthStore } from "../../store";
-import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
 import { Text } from "../../components/ui/Text";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Card } from "../../components/ui/Card";
+import { SafeArea } from "@/components/ui/SafeArea";
+import { ApiLoader } from "@/components/ui/ApiLoader";
 
-type ScreenRouteProp = RouteProp<RootStackParamList, "ResetPassword">;
-
-export const ResetPasswordScreen = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const route = useRoute<ScreenRouteProp>();
-  const { email, code } = route.params;
-  const { resetPassword, isLoading, clearError, error } = useAuthStore();
+export const ChangePasswordScreen = () => {
+  const { isLoading, error, changePassword } = useAuthStore();
 
   const {
     control,
@@ -37,29 +29,14 @@ export const ResetPasswordScreen = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      clearError();
-      await resetPassword(email, data.password, code);
-      navigation.popToTop();
-      navigation.navigate("Auth");
+      await changePassword(data.password);
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <ScreenWrapper style={styles.container}>
-      <View style={styles.header}>
-        <Button
-          title=""
-          variant="ghost"
-          icon={
-            <Feather name="arrow-left" size={24} color={styles.icon.color} />
-          }
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        />
-      </View>
-
+    <SafeArea applyBottomInset scrollable style={styles.container}>
       <View style={styles.content}>
         <View style={styles.titleContainer}>
           <Text variant="h2">New Password</Text>
@@ -127,7 +104,8 @@ export const ResetPasswordScreen = () => {
           </View>
         </Card>
       </View>
-    </ScreenWrapper>
+      <ApiLoader isLoading={isLoading} />
+    </SafeArea>
   );
 };
 
@@ -135,13 +113,6 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    padding: theme.paddings.md,
-  },
-  backButton: {
-    width: 40,
-    paddingHorizontal: 0,
   },
   icon: {
     color: theme.colors.foreground,

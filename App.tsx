@@ -36,12 +36,29 @@ export default function App() {
 
         const access_token = params.get("access_token");
         const refresh_token = params.get("refresh_token");
+        const error = params.get("error");
+        const error_code = params.get("error_code");
+        const error_description = params.get("error_description");
         const type = params.get("type");
+        console.log({
+          url,
+          access_token,
+          refresh_token,
+          type,
+          error,
+          error_code,
+          error_description,
+        });
 
         // Check if we have tokens (email verification or password reset)
-        if (access_token && refresh_token) {
-          confirmEmail(access_token, refresh_token, type!);
-        }
+        confirmEmail({
+          access_token,
+          refresh_token,
+          type: type!,
+          error,
+          error_code,
+          error_description,
+        });
       } catch (error: any) {}
     };
 
