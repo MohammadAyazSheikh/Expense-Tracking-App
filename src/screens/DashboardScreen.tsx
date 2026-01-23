@@ -10,17 +10,17 @@ import { Button } from "../components/ui/Button";
 import { Text } from "../components/ui/Text";
 import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
-import { useFinanceStore } from "../store";
+import { useAuthStore, useFinanceStore } from "../store";
 import { useFonts } from "../hooks/useFonts";
 import { TransactionCard } from "../components/Transactions/TransactionCard";
 
 export const DashboardScreen = () => {
   const { width } = useWindowDimensions();
-
   const { theme } = useUnistyles();
   const { fonts } = useFonts();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { transactions, wallets } = useFinanceStore();
+  const { user } = useAuthStore();
 
   const totalBalance = useMemo(() => {
     return wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
@@ -36,7 +36,7 @@ export const DashboardScreen = () => {
         }
         return acc;
       },
-      { income: 0, expenses: 0 }
+      { income: 0, expenses: 0 },
     );
   }, [transactions]);
 
@@ -48,10 +48,13 @@ export const DashboardScreen = () => {
     const categoryTotals = transactions
       .slice(0, 7)
       .filter((t) => t.type === "expense")
-      .reduce((acc, t) => {
-        acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
-        return acc;
-      }, {} as Record<string, number>);
+      .reduce(
+        (acc, t) => {
+          acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
     const colors = [
       theme.colors.primary,
@@ -117,7 +120,7 @@ export const DashboardScreen = () => {
       <View style={styles.header}>
         <View>
           <Text variant="caption">Welcome back</Text>
-          <Text variant="h2">Alex Johnson</Text>
+          <Text variant="h2">{user?.fullName} </Text>
         </View>
         <View>
           <Button

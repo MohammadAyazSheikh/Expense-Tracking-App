@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { Text } from "../../components/ui/Text";
 import { Button } from "../../components/ui/Button";
@@ -9,7 +9,6 @@ import { useAuthStore } from "../../store";
 import { supabase } from "../../utils/supabase";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { DAMPING } from "../../utils/animation";
-import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { ApiLoader } from "@/components/ui/ApiLoader";
 

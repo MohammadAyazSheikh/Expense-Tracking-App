@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Image } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -14,6 +14,7 @@ import { SettingsRow } from "../components/ui/SettingsRow";
 import { useAppSettingsStore, useAuthStore } from "../store";
 import { SUPPORTED_LOCALES } from "../i18n/types";
 import { useTranslation } from "../hooks/useTranslation";
+import { ApiLoader } from "@/components/ui/ApiLoader";
 
 export const SettingsScreen = () => {
   const { t } = useTranslation();
@@ -24,7 +25,7 @@ export const SettingsScreen = () => {
     locale,
     changeLocale,
   } = useAppSettingsStore();
-  const { logout } = useAuthStore();
+  const { logout, isLoading, user } = useAuthStore();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const settingsGroups = [
@@ -96,15 +97,19 @@ export const SettingsScreen = () => {
 
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText} weight="bold">
-              AJ
-            </Text>
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText} weight="bold">
+                {user?.fullName?.slice(0, 2).toUpperCase()}
+              </Text>
+            )}
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileName} weight="semiBold">
-              Alex Johnson
+              {user?.fullName}
             </Text>
-            <Text style={styles.profileEmail}>alex.johnson@email.com</Text>
+            <Text style={styles.profileEmail}>{user?.email}</Text>
           </View>
           <TouchableOpacity
             style={styles.editButton}
@@ -213,6 +218,7 @@ export const SettingsScreen = () => {
           {t("settings.version")} 1.0.0
         </Text>
       </View>
+      <ApiLoader isLoading={isLoading} message="Logging out..." />
     </ScreenWrapper>
   );
 };
@@ -253,6 +259,11 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: "rgba(255, 255, 255, 0.3)",
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
   avatarText: {
     color: "white",

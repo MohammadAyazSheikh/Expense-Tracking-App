@@ -131,7 +131,11 @@ export const AuthScreen = () => {
 
       <ApiLoader
         isLoading={isLoading}
-        message={activeTab === "login" ? "Logging in..." : "Sending OTP..."}
+        message={
+          activeTab === "login"
+            ? "Logging in..."
+            : "Sending verification email..."
+        }
       />
     </SafeArea>
   );

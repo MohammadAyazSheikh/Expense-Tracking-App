@@ -9,7 +9,8 @@ interface User {
   email: string;
   username?: string;
   firstName?: string;
-  lastName?: string
+  lastName?: string;
+  fullName?: string;
   avatar?: string;
 }
 
@@ -59,23 +60,24 @@ export const useAuthStore = create<AuthState>()(
               throw error
             }
             if (session) {
-              const { data: userData, error } = await supabase.from("users").select("*").eq("id", user.id).single()
+              const { data: userData, error } = await supabase.from("profiles").select("*").eq("id", user.id).single()
               if (error) throw error;
               set({
                 user: {
                   id: user.id,
                   email: user.email!,
                   username: userData?.username,
-                  firstName: userData?.first_name,
                   lastName: userData?.last_name,
+                  firstName: userData?.first_name,
                   avatar: userData?.avatar_url,
+                  fullName: userData?.first_name + " " + userData?.last_name,
                 },
                 verificationStatus: session?.user?.confirmed_at ? "verified" : "pending",
                 isAuthenticated: true,
               })
             }
           } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Registration failed';
+            const errorMsg = error.message || 'Login failed';
             Toast.show({
               type: "error",
               text1: "Error",

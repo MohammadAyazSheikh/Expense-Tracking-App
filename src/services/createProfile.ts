@@ -2,7 +2,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { supabase } from '../utils/supabase';
 import Toast from 'react-native-toast-message';
-import { decode } from 'base64-arraybuffer';
 
 interface CreateProfileParams {
     userId: string;
@@ -20,26 +19,32 @@ interface ProfileData {
     updated_at: string;
 }
 
+// Helper function to decode base64
+const decode = (base64: string): Uint8Array => {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+};
+
 // Upload avatar to Supabase Storage
 const uploadAvatar = async (userId: string, uri: string, base64: string): Promise<string | null> => {
     try {
-        // Convert image to blob
 
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        // console.log({ blob })
+        // Convert image to blob
+        const blob = decode(base64);
         // Create unique filename
         const fileExt = uri.split('.').pop();
-        const fileName = `${userId}-${Date.now()}.${fileExt} `;
-        const filePath = `${userId}/${fileName} `;
-        console.log({ filePath, fileName })
-        // return Promise.reject(filePath);
+        const fileName = `${userId}-${Date.now()}.${fileExt}`;
+        const filePath = `${userId}/${fileName}`;
         // Upload to Supabase Storage
         const { error, } = await supabase.storage
             .from('avatars')
-            .upload(filePath, `data:image/jpeg;base64,${base64}`, {
-                contentType: 'image/*',
-                //   upsert: true, // replace existing avatar
+            .upload(filePath, blob, {
+                contentType: `image/${fileExt}`,
+                upsert: true, // replace existing avatar
             });
 
         if (error) throw error;

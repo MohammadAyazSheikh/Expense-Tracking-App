@@ -1,24 +1,22 @@
-import React, { } from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import { StyleSheet, useUnistyles } from "react-native-unistyles"
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../navigation/types';
-import { Text } from '../components/ui/Text';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { ScreenWrapper } from '../components/ui/ScreenWrapper';
-import { Feather } from '@expo/vector-icons';
+import React from "react";
+import { View, TouchableOpacity } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/types";
+import { Text } from "../components/ui/Text";
+import { Button } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { Feather } from "@expo/vector-icons";
+import { useAuthStore } from "@/store";
 
 export const ProfileScreen = () => {
-
-
+  const { user } = useAuthStore();
 
   const { theme } = useUnistyles();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
-
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
@@ -31,13 +29,17 @@ export const ProfileScreen = () => {
             onPress={() => navigation.goBack()}
             style={{ paddingHorizontal: 0, width: 40 }}
           />
-          <Text variant="h2" style={styles.headerTitle}>Profile Settings</Text>
+          <Text variant="h2" style={styles.headerTitle}>
+            Profile Settings
+          </Text>
         </View>
 
         <View style={styles.avatarContainer}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText} weight="bold">AJ</Text>
+              <Text style={styles.avatarText} weight="bold">
+                {user?.firstName?.split(" ")[0][0]}
+              </Text>
             </View>
             <TouchableOpacity style={styles.cameraButton}>
               <Feather name="camera" size={16} color={theme.colors.primary} />
@@ -49,15 +51,14 @@ export const ProfileScreen = () => {
       <View style={styles.content}>
         {/* Personal Information */}
         <Card>
-          <Text variant="h3" style={styles.sectionTitle}>Personal Information</Text>
+          <Text variant="h3" style={styles.sectionTitle}>
+            Personal Information
+          </Text>
           <View style={styles.formGroup}>
-            <Input
-              label="Full Name"
-              defaultValue="Alex Johnson"
-            />
+            <Input label="Full Name" defaultValue={user?.firstName} />
             <Input
               label="Email Address"
-              defaultValue="alex.johnson@email.com"
+              defaultValue={user?.email}
               keyboardType="email-address"
             />
             <Input
@@ -65,29 +66,19 @@ export const ProfileScreen = () => {
               defaultValue="+1 234 567 8900"
               keyboardType="phone-pad"
             />
-            <Input
-              label="Date of Birth"
-              defaultValue="1990-01-15"
-            />
+            <Input label="Date of Birth" defaultValue="1990-01-15" />
           </View>
         </Card>
 
         {/* Preferences */}
         <Card>
-          <Text variant="h3" style={styles.sectionTitle}>Preferences</Text>
+          <Text variant="h3" style={styles.sectionTitle}>
+            Preferences
+          </Text>
           <View style={styles.formGroup}>
-            <Input
-              label="Default Currency"
-              defaultValue="USD ($)"
-            />
-            <Input
-              label="Language"
-              defaultValue="English"
-            />
-            <Input
-              label="Timezone"
-              defaultValue="America/New_York (EST)"
-            />
+            <Input label="Default Currency" defaultValue="USD ($)" />
+            <Input label="Language" defaultValue="English" />
+            <Input label="Timezone" defaultValue="America/New_York (EST)" />
           </View>
         </Card>
 
@@ -97,13 +88,13 @@ export const ProfileScreen = () => {
             title="Save Changes"
             icon={<Feather name="save" size={20} color="white" />}
             size="lg"
-            onPress={() => { }}
+            onPress={() => {}}
           />
           <Button
             title="Export Profile Data"
             variant="outline"
             size="lg"
-            onPress={() => { }}
+            onPress={() => {}}
           />
         </View>
       </View>
@@ -111,8 +102,7 @@ export const ProfileScreen = () => {
   );
 };
 
-
-const styles = StyleSheet.create(theme => ({
+const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -123,44 +113,44 @@ const styles = StyleSheet.create(theme => ({
     paddingBottom: theme.paddings.xl * 1.5,
   },
   headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.margins.md,
     marginBottom: theme.margins.lg,
   },
   headerTitle: {
-    color: 'white',
+    color: "white",
   },
   avatarContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: -theme.margins.md,
   },
   avatarWrapper: {
-    position: 'relative',
+    position: "relative",
   },
   avatar: {
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarText: {
-    color: 'white',
+    color: "white",
     fontSize: 32,
   },
   cameraButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    backgroundColor: "white",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -171,10 +161,10 @@ const styles = StyleSheet.create(theme => ({
     marginTop: -theme.margins.lg,
     gap: theme.margins.md,
     maxWidth: {
-      md: 800
+      md: 800,
     },
-    alignSelf: 'center',
-    width: '100%'
+    alignSelf: "center",
+    width: "100%",
   },
   sectionTitle: {
     marginBottom: theme.margins.md,
@@ -186,5 +176,5 @@ const styles = StyleSheet.create(theme => ({
     gap: theme.margins.md,
     marginTop: theme.margins.md,
     marginBottom: theme.margins.xl,
-  }
+  },
 }));

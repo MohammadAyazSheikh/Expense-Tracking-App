@@ -12,6 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { useAuthStore } from "../store";
 import * as ImagePicker from "expo-image-picker";
 import { useCreateProfile } from "../services/createProfile";
+import { ApiLoader } from "@/components/ui/ApiLoader";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -27,7 +28,7 @@ export const ProfileSetupScreen = () => {
   const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
 
   // TanStack Query mutation
-  const createProfileMutation = useCreateProfile();
+  const { mutate, isPending } = useCreateProfile();
 
   const {
     control,
@@ -59,7 +60,7 @@ export const ProfileSetupScreen = () => {
   const onSubmit = async (data: ProfileFormData) => {
     if (!user?.id) return;
 
-    createProfileMutation.mutate(
+    mutate(
       {
         userId: user.id,
         firstName: data.firstName,
@@ -76,8 +77,8 @@ export const ProfileSetupScreen = () => {
             firstName: profile.first_name,
             lastName: profile.last_name,
             avatar: profile.avatar_url!,
+            fullName: profile.first_name + " " + profile.last_name,
           });
-          // Navigation will be handled by RootNavigator based on auth state
         },
       },
     );
@@ -151,11 +152,12 @@ export const ProfileSetupScreen = () => {
           <Button
             title="Continue"
             onPress={handleSubmit(onSubmit)}
-            loading={createProfileMutation.isPending}
+            loading={isPending}
             size="lg"
           />
         </View>
       </View>
+      <ApiLoader isLoading={isPending} message="Updating profile..." />
     </ScreenWrapper>
   );
 };
