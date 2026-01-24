@@ -1,91 +1,126 @@
-import React from "react";
-import { View, FlatList, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, FlatList, useWindowDimensions } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Ionicons } from "@expo/vector-icons";
 import { SheetManager } from "react-native-actions-sheet";
-import { useFinanceStore } from "../store/financeStore";
-import { alertService } from "../utils/alertService";
+import { useFinanceStore } from "../store";
 import { Category } from "../types";
+import { alertService } from "../utils/alertService";
 import { useTranslation } from "../hooks/useTranslation";
 import { Text } from "../components/ui/Text";
-import { Icon, IconType } from "../components/ui/Icon";
 import { SafeArea } from "@/components/ui/SafeArea";
 import Fab from "@/components/ui/Fab";
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import { CategoryCard } from "../components/categories/CategoryCard";
 
 export const CategoryManagerScreen = ({ navigation }: any) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const { categories, deleteCategory } = useFinanceStore();
+  const layout = useWindowDimensions();
+
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: "expense", title: t("transactions.expenses") },
+    { key: "income", title: t("transactions.income") },
+  ]);
 
   const handleAddCategory = () => {
-    SheetManager.show("category-sheet");
-  };
-
-  const handleEditCategory = (category: Category) => {
-    SheetManager.show("category-sheet", {
-      payload: { category },
+    SheetManager.show("manage-category-sheet", {
+      payload: { type: index === 0 ? "expense" : "income" },
     });
   };
 
-  const handleDeleteCategory = (id: string) => {
+  const handleEditCategory = (category: Category) => {
+    SheetManager.show("manage-category-sheet", {
+      payload: { category, type: index === 0 ? "expense" : "income" },
+    });
+  };
+
+  const handleDeleteCategory = (category: Category) => {
+    const isSystem = category.isSystem;
     alertService.show(
-      t("categoryManager.deleteConfirmTitle"),
-      t("categoryManager.deleteConfirmMessage"),
+      isSystem
+        ? t("categoryManager.removeTitle")
+        : t("categoryManager.deleteConfirmTitle"),
+      isSystem
+        ? t("categoryManager.removeMessage")
+        : t("categoryManager.deleteConfirmMessage"),
       [
         { text: t("common.cancel"), style: "cancel" },
         {
-          text: t("common.delete"),
+          text: isSystem ? t("common.remove") : t("common.delete"),
           style: "destructive",
-          onPress: () => deleteCategory(id),
+          onPress: () => deleteCategory(category.id),
         },
       ],
     );
   };
 
-  const renderItem = ({ item }: { item: Category }) => (
-    <TouchableOpacity
-      style={styles.categoryItem}
+  const renderCategoryItem = ({ item }: { item: Category }) => (
+    <CategoryCard
+      category={item}
       onPress={() => handleEditCategory(item)}
-    >
-      <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
-        {/* Fallback to Ionicons if iconFamily is missing (legacy support) */}
-        <Icon
-          type={(item.iconFamily as IconType) || "Ionicons"}
-          name={item.icon as any}
-          size={24}
-          color="white"
-        />
-      </View>
-      <View style={styles.categoryInfo}>
-        <Text style={styles.categoryName}>{item.name}</Text>
-      </View>
-      <TouchableOpacity
-        onPress={() => handleDeleteCategory(item.id)}
-        style={styles.deleteButton}
-      >
-        <Ionicons
-          name="trash-outline"
-          size={20}
-          color={theme.colors.destructive}
-        />
-      </TouchableOpacity>
-    </TouchableOpacity>
+      onAction={() => handleDeleteCategory(item)}
+      actionIcon={item.isSystem ? "remove-circle-outline" : "trash-outline"}
+    />
+  );
+
+  const ExpenseRoute = () => (
+    <FlatList
+      data={categories.filter((c) => c.type === "expense")}
+      keyExtractor={(item) => item.id}
+      renderItem={renderCategoryItem}
+      contentContainerStyle={styles.listContent}
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            {t("categoryManager.noCategories")}
+          </Text>
+        </View>
+      }
+    />
+  );
+
+  const IncomeRoute = () => (
+    <FlatList
+      data={categories.filter((c) => c.type === "income")}
+      keyExtractor={(item) => item.id}
+      renderItem={renderCategoryItem}
+      contentContainerStyle={styles.listContent}
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            {t("categoryManager.noCategories")}
+          </Text>
+        </View>
+      }
+    />
+  );
+
+  const renderScene = SceneMap({
+    expense: ExpenseRoute,
+    income: IncomeRoute,
+  });
+
+  const renderTabBar = (props: any) => (
+    <TabBar
+      {...props}
+      indicatorStyle={{ backgroundColor: theme.colors.primary }}
+      style={{ backgroundColor: theme.colors.background }}
+      activeColor={theme.colors.primary}
+      inactiveColor={theme.colors.mutedForeground}
+      labelStyle={{ fontWeight: "600" }}
+    />
   );
 
   return (
     <SafeArea applyBottomInset style={styles.container}>
-      <FlatList
-        data={categories}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              {t("categoryManager.noCategories")}
-            </Text>
-          </View>
-        }
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+        renderTabBar={renderTabBar}
       />
       <Fab onPress={handleAddCategory} />
     </SafeArea>

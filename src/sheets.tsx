@@ -101,9 +101,14 @@ declare module "react-native-actions-sheet" {
         onConfirm: (amount: number, method: string) => void;
       };
     }>;
-    "category-sheet": SheetDefinition<{
+    "manage-category-sheet": SheetDefinition<{
       payload: {
         category?: Category;
+        type?: "income" | "expense";
+      };
+      routes: {
+        "add-update-category": RouteDefinition;
+        "system-category-picker": RouteDefinition;
       };
     }>;
     "tag-sheet": SheetDefinition<{
@@ -136,7 +141,7 @@ export const Sheets = () => {
         "multi-select-sheet": MultiSelectSheet,
         "add-friend-sheet": AddFriendSheet,
         "record-payment-sheet": RecordPaymentSheet,
-        "category-sheet": CategorySheet,
+        "manage-category-sheet": CategorySheet,
         "tag-sheet": TagSheet,
         "color-picker-sheet": ColorPickerSheet,
       }}

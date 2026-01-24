@@ -4,6 +4,9 @@ import ActionSheet, {
   ScrollView,
   SheetProps,
   SheetManager,
+  useSheetPayload,
+  RouteScreenProps,
+  Route,
 } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,12 +18,16 @@ import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useFinanceStore } from "../../store";
 import { alertService } from "../../utils/alertService";
+import { DEFAULT_CATEGORIES } from "../../data/categories";
+import { CategoryCard } from "../categories/CategoryCard";
 
-export const CategorySheet = (props: SheetProps<"category-sheet">) => {
-  const { sheetId, payload } = props;
+const ManageCategoryRoute = ({
+  router,
+}: RouteScreenProps<"manage-category-sheet", "add-update-category">) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const { addCategory, updateCategory } = useFinanceStore();
+  const payload = useSheetPayload("manage-category-sheet");
 
   const isEditing = !!payload?.category;
   const initialCategory = payload?.category;
@@ -50,7 +57,8 @@ export const CategorySheet = (props: SheetProps<"category-sheet">) => {
       icon: iconConfig.name,
       iconFamily: iconConfig.type,
       color: selectedColor,
-      type: "expense", // Default to expense
+      type: payload?.type,
+      isSystem: initialCategory?.isSystem,
     };
 
     if (isEditing && initialCategory) {
@@ -59,7 +67,7 @@ export const CategorySheet = (props: SheetProps<"category-sheet">) => {
       addCategory(categoryData);
     }
 
-    SheetManager.hide(sheetId);
+    SheetManager.hide("manage-category-sheet");
   };
 
   const openColorPicker = async () => {
@@ -78,95 +86,202 @@ export const CategorySheet = (props: SheetProps<"category-sheet">) => {
   const selectedIconConfig = CATEGORY_ICONS[selectedIconKey];
 
   return (
-    <ActionSheet
-      id={sheetId}
-      gestureEnabled={true}
-      indicatorStyle={{ backgroundColor: theme.colors.border }}
-      containerStyle={styles.container}
-    >
-      <View style={{ flex: 1 }}>
-        <View style={styles.header}>
-          <Text variant="h3">
-            {isEditing
-              ? t("categoryManager.editCategory")
-              : t("categoryManager.newCategory")}
-          </Text>
-          <TouchableOpacity onPress={() => SheetManager.hide(sheetId)}>
-            <Ionicons name="close" size={24} color={theme.colors.foreground} />
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text variant="h3">
+          {isEditing
+            ? t("categoryManager.editCategory", {
+                type: payload?.type?.toLocaleUpperCase(),
+              })
+            : t("categoryManager.newCategory", {
+                type: payload?.type?.toLocaleUpperCase(),
+              })}
+        </Text>
+        <TouchableOpacity
+          onPress={() => SheetManager.hide("manage-category-sheet")}
+        >
+          <Ionicons name="close" size={24} color={theme.colors.foreground} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 100, width: "100%" }}
+      >
+        {!isEditing && (
+          <TouchableOpacity
+            style={styles.pickSystemButton}
+            onPress={() =>
+              router.navigate("system-category-picker", {
+                payload: { type: payload?.type },
+              })
+            }
+          >
+            <View style={styles.pickSystemIcon}>
+              <Ionicons
+                name="grid-outline"
+                size={20}
+                color={theme.colors.muted}
+              />
+            </View>
+            <View style={styles.pickSystemContent}>
+              <Text weight="semiBold">
+                {t("categoryManager.suggestedCategories")}
+              </Text>
+              <Text style={{ color: theme.colors.mutedForeground }}>
+                Pick from standard {payload?.type} categories
+              </Text>
+            </View>
+
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.mutedForeground}
+            />
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.previewContainer}>
+          <View
+            style={[styles.previewIcon, { backgroundColor: selectedColor }]}
+          >
+            {selectedIconConfig && (
+              <Icon
+                type={selectedIconConfig.type as any}
+                name={selectedIconConfig.name as any}
+                size={40}
+                color="white"
+              />
+            )}
+          </View>
+          <TouchableOpacity onPress={openColorPicker}>
+            <Text style={{ color: theme.colors.primary }}>
+              {t("categoryManager.changeColor")}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView
-          style={styles.content}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
-        >
-          {/* Preview */}
-          <View style={styles.previewContainer}>
-            <View
-              style={[styles.previewIcon, { backgroundColor: selectedColor }]}
-            >
-              {selectedIconConfig && (
-                <Icon
-                  type={selectedIconConfig.type as any}
-                  name={selectedIconConfig.name as any}
-                  size={40}
-                  color="white"
-                />
-              )}
-            </View>
-            <TouchableOpacity onPress={openColorPicker}>
-              <Text style={{ color: theme.colors.primary }}>
-                {t("categoryManager.changeColor")}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Name Input */}
-          <View>
-            <Text weight="medium" style={{ marginBottom: 8 }}>
-              {t("categoryManager.categoryName")}
-            </Text>
-            <Input
-              value={name}
-              onChangeText={setName}
-              placeholder={t("categoryManager.namePlaceholder")}
-            />
-          </View>
-
-          {/* Icon Selection */}
-          <Text weight="semiBold" style={styles.sectionTitle}>
-            {t("categoryManager.selectIcon")}
+        <View>
+          <Text weight="medium" style={{ marginBottom: 8 }}>
+            {t("categoryManager.categoryName")}
           </Text>
-
-          {CATEGORY_GROUPS.map((group) => (
-            <View key={group.title}>
-              <Text style={{ marginVertical: 8, fontSize: 12 }}>
-                {group.title}
-              </Text>
-              <View style={styles.grid}>
-                {group.data.map((iconKey) => (
-                  <IconItem
-                    key={iconKey}
-                    iconKey={iconKey}
-                    isSelected={selectedIconKey === iconKey}
-                    onPress={() => setSelectedIconKey(iconKey)}
-                  />
-                ))}
-              </View>
-            </View>
-          ))}
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <Button
-            title={isEditing ? t("common.update") : t("common.save")}
-            onPress={handleSave}
-            size="lg"
+          <Input
+            value={name}
+            onChangeText={setName}
+            placeholder={t("categoryManager.namePlaceholder")}
+            editable={!initialCategory?.isSystem}
+            style={initialCategory?.isSystem ? { opacity: 0.5 } : {}}
           />
+          {initialCategory?.isSystem && (
+            <Text style={{ color: theme.colors.muted, marginTop: 4 }}>
+              {t(
+                "categoryManager.systemCategoryNote",
+                "System category names cannot be changed",
+              )}
+            </Text>
+          )}
         </View>
+
+        <Text weight="semiBold" style={styles.sectionTitle}>
+          {t("categoryManager.selectIcon")}
+        </Text>
+
+        {CATEGORY_GROUPS.map((group) => (
+          <View key={group.title}>
+            <Text style={{ marginVertical: 8, fontSize: 12 }}>
+              {group.title}
+            </Text>
+            <View style={styles.grid}>
+              {group.data.map((iconKey) => (
+                <IconItem
+                  key={iconKey}
+                  iconKey={iconKey}
+                  isSelected={selectedIconKey === iconKey}
+                  onPress={() => setSelectedIconKey(iconKey)}
+                />
+              ))}
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <Button
+          title={isEditing ? t("common.update") : t("common.save")}
+          onPress={handleSave}
+          size="lg"
+        />
       </View>
-    </ActionSheet>
+    </View>
+  );
+};
+
+const SystemPickerRoute = ({
+  router,
+}: RouteScreenProps<"manage-category-sheet", "system-category-picker">) => {
+  const { theme } = useUnistyles();
+  const { t } = useTranslation();
+  const { categories, addCategory } = useFinanceStore();
+
+  const payload = useSheetPayload("manage-category-sheet");
+
+  // Prefer params from navigation (local override), fallback to sheet payload
+  const categoryType = payload?.type || "expense";
+
+  const availableSystemCategories = React.useMemo(() => {
+    return DEFAULT_CATEGORIES.filter(
+      (dc) =>
+        dc.type === categoryType &&
+        !categories.some((uc) => uc.name === dc.name && uc.type === dc.type),
+    );
+  }, [categories, categoryType]);
+
+  const handleAddSystemCategory = (cat: (typeof DEFAULT_CATEGORIES)[0]) => {
+    addCategory(cat);
+    SheetManager.hide("category-sheet");
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={theme.colors.foreground}
+          />
+        </TouchableOpacity>
+        <Text variant="h3">{t("categoryManager.suggestedCategories")}</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        {availableSystemCategories.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={{ color: theme.colors.mutedForeground }}>
+              No more system categories available for {categoryType}.
+            </Text>
+          </View>
+        ) : (
+          availableSystemCategories.map((cat) => (
+            <CategoryCard
+              key={cat.id}
+              category={cat}
+              onAction={() => handleAddSystemCategory(cat)}
+              actionIcon="add-circle"
+              style={{ paddingRight: 8 }}
+            />
+          ))
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -180,9 +295,6 @@ const IconItem = ({
   onPress: () => void;
 }) => {
   const { theme } = useUnistyles();
-  styles.useVariants({
-    selected: isSelected,
-  });
 
   const iconConfig = CATEGORY_ICONS[iconKey];
   if (!iconConfig) return null;
@@ -199,6 +311,34 @@ const IconItem = ({
   );
 };
 
+const routes: Route[] = [
+  {
+    name: "add-update-category",
+    component: ManageCategoryRoute,
+  },
+  {
+    name: "system-category-picker",
+    component: SystemPickerRoute,
+  },
+];
+
+export const CategorySheet = (props: SheetProps<"manage-category-sheet">) => {
+  const { sheetId } = props;
+  const { theme } = useUnistyles();
+
+  return (
+    <ActionSheet
+      id={sheetId}
+      routes={routes}
+      initialRoute="add-update-category"
+      enableRouterBackNavigation={true}
+      gestureEnabled={true}
+      indicatorStyle={{ backgroundColor: theme.colors.border }}
+      containerStyle={{ height: "90%" }}
+    />
+  );
+};
+
 const styles = StyleSheet.create((theme, rt) => ({
   container: {
     padding: theme.paddings.lg,
@@ -206,7 +346,7 @@ const styles = StyleSheet.create((theme, rt) => ({
     backgroundColor: theme.colors.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    height: "90%",
+    height: "100%",
   },
   header: {
     flexDirection: "row",
@@ -226,24 +366,6 @@ const styles = StyleSheet.create((theme, rt) => ({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-  },
-  iconItem: {
-    width: 48,
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.background,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    variants: {
-      selected: {
-        true: {
-          borderColor: theme.colors.primary,
-          backgroundColor: theme.colors.primary + "10",
-        },
-      },
-    },
   },
   colorPreview: {
     width: 48,
@@ -269,5 +391,55 @@ const styles = StyleSheet.create((theme, rt) => ({
   footer: {
     gap: theme.margins.md,
     marginTop: theme.margins.lg,
+  },
+  pickSystemButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: theme.colors.background,
+    padding: theme.paddings.md,
+    borderRadius: theme.radius.md,
+    marginBottom: theme.margins.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  pickSystemContent: {
+    flex: 1,
+    paddingHorizontal: theme.paddings.md,
+  },
+  pickSystemIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.primary + "15",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backButton: {
+    marginRight: theme.margins.md,
+  },
+  emptyState: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: theme.paddings.xl,
+  },
+
+  iconItem: {
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.background,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    variants: {
+      selected: {
+        true: {
+          borderColor: theme.colors.primary,
+          backgroundColor: theme.colors.primary + "10",
+        },
+      },
+    },
   },
 }));

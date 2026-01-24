@@ -4,6 +4,7 @@
         "save": "محفوظ کریں",
         "cancel": "منسوخ کریں",
         "delete": "حذف کریں",
+        "remove": "ہٹائیں",
         "edit": "ترمیم کریں",
         "done": "مکمل",
         "next": "اگلا",
@@ -172,7 +173,7 @@
     },
     "categoryManager": {
         "title": "زمرہ جات",
-        "newCategory": "نیا زمرہ",
+        "newCategory": "نیا زمرہ - {{type}}",
         "categoryName": "زمرہ کا نام",
         "selectIcon": "آئیکن منتخب کریں",
         "selectColor": "رنگ منتخب کریں",
@@ -180,10 +181,14 @@
         "deleteConfirmTitle": "زمرہ حذف کریں",
         "deleteConfirmMessage": "کیا آپ واقعی اس زمرے کو حذف کرنا چاہتے ہیں؟",
         "manage": "انتظام کریں",
-        "editCategory": "زمرہ میں ترمیم کریں",
+        "editCategory": "زمرہ میں ترمیم کریں - {{type}}",
         "namePlaceholder": "مثال: گروسری",
         "changeColor": "رنگ تبدیل کریں",
-        "nameRequired": "زمرہ کا نام درکار ہے"
+        "nameRequired": "زمرہ کا نام درکار ہے",
+        "removeTitle": "زمرہ ہٹائیں",
+        "removeMessage": "یہ اس زمرے کو آپ کی فہرست سے ہٹا دے گا۔",
+        "suggestedCategories": "تجویز کردہ زمرے",
+        "systemCategoryNote": "سسٹم کے زمرے کے نام تبدیل نہیں کیے جا سکتے"
     },
     "filter": {
         "title": "لین دین کو فلٹر کریں",
