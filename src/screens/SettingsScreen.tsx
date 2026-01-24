@@ -33,19 +33,28 @@ export const SettingsScreen = () => {
       title: t("settings.account"),
       items: [
         {
-          icon: "user",
+          icon: {
+            name: "user",
+            family: "Feather",
+          },
           label: t("settings.profileSettings"),
           badge: null,
           path: "Profile",
         },
         {
-          icon: "bell",
+          icon: {
+            name: "bell",
+            family: "Feather",
+          },
           label: t("settings.notifications"),
           badge: "3 New",
           path: "NotificationSettings",
         },
         {
-          icon: "lock",
+          icon: {
+            name: "lock",
+            family: "Feather",
+          },
           label: t("settings.security"),
           badge: null,
           path: "Security",
@@ -56,13 +65,19 @@ export const SettingsScreen = () => {
       title: t("settings.preferences"),
       items: [
         {
-          icon: "credit-card",
+          icon: {
+            name: "credit-card",
+            family: "Feather",
+          },
           label: t("settings.manageAccounts"),
           badge: null,
           path: "Wallets",
         },
         {
-          icon: "file-text",
+          icon: {
+            name: "file-text",
+            family: "Feather",
+          },
           label: t("settings.exportData"),
           badge: null,
           path: "Profile",
@@ -73,13 +88,16 @@ export const SettingsScreen = () => {
       title: t("settings.support"),
       items: [
         {
-          icon: "help-circle",
+          icon: {
+            name: "help-circle",
+            family: "Feather",
+          },
           label: t("settings.helpSupport"),
           badge: null,
           path: "HelpSupport",
         },
         {
-          icon: "zap",
+          icon: { name: "zap", family: "Feather" },
           label: t("settings.smartSenseSettings"),
           badge: "AI",
           path: "SmartSense",
@@ -141,7 +159,7 @@ export const SettingsScreen = () => {
           <SettingsRow
             label={t("settings.language")}
             description={t("settings.changeLanguage")}
-            icon="globe"
+            icon={{ name: "globe", family: "Feather" }}
             iconColor={theme.colors.primary}
             variant="toggle"
             showSeparator
@@ -207,7 +225,7 @@ export const SettingsScreen = () => {
         <SettingsGroup>
           <SettingsRow
             label={t("settings.logOut")}
-            icon="log-out"
+            icon={{ name: "log-out", family: "Feather" }}
             isDestructive
             onPress={logout}
             style={styles.logoutRow}

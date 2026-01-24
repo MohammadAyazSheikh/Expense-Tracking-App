@@ -83,7 +83,7 @@ export const CreateGroupScreen = () => {
   const removeMember = (id: string) => {
     setValue(
       "memberIds",
-      memberIds.filter((memberId) => memberId !== id)
+      memberIds.filter((memberId) => memberId !== id),
     );
   };
 
@@ -221,7 +221,7 @@ export const CreateGroupScreen = () => {
                 showSeparator={index != 0}
                 key={member.id}
                 label={member.name}
-                icon={
+                leftElement={
                   <View style={styles.memberAvatar}>
                     <Text style={{ fontSize: 16 }}>{member.avatar}</Text>
                   </View>

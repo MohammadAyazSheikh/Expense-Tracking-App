@@ -12,7 +12,7 @@ import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
 import { useAuthStore, useFinanceStore } from "../store";
 import { useFonts } from "../hooks/useFonts";
-import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { TransactionCard } from "../components/transactions/TransactionCard";
 
 export const DashboardScreen = () => {
   const { width } = useWindowDimensions();

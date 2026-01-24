@@ -10,7 +10,7 @@ import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { useFinanceStore } from "../store";
-import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { TransactionCard } from "../components/transactions/TransactionCard";
 import { Badge } from "../components/ui/Badge";
 
 type FriendDetailRouteProp = RouteProp<RootStackParamList, "FriendDetail">;
@@ -39,7 +39,7 @@ export const FriendDetailScreen = () => {
       .filter(
         (t) =>
           t.note?.includes(friend?.name || "") ||
-          t.description?.includes(friend?.name || "")
+          t.description?.includes(friend?.name || ""),
       )
       .slice(0, 5);
   }, [transactions, friend]);

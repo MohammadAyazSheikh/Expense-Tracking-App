@@ -11,7 +11,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { useFinanceStore } from "../store";
 import Toast from "react-native-toast-message";
-import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { TransactionCard } from "../components/transactions/TransactionCard";
 import { SheetManager } from "react-native-actions-sheet";
 import { SelectorOption } from "../components/sheets/SelectSheet";
 
@@ -29,7 +29,7 @@ export default function WalletStatementScreen() {
   const { wallets, transactions, categories } = useFinanceStore();
 
   const [filterType, setFilterType] = useState<"all" | "income" | "expense">(
-    "all"
+    "all",
   );
   const [dateFilter, setDateFilter] = useState("this_month");
 
@@ -115,7 +115,7 @@ export default function WalletStatementScreen() {
     .filter(
       (t) =>
         (t.walletId === walletId || t.toWalletId === walletId) &&
-        dateFilteredParams(t)
+        dateFilteredParams(t),
     )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Ascending for running balance
 
@@ -193,7 +193,7 @@ export default function WalletStatementScreen() {
     .filter(
       (t) =>
         t.type === "income" ||
-        (t.type === "transfer" && t.toWalletId === walletId)
+        (t.type === "transfer" && t.toWalletId === walletId),
     )
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -201,7 +201,7 @@ export default function WalletStatementScreen() {
     .filter(
       (t) =>
         t.type === "expense" ||
-        (t.type === "transfer" && t.walletId === walletId)
+        (t.type === "transfer" && t.walletId === walletId),
     )
     .reduce((sum, t) => sum + t.amount, 0);
 
@@ -358,8 +358,8 @@ export default function WalletStatementScreen() {
                     filterType === "all"
                       ? t("wallets.viewAll")
                       : filterType === "income"
-                      ? t("wallets.income")
-                      : t("wallets.expense")
+                        ? t("wallets.income")
+                        : t("wallets.expense")
                   }
                   variant="outline"
                   size="sm"

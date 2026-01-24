@@ -67,7 +67,7 @@ export const SecurityScreen = () => {
           <SettingsRow
             label="Biometric Login"
             description="Use fingerprint/Face ID"
-            icon="smartphone"
+            icon={{ name: "smartphone", family: "Feather" }}
             iconColor={theme.colors.primary}
             variant="toggle"
             style={{ paddingHorizontal: 0 }}
@@ -81,7 +81,7 @@ export const SecurityScreen = () => {
           <SettingsRow
             label="Two-Factor Authentication"
             description="SMS or authenticator app"
-            icon="lock"
+            icon={{ name: "lock", family: "Feather" }}
             iconColor={theme.colors.warning}
             variant="toggle"
             showSeparator
@@ -167,13 +167,13 @@ export const SecurityScreen = () => {
           <SettingsRow
             label="Data & Privacy"
             description="Manage your data"
-            icon="key"
+            icon={{ name: "key", family: "Feather" }}
             onPress={() => {}}
           />
           <SettingsRow
             label="Connected Apps"
             description="Review app permissions"
-            icon="shield"
+            icon={{ name: "shield", family: "Feather" }}
             showSeparator
             onPress={() => {}}
           />

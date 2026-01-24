@@ -143,7 +143,7 @@ export const NotificationSettingsScreen = () => {
           <SettingsRow
             label="Push Notifications"
             description="Receive all app notifications"
-            icon="bell"
+            icon={{ name: "bell", family: "Feather" }}
             iconColor="white"
             variant="toggle"
             rightElement={<Switch value={true} onValueChange={() => {}} />}

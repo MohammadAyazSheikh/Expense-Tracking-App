@@ -3,7 +3,7 @@ import { View, FlatList, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useFinanceStore } from "../store/financeStore";
-import { AddCategoryModal } from "../components/Category/AddCategoryModal";
+import { AddCategoryModal } from "../components/category/AddCategoryModal";
 import { alertService } from "../utils/alertService";
 import { Category } from "../types";
 import { useTranslation } from "../hooks/useTranslation";

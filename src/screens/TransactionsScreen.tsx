@@ -14,16 +14,16 @@ import { SearchBar } from "../components/ui/searchbar";
 import {
   FilterState,
   DateRange,
-} from "../components/Transactions/filterSheet/FilterSheet";
+} from "../components/transactions/filterSheet/FilterSheet";
 
 import { useFinanceStore } from "../store";
-import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { TransactionCard } from "../components/transactions/TransactionCard";
 // Helper function to filter by date range
 const isWithinDateRange = (
   transactionDate: string,
   dateRange: DateRange,
   customStartDate?: string,
-  customEndDate?: string
+  customEndDate?: string,
 ): boolean => {
   const txDate = new Date(transactionDate);
   const today = new Date();
@@ -76,18 +76,21 @@ export const TransactionsScreen = () => {
   });
 
   const groupedTransactions = useMemo(() => {
-    return transactions.reduce((groups, transaction) => {
-      const date = transaction.date;
-      let dateLabel = date;
-      if (date === "2024-06-15") dateLabel = t("transactions.today");
-      else if (date === "2024-06-14") dateLabel = t("transactions.yesterday");
+    return transactions.reduce(
+      (groups, transaction) => {
+        const date = transaction.date;
+        let dateLabel = date;
+        if (date === "2024-06-15") dateLabel = t("transactions.today");
+        else if (date === "2024-06-14") dateLabel = t("transactions.yesterday");
 
-      if (!groups[dateLabel]) {
-        groups[dateLabel] = [];
-      }
-      groups[dateLabel].push(transaction);
-      return groups;
-    }, {} as Record<string, typeof transactions>);
+        if (!groups[dateLabel]) {
+          groups[dateLabel] = [];
+        }
+        groups[dateLabel].push(transaction);
+        return groups;
+      },
+      {} as Record<string, typeof transactions>,
+    );
   }, [transactions, t]);
 
   const filteredGroups = Object.entries(groupedTransactions).reduce(
@@ -112,7 +115,7 @@ export const TransactionsScreen = () => {
           t.date,
           filters.dateRange,
           filters.customStartDate,
-          filters.customEndDate
+          filters.customEndDate,
         );
 
         // Tags filter
@@ -134,7 +137,7 @@ export const TransactionsScreen = () => {
       }
       return acc;
     },
-    [] as [string, typeof transactions][]
+    [] as [string, typeof transactions][],
   );
 
   // Count active filters
@@ -211,7 +214,7 @@ export const TransactionsScreen = () => {
                 {Math.abs(
                   transactions
                     .filter((t) => t.type === "expense")
-                    .reduce((sum, t) => sum + t.amount, 0)
+                    .reduce((sum, t) => sum + t.amount, 0),
                 ).toFixed(2)}
               </Text>
             </View>
@@ -232,7 +235,7 @@ export const TransactionsScreen = () => {
               <View style={styles.transactionList}>
                 {dateTransactions.map((transaction) => {
                   const category = categories.find(
-                    (c) => c.name === transaction.category
+                    (c) => c.name === transaction.category,
                   );
                   return (
                     <TransactionCard

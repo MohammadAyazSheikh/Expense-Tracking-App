@@ -160,7 +160,7 @@ export const HelpSupportScreen = () => {
               key={option.title}
               label={option.title}
               description={option.description}
-              icon={option.icon as any}
+              icon={{ name: option.icon, family: "Feather" } as any}
               iconColor={
                 theme.colors[
                   option.color as keyof typeof theme.colors

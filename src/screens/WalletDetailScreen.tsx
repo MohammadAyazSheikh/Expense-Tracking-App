@@ -18,7 +18,7 @@ import { Header } from "../components/ui/Headers";
 import { LineChart } from "react-native-gifted-charts";
 import { MenuItem } from "../components/sheets/MenuSheet";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { TransactionCard } from "../components/transactions/TransactionCard";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 
 type WalletDetailScreenRouteProp = RouteProp<

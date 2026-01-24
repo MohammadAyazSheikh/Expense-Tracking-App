@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../hooks/useTranslation";
 import { useFinanceStore } from "../store";
 import { Transaction } from "../types";
-import { TransactionCard } from "../components/Transactions/TransactionCard";
+import { TransactionCard } from "../components/transactions/TransactionCard";
 import Animated from "react-native-reanimated";
 import { EnteringAnimation, ExitingAnimation } from "../utils/animation";
 import { useFonts } from "../hooks/useFonts";

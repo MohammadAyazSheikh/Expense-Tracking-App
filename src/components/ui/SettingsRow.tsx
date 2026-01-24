@@ -9,11 +9,13 @@ import {
   ExitingAnimation,
   LayoutAnimation,
 } from "../../utils/animation";
+import { Icon, IconName, IconType } from "./Icon";
 
-interface SettingsRowProps {
+interface SettingsRowProps<T extends IconType> {
   label: string;
   description?: string;
-  icon?: keyof typeof Feather.glyphMap | React.ReactNode;
+  icon?: { name: IconName<T>; family: T };
+  leftElement?: React.ReactNode;
   iconColor?: string;
   rightElement?: React.ReactNode;
   onPress?: () => void;
@@ -24,19 +26,20 @@ interface SettingsRowProps {
   style?: ViewStyle;
 }
 
-export const SettingsRow = ({
+export const SettingsRow = <T extends IconType>({
   label,
   description,
   icon,
   iconColor,
   rightElement,
+  leftElement,
   onPress,
   showChevron = true,
   isDestructive = false,
   showSeparator = false,
   variant = "standard",
   style,
-}: SettingsRowProps) => {
+}: SettingsRowProps<T>) => {
   const { theme } = useUnistyles();
 
   const content = (
@@ -47,9 +50,10 @@ export const SettingsRow = ({
         style,
       ]}
     >
-      {icon && typeof icon === "string" ? (
-        <Feather
-          name={icon as keyof typeof Feather.glyphMap}
+      {icon?.name && icon?.family && !leftElement ? (
+        <Icon
+          name={icon.name}
+          type={icon.family}
           size={20}
           color={
             isDestructive
@@ -59,7 +63,7 @@ export const SettingsRow = ({
           style={styles.icon}
         />
       ) : (
-        icon
+        leftElement
       )}
       <View style={styles.textContainer}>
         <Text
