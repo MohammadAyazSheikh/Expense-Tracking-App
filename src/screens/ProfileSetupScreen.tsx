@@ -70,7 +70,6 @@ export const ProfileSetupScreen = () => {
       },
       {
         onSuccess: (profile) => {
-          console.log({ profile });
           // Update user in auth store
           updateUser({
             ...user,
@@ -125,7 +124,7 @@ export const ProfileSetupScreen = () => {
             render={({ field: { onChange, value } }) => (
               <Input
                 label="First Name"
-                placeholder="John"
+                placeholder="Your first name"
                 autoCapitalize="words"
                 value={value}
                 onChangeText={onChange}
@@ -140,7 +139,7 @@ export const ProfileSetupScreen = () => {
             render={({ field: { onChange, value } }) => (
               <Input
                 label="Last Name"
-                placeholder="Doe"
+                placeholder="Your last name"
                 autoCapitalize="words"
                 value={value}
                 onChangeText={onChange}

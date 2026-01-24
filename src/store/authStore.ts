@@ -239,10 +239,9 @@ export const useAuthStore = create<AuthState>()(
         },
         // Forgot password action
         forgotPassword: async (email) => {
-
           set({ isLoading: true, error: null });
           try {
-            const { error, data } = await supabase.auth.resetPasswordForEmail(email, {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
               redirectTo: DEEP_LINKS.VERIFY_EMAIL,
             });
             if (error) throw error;
@@ -267,19 +266,35 @@ export const useAuthStore = create<AuthState>()(
         changePassword: async ({ password }) => {
           set({ isLoading: true, error: null });
           try {
-            const { error } = await supabase.auth.updateUser({
+            const { error, data } = await supabase.auth.updateUser({
               password,
             });
             if (error) throw error;
+
+            const { data: userData, error: userError } =
+              await supabase.from("profiles").select("*")
+                .eq("id", data.user.id).single();
+
+            if (userError) throw userError;
+
+            set({
+              user: {
+                id: data.user.id,
+                email: data.user.email!,
+                username: userData?.username,
+                lastName: userData?.last_name,
+                firstName: userData?.first_name,
+                avatar: userData?.avatar_url,
+                fullName: userData?.first_name + " " + userData?.last_name,
+              },
+              verificationStatus: "VERIFIED",
+            });
+
             Toast.show({
               type: "success",
               text1: "Success",
               text2: "Password changed successfully!",
             });
-            set({
-              ...get(),
-              verificationStatus: "VERIFIED"
-            })
           } catch (error: any) {
             set({ isLoading: false });
             Toast.show({
