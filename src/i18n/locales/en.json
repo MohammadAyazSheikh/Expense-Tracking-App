@@ -411,6 +411,8 @@
         "account": "Account",
         "preferences": "Preferences",
         "support": "Support",
+        "categories": "Categories",
+        "tags": "Tags",
         "profileSettings": "Profile Settings",
         "notifications": "Notifications",
         "security": "Security",

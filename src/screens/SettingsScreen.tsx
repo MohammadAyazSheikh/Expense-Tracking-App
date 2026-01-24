@@ -15,6 +15,8 @@ import { useAppSettingsStore, useAuthStore } from "../store";
 import { SUPPORTED_LOCALES } from "../i18n/types";
 import { useTranslation } from "../hooks/useTranslation";
 import { ApiLoader } from "@/components/ui/ApiLoader";
+import { SafeArea } from "@/components/ui/SafeArea";
+import { Header } from "@/components/ui/Headers";
 
 export const SettingsScreen = () => {
   const { t } = useTranslation();
@@ -75,6 +77,24 @@ export const SettingsScreen = () => {
         },
         {
           icon: {
+            name: "grid",
+            family: "Feather",
+          },
+          label: t("settings.categories"),
+          badge: null,
+          path: "CategoryManager",
+        },
+        {
+          icon: {
+            name: "tag",
+            family: "Feather",
+          },
+          label: t("settings.tags"),
+          badge: null,
+          path: "TagManager",
+        },
+        {
+          icon: {
             name: "file-text",
             family: "Feather",
           },
@@ -107,12 +127,8 @@ export const SettingsScreen = () => {
   ];
 
   return (
-    <ScreenWrapper style={styles.container} scrollable>
-      <View style={styles.header}>
-        <Text variant="h2" style={styles.headerTitle}>
-          {t("settings.title")}
-        </Text>
-
+    <SafeArea applyBottomInset style={styles.container} scrollable>
+      <Header applySafeAreaPadding title={t("settings.title")}>
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
             {user?.avatar ? (
@@ -138,8 +154,7 @@ export const SettingsScreen = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
-
+      </Header>
       <View style={styles.content}>
         {/* Quick Toggles */}
         <SettingsGroup cardStyle={{ padding: theme.paddings.lg }}>
@@ -237,7 +252,7 @@ export const SettingsScreen = () => {
         </Text>
       </View>
       <ApiLoader isLoading={isLoading} message="Logging out..." />
-    </ScreenWrapper>
+    </SafeArea>
   );
 };
 
@@ -246,15 +261,6 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl * 1.5,
-  },
-  headerTitle: {
-    color: "white",
-    marginBottom: theme.margins.lg,
-  },
   profileCard: {
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     padding: theme.paddings.md,
@@ -262,6 +268,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.margins.md,
+    marginVertical: theme.margins.lg,
     maxWidth: {
       md: 600,
     },
