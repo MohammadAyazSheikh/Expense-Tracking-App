@@ -37,7 +37,7 @@ const uploadAvatar = async (userId: string, uri: string, base64: string): Promis
         const blob = decode(base64);
         // Create unique filename
         const fileExt = uri.split('.').pop();
-        const fileName = `${userId}-${Date.now()}.${fileExt}`;
+        const fileName = `avatar-${userId}-${fileExt}`;
         const filePath = `${userId}/${fileName}`;
         // Upload to Supabase Storage
         const { error, } = await supabase.storage
