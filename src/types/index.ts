@@ -89,7 +89,6 @@ export interface Category {
   iconFamily?: IconType;
   color: string;
   type: 'income' | 'expense';
-  tags?: string[];
 }
 
 export interface Tag {

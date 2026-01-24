@@ -1,33 +1,29 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, FlatList, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
+import { SheetManager } from "react-native-actions-sheet";
 import { useFinanceStore } from "../store/financeStore";
-import { AddCategoryModal } from "../components/category/AddCategoryModal";
 import { alertService } from "../utils/alertService";
 import { Category } from "../types";
 import { useTranslation } from "../hooks/useTranslation";
 import { Text } from "../components/ui/Text";
 import { Icon, IconType } from "../components/ui/Icon";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Button } from "../components/ui/Button";
+import { SafeArea } from "@/components/ui/SafeArea";
+import Fab from "@/components/ui/Fab";
 
 export const CategoryManagerScreen = ({ navigation }: any) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { categories, addCategory, deleteCategory } = useFinanceStore();
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const { categories, deleteCategory } = useFinanceStore();
 
-  const handleAddCategory = (categoryData: {
-    name: string;
-    icon: string;
-    iconFamily: string;
-    color: string;
-    tags: string[];
-  }) => {
-    addCategory({
-      ...categoryData,
-      type: "expense", // Default to expense for now, can be extended
+  const handleAddCategory = () => {
+    SheetManager.show("category-sheet");
+  };
+
+  const handleEditCategory = (category: Category) => {
+    SheetManager.show("category-sheet", {
+      payload: { category },
     });
   };
 
@@ -47,7 +43,10 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
   };
 
   const renderItem = ({ item }: { item: Category }) => (
-    <View style={styles.categoryItem}>
+    <TouchableOpacity
+      style={styles.categoryItem}
+      onPress={() => handleEditCategory(item)}
+    >
       <View style={[styles.iconContainer, { backgroundColor: item.color }]}>
         {/* Fallback to Ionicons if iconFamily is missing (legacy support) */}
         <Icon
@@ -59,9 +58,6 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
       </View>
       <View style={styles.categoryInfo}>
         <Text style={styles.categoryName}>{item.name}</Text>
-        {item.tags && item.tags.length > 0 && (
-          <Text style={styles.categoryTags}>{item.tags.join(", ")}</Text>
-        )}
       </View>
       <TouchableOpacity
         onPress={() => handleDeleteCategory(item.id)}
@@ -73,31 +69,11 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
           color={theme.colors.destructive}
         />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
-    <ScreenWrapper style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={theme.colors.foreground}
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>{t("categoryManager.title")}</Text>
-        <TouchableOpacity
-          onPress={() => setIsModalVisible(true)}
-          style={styles.addButton}
-        >
-          <Ionicons name="add" size={24} color={theme.colors.primary} />
-        </TouchableOpacity>
-      </View>
-
+    <SafeArea applyBottomInset style={styles.container}>
       <FlatList
         data={categories}
         keyExtractor={(item) => item.id}
@@ -111,12 +87,8 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
           </View>
         }
       />
-      <AddCategoryModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onSave={handleAddCategory}
-      />
-    </ScreenWrapper>
+      <Fab onPress={handleAddCategory} />
+    </SafeArea>
   );
 };
 
@@ -124,25 +96,6 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.paddings.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  backButton: {
-    padding: theme.paddings.sm,
-  },
-  title: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: "bold",
-    color: theme.colors.foreground,
-  },
-  addButton: {
-    padding: theme.paddings.sm,
   },
   listContent: {
     padding: theme.paddings.md,

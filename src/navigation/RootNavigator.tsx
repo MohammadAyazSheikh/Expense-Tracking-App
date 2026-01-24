@@ -1,4 +1,5 @@
 import React from "react";
+import { Text } from "@/components/ui/Text";
 import { createStackNavigator } from "@react-navigation/stack";
 import { RootStackParamList } from "./types";
 import { TabNavigator } from "./TabNavigator";
@@ -38,6 +39,8 @@ import { EditWalletScreen } from "../screens/EditWalletScreen";
 import { TransferScreen } from "../screens/TransferScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "../screens/NotificationSettingsScreen";
+import { useTranslation } from "react-i18next";
+import { useUnistyles } from "react-native-unistyles";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -137,6 +140,8 @@ const profileSetupRoutes = () => {
 };
 
 const mainRoutes = () => {
+  const { t } = useTranslation();
+  const { theme } = useUnistyles();
   return (
     <Stack.Navigator
       initialRouteName="MainTab"
@@ -162,9 +167,38 @@ const mainRoutes = () => {
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
       <Stack.Screen name="SmartSense" component={SmartSenseScreen} />
-      <Stack.Screen name="CategoryManager" component={CategoryManagerScreen} />
+      <Stack.Screen
+        name="CategoryManager"
+        options={{ headerShown: true, title: t("categoryManager.title") }}
+        component={CategoryManagerScreen}
+      />
       <Stack.Screen name="Calendar" component={CalendarScreen} />
-      <Stack.Screen name="TagManager" component={TagsScreen} />
+      <Stack.Screen
+        name="TagManager"
+        component={TagsScreen}
+        options={{
+          headerShown: true,
+          header: ({ navigation }) => (
+            <Header
+              applySafeAreaPadding
+              onBack={() => navigation.goBack()}
+              title={t("tags.title", "Tags")}
+            >
+              <Text
+                style={{
+                  color: theme.colors.muted,
+                  marginTop: theme.margins.md,
+                }}
+              >
+                {t(
+                  "tags.description",
+                  "Create tags to organize your transactions",
+                )}
+              </Text>
+            </Header>
+          ),
+        }}
+      />
       <Stack.Screen name="EditExpense" component={AddExpenseScreen} />
       <Stack.Screen
         name="TransactionDetail"

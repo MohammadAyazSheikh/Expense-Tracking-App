@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { View, TouchableOpacity, ScrollView } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
@@ -14,7 +14,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../hooks/useTranslation";
 import { useFinanceStore } from "../store";
 import { Tag } from "../types";
-import ColorPicker from "../components/ui/ColorPicker";
+import { SheetManager } from "react-native-actions-sheet";
+import { alertService } from "../utils/alertService";
+import { SafeArea } from "@/components/ui/SafeArea";
+import { Header } from "@/components/ui/Headers";
+import Fab from "@/components/ui/Fab";
 
 const SUGGESTED_TAGS = [
   "Travel",
@@ -33,34 +37,32 @@ export const TagsScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const tags = useFinanceStore((state) => state.tags);
-  const addTag = useFinanceStore((state) => state.addTag);
-  const updateTag = useFinanceStore((state) => state.updateTag);
   const deleteTag = useFinanceStore((state) => state.deleteTag);
+  const addTag = useFinanceStore((state) => state.addTag);
 
-  const [isAddingNew, setIsAddingNew] = useState(false);
-  const [editingTag, setEditingTag] = useState<Tag | null>(null);
-  const [newTag, setNewTag] = useState<Omit<Tag, "id">>({
-    name: "",
-    color: "hsl(255, 70%, 65%)",
-  });
-
-  const handleSaveNew = () => {
-    if (newTag.name.trim()) {
-      addTag(newTag);
-      setNewTag({ name: "", color: "hsl(255, 70%, 65%)" });
-      setIsAddingNew(false);
-    }
+  const handleAddTag = () => {
+    SheetManager.show("tag-sheet");
   };
 
-  const handleSaveEdit = () => {
-    if (editingTag) {
-      updateTag(editingTag.id, editingTag);
-      setEditingTag(null);
-    }
+  const handleEditTag = (tag: Tag) => {
+    SheetManager.show("tag-sheet", {
+      payload: { tag },
+    });
   };
 
-  const handleDelete = (id: string) => {
-    deleteTag(id);
+  const handleDelete = (id: string, name: string) => {
+    alertService.show(
+      t("tags.deleteConfirmTitle"),
+      t("tags.deleteConfirmMessage"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.delete"),
+          style: "destructive",
+          onPress: () => deleteTag(id),
+        },
+      ],
+    );
   };
 
   const handleAddSuggested = (name: string) => {
@@ -77,210 +79,117 @@ export const TagsScreen = () => {
   };
 
   return (
-    <ScreenWrapper style={styles.container} scrollable>
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Button
-            title=""
-            icon={<Ionicons name="arrow-back" size={24} color="white" />}
-            variant="ghost"
-            onPress={() => navigation.goBack()}
-            style={{ paddingHorizontal: 0, width: 40 }}
-          />
-          <Text variant="h2" style={styles.headerTitle}>
-            {t("tags.title", "Tags")}
-          </Text>
-          <Button
-            title={t("tags.add", "Add")}
-            icon={<Ionicons name="add" size={20} color="white" />}
-            variant="ghost"
-            onPress={() => {
-              setIsAddingNew(true);
-              setEditingTag(null);
-            }}
-            style={{ paddingHorizontal: 8 }}
-          />
-        </View>
-        <Text style={styles.headerDescription}>
-          {t("tags.description", "Create tags to organize your transactions")}
-        </Text>
-      </View>
+    <SafeArea applyBottomInset style={styles.container}>
+      <SafeArea scrollable>
+        <View style={styles.content}>
+          {/* Tags List */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text weight="semiBold" style={styles.sectionTitle}>
+                {t("tags.yourTags", "Your Tags")}
+              </Text>
+              <Badge variant="secondary">
+                {tags.length} {t("tags.total", "Total")}
+              </Badge>
+            </View>
 
-      <View style={styles.content}>
-        {/* Add/Edit Form */}
-        {(isAddingNew || editingTag) && (
-          <Card style={styles.formCard}>
-            <Text weight="semiBold" style={styles.formTitle}>
-              {editingTag
-                ? t("tags.editTag", "Edit Tag")
-                : t("tags.addNew", "Add New Tag")}
+            {tags.length === 0 ? (
+              <Card style={styles.emptyState}>
+                <Ionicons
+                  name="pricetag-outline"
+                  size={48}
+                  color={theme.colors.mutedForeground}
+                />
+                <Text style={styles.emptyText}>
+                  {t("tags.noTags", "No tags created yet")}
+                </Text>
+                <Button
+                  title={t("tags.createFirst", "Create Your First Tag")}
+                  icon={<Ionicons name="add" size={18} color="white" />}
+                  onPress={handleAddTag}
+                  style={{ marginTop: 16 }}
+                />
+              </Card>
+            ) : (
+              <View style={styles.tagsGrid}>
+                {tags.map((tag) => (
+                  <Card key={tag.id} style={styles.tagCard}>
+                    <TouchableOpacity
+                      style={styles.tagContent}
+                      onPress={() => handleEditTag(tag)}
+                    >
+                      <View style={styles.tagInfo}>
+                        <View
+                          style={[
+                            styles.tagDot,
+                            { backgroundColor: tag.color },
+                          ]}
+                        />
+                        <Text weight="medium" numberOfLines={1}>
+                          {tag.name}
+                        </Text>
+                      </View>
+                      <View style={styles.tagActions}>
+                        <TouchableOpacity
+                          onPress={() => handleDelete(tag.id, tag.name)}
+                          style={styles.actionButton}
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={16}
+                            color={theme.colors.destructive}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </TouchableOpacity>
+                  </Card>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Suggested Tags */}
+          <Card style={styles.suggestedCard}>
+            <Text weight="semiBold" style={styles.suggestedTitle}>
+              {t("tags.suggested", "Suggested Tags")}
             </Text>
-            <View style={styles.formContent}>
-              <View>
-                <Text weight="medium" style={styles.label}>
-                  {t("tags.name", "Tag Name")}
-                </Text>
-                <Input
-                  placeholder={t("tags.namePlaceholder", "e.g., Business")}
-                  value={editingTag?.name || newTag.name}
-                  onChangeText={(text) =>
-                    editingTag
-                      ? setEditingTag({ ...editingTag, name: text })
-                      : setNewTag({ ...newTag, name: text })
-                  }
-                />
-              </View>
-              <View>
-                <Text weight="medium" style={styles.label}>
-                  {t("tags.color", "Color")}
-                </Text>
-                <ColorPicker
-                  value={editingTag?.color || newTag.color}
-                  onChange={(color) =>
-                    editingTag
-                      ? setEditingTag({ ...editingTag, color })
-                      : setNewTag({ ...newTag, color })
-                  }
-                />
-              </View>
-              <View style={styles.formActions}>
-                <Button
-                  title={t("tags.save", "Save")}
-                  icon={
-                    <Ionicons name="save-outline" size={18} color="white" />
-                  }
-                  onPress={editingTag ? handleSaveEdit : handleSaveNew}
-                  style={{ flex: 1 }}
-                />
-                <Button
-                  title={t("tags.cancel", "Cancel")}
-                  icon={<Ionicons name="close-outline" size={18} />}
-                  variant="outline"
-                  onPress={() => {
-                    setIsAddingNew(false);
-                    setEditingTag(null);
-                    setNewTag({ name: "", color: "hsl(255, 70%, 65%)" });
-                  }}
-                  style={{ flex: 1 }}
-                />
-              </View>
+            <View style={styles.suggestedTags}>
+              {SUGGESTED_TAGS.map((suggestion) => {
+                const exists = tags.some(
+                  (t) => t.name.toLowerCase() === suggestion.toLowerCase(),
+                );
+                return (
+                  <Button
+                    key={suggestion}
+                    title={suggestion}
+                    icon={<Ionicons name="add" size={14} />}
+                    variant="outline"
+                    size="sm"
+                    disabled={exists}
+                    onPress={() => handleAddSuggested(suggestion)}
+                    style={styles.suggestedButton}
+                  />
+                );
+              })}
             </View>
           </Card>
-        )}
 
-        {/* Tags List */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text weight="semiBold" style={styles.sectionTitle}>
-              {t("tags.yourTags", "Your Tags")}
+          {/* Info Card */}
+          <Card style={styles.infoCard}>
+            <Text weight="semiBold" style={styles.infoTitle}>
+              💡 {t("tags.tip", "Tip")}
             </Text>
-            <Badge variant="secondary">
-              {tags.length} {t("tags.total", "Total")}
-            </Badge>
-          </View>
-
-          {tags.length === 0 ? (
-            <Card style={styles.emptyState}>
-              <Ionicons
-                name="pricetag-outline"
-                size={48}
-                color={theme.colors.mutedForeground}
-              />
-              <Text style={styles.emptyText}>
-                {t("tags.noTags", "No tags created yet")}
-              </Text>
-              <Button
-                title={t("tags.createFirst", "Create Your First Tag")}
-                icon={<Ionicons name="add" size={18} color="white" />}
-                onPress={() => setIsAddingNew(true)}
-                style={{ marginTop: 16 }}
-              />
-            </Card>
-          ) : (
-            <View style={styles.tagsGrid}>
-              {tags.map((tag) => (
-                <Card key={tag.id} style={styles.tagCard}>
-                  <View style={styles.tagContent}>
-                    <View style={styles.tagInfo}>
-                      <View
-                        style={[styles.tagDot, { backgroundColor: tag.color }]}
-                      />
-                      <Text weight="medium" numberOfLines={1}>
-                        {tag.name}
-                      </Text>
-                    </View>
-                    <View style={styles.tagActions}>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setEditingTag(tag);
-                          setIsAddingNew(false);
-                        }}
-                        style={styles.actionButton}
-                      >
-                        <Ionicons
-                          name="pencil-outline"
-                          size={16}
-                          color={theme.colors.primary}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleDelete(tag.id)}
-                        style={styles.actionButton}
-                      >
-                        <Ionicons
-                          name="trash-outline"
-                          size={16}
-                          color={theme.colors.destructive}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                </Card>
-              ))}
-            </View>
-          )}
+            <Text style={styles.infoText}>
+              {t(
+                "tags.tipDescription",
+                "Tags help you filter and analyze expenses across different categories. Use them to track project-specific spending or personal goals.",
+              )}
+            </Text>
+          </Card>
         </View>
-
-        {/* Suggested Tags */}
-        <Card style={styles.suggestedCard}>
-          <Text weight="semiBold" style={styles.suggestedTitle}>
-            {t("tags.suggested", "Suggested Tags")}
-          </Text>
-          <View style={styles.suggestedTags}>
-            {SUGGESTED_TAGS.map((suggestion) => {
-              const exists = tags.some(
-                (t) => t.name.toLowerCase() === suggestion.toLowerCase()
-              );
-              return (
-                <Button
-                  key={suggestion}
-                  title={suggestion}
-                  icon={<Ionicons name="add" size={14} />}
-                  variant="outline"
-                  size="sm"
-                  disabled={exists}
-                  onPress={() => handleAddSuggested(suggestion)}
-                  style={styles.suggestedButton}
-                />
-              );
-            })}
-          </View>
-        </Card>
-
-        {/* Info Card */}
-        <Card style={styles.infoCard}>
-          <Text weight="semiBold" style={styles.infoTitle}>
-            💡 {t("tags.tip", "Tip")}
-          </Text>
-          <Text style={styles.infoText}>
-            {t(
-              "tags.tipDescription",
-              "Tags help you filter and analyze expenses across different categories. Use them to track project-specific spending or personal goals."
-            )}
-          </Text>
-        </Card>
-      </View>
-    </ScreenWrapper>
+      </SafeArea>
+      <Fab onPress={handleAddTag} />
+    </SafeArea>
   );
 };
 
@@ -289,28 +198,14 @@ const styles = StyleSheet.create((theme) => ({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.paddings.lg,
-    paddingBottom: theme.paddings.xl,
-  },
-  headerTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.margins.md,
-    marginBottom: theme.margins.sm,
-  },
-  headerTitle: {
-    color: "white",
-    flex: 1,
-  },
   headerDescription: {
     color: "rgba(255, 255, 255, 0.9)",
     fontSize: theme.fontSize.sm,
+    paddingVertical: theme.paddings.md,
   },
   content: {
     padding: theme.paddings.md,
-    marginTop: -theme.margins.lg,
+    paddingBottom: theme.paddings.xl,
     gap: theme.margins.md,
     maxWidth: {
       md: 800,
@@ -414,9 +309,10 @@ const styles = StyleSheet.create((theme) => ({
   infoTitle: {
     fontSize: theme.fontSize.md,
     marginBottom: theme.margins.sm,
+    color: theme.colors.muted,
   },
   infoText: {
-    color: theme.colors.mutedForeground,
+    color: theme.colors.muted,
     fontSize: theme.fontSize.sm,
     lineHeight: 20,
   },

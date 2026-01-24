@@ -147,15 +147,15 @@ const styles = StyleSheet.create((theme) => ({
       },
       size: {
         sm: {
-          paddingVertical: theme.paddings.sm / 2,
+          paddingVertical: theme.paddings.xs / 2,
           paddingHorizontal: theme.paddings.md,
         },
         md: {
-          paddingVertical: theme.paddings.sm,
+          paddingVertical: theme.paddings.xs,
           paddingHorizontal: theme.paddings.lg,
         },
         lg: {
-          paddingVertical: theme.paddings.md,
+          paddingVertical: theme.paddings.sm,
           paddingHorizontal: theme.paddings.xl,
         },
       },

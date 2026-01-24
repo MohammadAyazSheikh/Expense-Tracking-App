@@ -17,6 +17,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { ApiLoader } from "@/components/ui/ApiLoader";
 import { SafeArea } from "@/components/ui/SafeArea";
 import { Header } from "@/components/ui/Headers";
+import { alertService } from "@/utils/alertService";
 
 export const SettingsScreen = () => {
   const { t } = useTranslation();
@@ -242,7 +243,16 @@ export const SettingsScreen = () => {
             label={t("settings.logOut")}
             icon={{ name: "log-out", family: "Feather" }}
             isDestructive
-            onPress={logout}
+            onPress={() => {
+              alertService.show(t("auth.logOut"), t("auth.logOutMessage"), [
+                { text: t("common.cancel"), style: "cancel" },
+                {
+                  text: t("auth.logOut"),
+                  style: "destructive",
+                  onPress: () => logout(),
+                },
+              ]);
+            }}
             style={styles.logoutRow}
           />
         </SettingsGroup>

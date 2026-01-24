@@ -12,6 +12,8 @@ import {
 } from "../../utils/alertService";
 import { StyleSheet } from "react-native-unistyles";
 import { Text } from "./Text";
+import Animated from "react-native-reanimated";
+import { EnteringAnimation } from "@/utils/animation";
 
 type AlertButtonProps = {
   btn: AlertButton;
@@ -100,28 +102,31 @@ export const CustomAlert = () => {
     >
       <TouchableWithoutFeedback onPress={handleClose}>
         <View style={styles.overlay}>
-          <TouchableWithoutFeedback>
-            <View style={styles.alertContainer}>
-              <View style={styles.contentContainer}>
-                <Text style={styles.title}>{config.title}</Text>
-                {config.message && (
-                  <Text style={styles.message}>{config.message}</Text>
-                )}
-              </View>
-
-              <View style={styles.buttonContainer}>
-                {buttons.map((btn, index) => (
-                  <AlertButtonComponent
-                    key={index}
-                    btn={btn}
-                    index={index}
-                    totalButtons={buttons.length}
-                    onPress={() => handleButtonPress(btn)}
-                  />
-                ))}
-              </View>
+          <Animated.View
+            entering={EnteringAnimation}
+            style={styles.alertContainer}
+          >
+            <View style={styles.contentContainer}>
+              <Text weight="semiBold" style={styles.title}>
+                {config.title}
+              </Text>
+              {config.message && (
+                <Text style={styles.message}>{config.message}</Text>
+              )}
             </View>
-          </TouchableWithoutFeedback>
+
+            <View style={styles.buttonContainer}>
+              {buttons.map((btn, index) => (
+                <AlertButtonComponent
+                  key={index}
+                  btn={btn}
+                  index={index}
+                  totalButtons={buttons.length}
+                  onPress={() => handleButtonPress(btn)}
+                />
+              ))}
+            </View>
+          </Animated.View>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
@@ -138,22 +143,22 @@ const styles = StyleSheet.create((theme) => ({
   alertContainer: {
     width: 270,
     backgroundColor: theme.colors.card,
-    borderRadius: 14,
+    borderRadius: theme.radius.md,
     overflow: "hidden",
   },
   contentContainer: {
-    padding: 20,
+    padding: theme.paddings.md,
     alignItems: "center",
   },
   title: {
-    fontSize: 17,
+    fontSize: theme.fontSize.md,
     fontWeight: "600",
     color: theme.colors.foreground,
     textAlign: "center",
     marginBottom: 4,
   },
   message: {
-    fontSize: 13,
+    fontSize: theme.fontSize.sm,
     color: theme.colors.foreground,
     textAlign: "center",
   },
@@ -178,7 +183,7 @@ const styles = StyleSheet.create((theme) => ({
     borderTopColor: theme.colors.border,
   },
   buttonText: {
-    fontSize: 17,
+    fontSize: theme.fontSize.md,
     color: theme.colors.primary, // Or system blue
     fontWeight: "600",
     variants: {
@@ -190,7 +195,7 @@ const styles = StyleSheet.create((theme) => ({
           color: theme.colors.destructive,
         },
         cancel: {
-          color: theme.colors.secondary,
+          color: theme.colors.mutedForeground,
         },
       },
     },

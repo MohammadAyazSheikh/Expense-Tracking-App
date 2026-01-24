@@ -1,5 +1,6 @@
 {
     "common": {
+        "update": "Update",
         "save": "Save",
         "cancel": "Cancel",
         "delete": "Delete",
@@ -55,7 +56,9 @@
         "passwordMinLength": "Password must be at least 6 characters",
         "termsPrivacy": "By continuing, you agree to our Terms & Privacy Policy",
         "google": "Google",
-        "apple": "Apple"
+        "apple": "Apple",
+        "logOut": "Logout",
+        "logOutMessage": "Are you sure you want to logout?"
     },
     "onboarding": {
         "title1": "Track Your Expenses",
@@ -173,12 +176,14 @@
         "categoryName": "Category Name",
         "selectIcon": "Select Icon",
         "selectColor": "Select Color",
-        "tags": "Tags",
-        "addTag": "Add a tag...",
         "noCategories": "No categories found. Add one!",
         "deleteConfirmTitle": "Delete Category",
         "deleteConfirmMessage": "Are you sure you want to delete this category?",
-        "manage": "Manage"
+        "manage": "Manage",
+        "editCategory": "Edit Category",
+        "namePlaceholder": "e.g., Groceries",
+        "changeColor": "Change Color",
+        "nameRequired": "Category name is required"
     },
     "filter": {
         "title": "Filter Transactions",
@@ -212,7 +217,11 @@
         "createFirst": "Create Your First Tag",
         "suggested": "Suggested Tags",
         "tip": "Tip",
-        "tipDescription": "Tags help you filter and analyze expenses across different categories. Use them to track project-specific spending or personal goals."
+        "tipDescription": "Tags help you filter and analyze expenses across different categories. Use them to track project-specific spending or personal goals.",
+        "nameRequired": "Tag name is required",
+        "selectColor": "Select Color",
+        "deleteConfirmTitle": "Delete Tag",
+        "deleteConfirmMessage": "Are you sure you want to delete this tag?"
     },
     "calendar": {
         "title": "Calendar",

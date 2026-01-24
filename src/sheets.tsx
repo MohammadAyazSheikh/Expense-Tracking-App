@@ -21,6 +21,10 @@ import {
 } from "./components/sheets/MultiSelectSheet";
 import { AddFriendSheet } from "./components/friends/AddFriendSheet";
 import { RecordPaymentSheet } from "./components/groups/RecordPaymentSheet";
+import { CategorySheet } from "./components/sheets/CategorySheet";
+import { TagSheet } from "./components/sheets/TagSheet";
+import { ColorPickerSheet } from "./components/sheets/ColorPickerSheet";
+import { Category, Tag } from "./types";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {
@@ -97,6 +101,24 @@ declare module "react-native-actions-sheet" {
         onConfirm: (amount: number, method: string) => void;
       };
     }>;
+    "category-sheet": SheetDefinition<{
+      payload: {
+        category?: Category;
+      };
+    }>;
+    "tag-sheet": SheetDefinition<{
+      payload: {
+        tag?: Tag;
+      };
+    }>;
+    "color-picker-sheet": SheetDefinition<{
+      payload: {
+        selectedColor?: string;
+        title?: string;
+        onSelect?: (color: string) => void;
+      };
+      returnValue: string | undefined;
+    }>;
   }
 }
 
@@ -114,6 +136,9 @@ export const Sheets = () => {
         "multi-select-sheet": MultiSelectSheet,
         "add-friend-sheet": AddFriendSheet,
         "record-payment-sheet": RecordPaymentSheet,
+        "category-sheet": CategorySheet,
+        "tag-sheet": TagSheet,
+        "color-picker-sheet": ColorPickerSheet,
       }}
     />
   );
