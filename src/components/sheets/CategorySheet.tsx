@@ -170,17 +170,7 @@ const ManageCategoryRoute = ({
             value={name}
             onChangeText={setName}
             placeholder={t("categoryManager.namePlaceholder")}
-            editable={!initialCategory?.isSystem}
-            style={initialCategory?.isSystem ? { opacity: 0.5 } : {}}
           />
-          {initialCategory?.isSystem && (
-            <Text style={{ color: theme.colors.muted, marginTop: 4 }}>
-              {t(
-                "categoryManager.systemCategoryNote",
-                "System category names cannot be changed",
-              )}
-            </Text>
-          )}
         </View>
 
         <Text weight="semiBold" style={styles.sectionTitle}>

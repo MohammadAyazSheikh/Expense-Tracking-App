@@ -14,6 +14,7 @@ import { HelpSupportScreen } from "../screens/HelpSupportScreen";
 import { SmartSenseScreen } from "../screens/SmartSenseScreen";
 import { CategoryManagerScreen } from "../screens/CategoryManagerScreen";
 import { useAuthStore } from "../store";
+import { translate as t } from "@/i18n";
 import { TransactionDetailScreen } from "../screens/TransactionDetailScreen";
 import { CalendarScreen } from "../screens/CalendarScreen";
 import { TagsScreen } from "../screens/TagsScreen";
@@ -39,7 +40,6 @@ import { EditWalletScreen } from "../screens/EditWalletScreen";
 import { TransferScreen } from "../screens/TransferScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "../screens/NotificationSettingsScreen";
-import { useTranslation } from "react-i18next";
 import { useUnistyles } from "react-native-unistyles";
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -140,7 +140,6 @@ const profileSetupRoutes = () => {
 };
 
 const mainRoutes = () => {
-  const { t } = useTranslation();
   const { theme } = useUnistyles();
   return (
     <Stack.Navigator

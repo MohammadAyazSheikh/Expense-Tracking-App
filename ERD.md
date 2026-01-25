@@ -59,15 +59,25 @@ erDiagram
         boolean include_in_total
     }
 
-    Category {
+    SystemCategory {
         uuid id PK
-        uuid user_id FK "Null if system default"
         string name
         string icon
         string icon_family
         string color
         string type "income, expense"
-        boolean is_default
+        boolean is_active
+    }
+
+    Category {
+        uuid id PK
+        uuid user_id FK
+        uuid system_category_id FK "Nullable, if copied from system"
+        string name
+        string icon
+        string icon_family
+        string color
+        string type "income, expense"
     }
 
     Tag {
@@ -156,7 +166,8 @@ erDiagram
     User ||--|| AppSettings : "has settings"
     User ||--o{ Notification : "receives"
     User ||--o{ Wallet : "owns"
-    User ||--o{ Category : "defines custom"
+    User ||--o{ Category : "manages"
+    SystemCategory ||--o{ Category : "serves as template for"
     User ||--o{ Tag : "creates"
     User ||--o{ Transaction : "makes (via Wallet)"
     User ||--o{ Budget : "sets"
@@ -194,7 +205,8 @@ erDiagram
 ### 2. Personal Finance Management
 
 - **Wallet**: Represents a source of funds (Bank Account, Cash, Credit Card). 'include_in_total' flag determines if it counts towards net worth.
-- **Category**: Hierarchical or flat list of spending/income types. Can be system-defined (user_id is null) or user-customized.
+- **SystemCategory**: Immutable master list of default categories provided by the platform.
+- **Category**: User-specific category list. Users can create custom categories or copy from `SystemCategory`. Once copied, they can modify the name/color/icon independently.
 - **Tag**: orthogonal classification for transactions (e.g., #trip, #urgent).
 - **Transaction**: The central event entity. Links Wallet and Category.
   - Includes `transfer_to_wallet_id` to handle internal transfers (double-entry bookkeeping logic simplified).
@@ -211,7 +223,7 @@ erDiagram
 
 ## Normalization Notes
 
-- **Category**: Separated from Transaction to allow renaming or iconography changes without updating every transaction record.
+- **Category**: Separated from Transaction. `SystemCategory` acts as a catalog. User `Category` table acts as the mutable list for user's transactions.
 - **Tags**: Many-to-Many relationship allows for flexible tagging without duplicating data.
 - **Splits**: `ExpenseSplit` is a separate table rather than a JSON array (unlike the current frontend store) to query "how much does User X owe in total" efficiently using SQL aggregates.
 - **Users**: In the frontend `Friend` model, friends might be ad-hoc. In this normalized schema, we assume they are mapped to `Users`. If "Shadow Users" (non-registered friends) are needed, a `is_registered` flag on the User table or a separate `GuestUser` table linked to the creator would be added.
