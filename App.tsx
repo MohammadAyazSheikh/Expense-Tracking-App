@@ -40,15 +40,6 @@ export default function App() {
         const error_code = params.get("error_code");
         const error_description = params.get("error_description");
         const type = params.get("type");
-        console.log({
-          url,
-          access_token,
-          refresh_token,
-          type,
-          error,
-          error_code,
-          error_description,
-        });
 
         // Check if we have tokens (email verification or password reset)
         confirmEmail({

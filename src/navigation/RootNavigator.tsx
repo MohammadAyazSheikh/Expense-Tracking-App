@@ -41,6 +41,7 @@ import { TransferScreen } from "../screens/TransferScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "../screens/NotificationSettingsScreen";
 import { useUnistyles } from "react-native-unistyles";
+import { lightTheme } from "@/styles/theme";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -139,8 +140,7 @@ const profileSetupRoutes = () => {
   );
 };
 
-const mainRoutes = () => {
-  const { theme } = useUnistyles();
+const mainRoutes = ({ theme }: { theme: typeof lightTheme }) => {
   return (
     <Stack.Navigator
       initialRouteName="MainTab"
@@ -224,7 +224,7 @@ const mainRoutes = () => {
 
 export const RootNavigator = () => {
   const { verificationStatus, user } = useAuthStore();
-
+  const { theme } = useUnistyles();
   // Routing logic
   if (verificationStatus === "SINGED_OUT") {
     // No session → Auth screens
@@ -248,7 +248,7 @@ export const RootNavigator = () => {
 
   // Session + VERIFIED + profile complete → Main app
   if (verificationStatus === "VERIFIED" && user?.firstName) {
-    return mainRoutes();
+    return mainRoutes({ theme: theme as any });
   }
 
   return authRoutes();

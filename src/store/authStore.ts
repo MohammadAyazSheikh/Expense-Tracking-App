@@ -115,12 +115,15 @@ export const useAuthStore = create<AuthState>()(
                 emailRedirectTo: DEEP_LINKS.VERIFY_EMAIL
               }
             });
-
+            console.log({
+              data,
+              error,
+            })
             if (error) {
               throw error;
             }
 
-            if (data.user) {
+            if (data?.user) {
               // Store minimal user data
               set({
                 user: {

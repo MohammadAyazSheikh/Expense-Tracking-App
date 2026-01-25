@@ -18,6 +18,7 @@ erDiagram
         string email
         string name
         string avatar_url
+        string role "admin, user"
         string device_token
         datetime created_at
         datetime updated_at
@@ -198,7 +199,7 @@ erDiagram
 
 ### 1. Authentication & User Profile
 
-- **User**: Core entity. Stores authentication credentials (hashed) and profile info.
+- **User**: Core entity. Stores authentication credentials (hashed), profile info, and role (admin or user).
 - **AppSettings**: 1:1 relationship with User. Stores device-specific or account-wide preferences like theme and language.
 - **Notification**: History of alerts sent to the user.
 
