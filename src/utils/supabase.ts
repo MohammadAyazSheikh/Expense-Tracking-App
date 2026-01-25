@@ -3,11 +3,12 @@ import 'react-native-url-polyfill/auto'
 
 import { createClient, processLock } from '@supabase/supabase-js'
 import { mmkvStorage } from './storage'
+import { Database } from '@/types/supabaseDbTypes'
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
         ...(Platform.OS !== "web" ? { storage: mmkvStorage } : {}),
         autoRefreshToken: true,

@@ -9,11 +9,11 @@ import { translate } from '@/i18n';
 interface User {
   id: string;
   email: string;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  avatar?: string;
+  username?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  fullName?: string | null;
+  avatar?: string | null;
 }
 type VerificationStatus = "VERIFIED" | 'SINGED_OUT' | 'VERIFICATION_PENDING' | 'RESET_PASSWORD';
 

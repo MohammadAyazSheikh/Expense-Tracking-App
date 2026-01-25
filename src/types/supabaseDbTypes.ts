@@ -14,12 +14,67 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          icon_family: string | null
+          id: string
+          name: string
+          system_category_id: string | null
+          transaction_type_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          icon_family?: string | null
+          id?: string
+          name: string
+          system_category_id?: string | null
+          transaction_type_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          icon_family?: string | null
+          id?: string
+          name?: string
+          system_category_id?: string | null
+          transaction_type_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_system_category_id_fkey"
+            columns: ["system_category_id"]
+            isOneToOne: false
+            referencedRelation: "system_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_categories_transaction_type"
+            columns: ["transaction_type_key"]
+            isOneToOne: false
+            referencedRelation: "transaction_types"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           device_token: string | null
           first_name: string | null
           id: string
+          is_admin: boolean
           last_name: string | null
           updated_at: string | null
           username: string | null
@@ -29,6 +84,7 @@ export type Database = {
           device_token?: string | null
           first_name?: string | null
           id: string
+          is_admin?: boolean
           last_name?: string | null
           updated_at?: string | null
           username?: string | null
@@ -38,9 +94,75 @@ export type Database = {
           device_token?: string | null
           first_name?: string | null
           id?: string
+          is_admin?: boolean
           last_name?: string | null
           updated_at?: string | null
           username?: string | null
+        }
+        Relationships: []
+      }
+      system_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          icon_family: string | null
+          id: string
+          is_active: boolean
+          name: string
+          transaction_type_key: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          icon_family?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          transaction_type_key: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          icon_family?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          transaction_type_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_system_categories_transaction_type"
+            columns: ["transaction_type_key"]
+            isOneToOne: false
+            referencedRelation: "transaction_types"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      transaction_types: {
+        Row: {
+          created_at: string | null
+          key: string
+          label: string
+          metadata: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          key: string
+          label: string
+          metadata?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          key?: string
+          label?: string
+          metadata?: Json | null
         }
         Relationships: []
       }
@@ -49,7 +171,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
