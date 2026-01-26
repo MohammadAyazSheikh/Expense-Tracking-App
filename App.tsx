@@ -1,25 +1,27 @@
-import "./src/styles/unistyles";
 import React, { useEffect } from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { RootNavigator } from "./src/navigation/RootNavigator";
-import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useAppSettingsStore, useAuthStore } from "./src/store";
-import Toast from "react-native-toast-message";
-import ToastConfig from "./src/components/ui/ToastConfig";
-import { CustomAlert } from "./src/components/ui/CustomAlert";
-
-import { SheetProvider } from "react-native-actions-sheet";
-import { Sheets } from "./src/sheets";
-import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Linking } from "react-native";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { StatusBar } from "expo-status-bar";
+import "@/styles/unistyles";
+import { Sheets } from "@/sheets";
+import Toast from "react-native-toast-message";
+import ToastConfig from "@/components/ui/ToastConfig";
+import { SheetProvider } from "react-native-actions-sheet";
+import { CustomAlert } from "@/components/ui/CustomAlert";
 import queryClient from "@/services/queries/query-client";
+import { RootNavigator } from "@/navigation/RootNavigator";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { useAppSettingsStore, useAuthStore } from "@/store";
+import { NavigationContainer } from "@react-navigation/native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { useNetworkSync } from "@/hooks/useNetworkSync";
 
 export default function App() {
   const { initialize, effectiveTheme } = useAppSettingsStore();
   const { confirmEmail } = useAuthStore();
-
+  // Auto-sync on network restore
+  useNetworkSync();
+  //initialize app settings
   useEffect(() => {
     initialize();
   }, []);

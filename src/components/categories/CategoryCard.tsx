@@ -4,7 +4,8 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "../ui/Text";
 import { Icon, IconType } from "../ui/Icon";
-import { Category } from "../../types";
+// import { Category } from "../../types";
+import { Category } from "@/models/category";
 
 interface CategoryRowProps {
   category: Category;
@@ -31,7 +32,9 @@ export const CategoryCard = ({
       onPress={onPress}
       disabled={!onPress}
     >
-      <View style={[styles.iconContainer, { backgroundColor: category.color }]}>
+      <View
+        style={[styles.iconContainer, { backgroundColor: category.color! }]}
+      >
         <Icon
           type={(category.iconFamily as IconType) || "Ionicons"}
           name={category.icon as any}
@@ -43,7 +46,7 @@ export const CategoryCard = ({
         <Text style={styles.categoryName} numberOfLines={1}>
           {category.name}
         </Text>
-        {category.isSystem && showSystemLabel && (
+        {category?.systemCategoryId && showSystemLabel && (
           <Text
             style={{
               fontSize: 10,

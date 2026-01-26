@@ -5,6 +5,10 @@
     "paths": {
       "@/*": ["./src/*"],
       "@assets/*": ["./assets/*"]
-    }
+    },
+    //added these 3 lines for watermelondb
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": false,
+    "useDefineForClassFields": false
   }
 }

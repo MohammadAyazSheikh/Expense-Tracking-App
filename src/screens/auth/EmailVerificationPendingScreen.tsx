@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { View } from "react-native";
-import { Text } from "../../components/ui/Text";
-import { Button } from "../../components/ui/Button";
-import { ScreenWrapper } from "../../components/ui/ScreenWrapper";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { useAuthStore } from "@/store";
+import { supabase } from "@/libs/supabase";
 import { Feather } from "@expo/vector-icons";
-import { useAuthStore } from "../../store";
-import { supabase } from "../../utils/supabase";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { DAMPING } from "../../utils/animation";
+import { Text } from "@/components/ui/Text";
+import { DAMPING } from "@/utils/animation";
+import { Button } from "@/components/ui/Button";
 import Toast from "react-native-toast-message";
 import { ApiLoader } from "@/components/ui/ApiLoader";
+import { ScreenWrapper } from "@/components/ui/ScreenWrapper";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export const EmailVerificationPendingScreen = () => {
   const { theme } = useUnistyles();

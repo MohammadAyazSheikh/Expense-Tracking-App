@@ -99,6 +99,9 @@ android {
         resourceConfigurations += ["en", "ar"]
         resourceConfigurations += ["en", "ar"]
         resourceConfigurations += ["en", "ar"]
+        resourceConfigurations += ["en", "ar"]
+        resourceConfigurations += ["en", "ar"]
+        resourceConfigurations += ["en", "ar"]
     }
     signingConfigs {
         debug {

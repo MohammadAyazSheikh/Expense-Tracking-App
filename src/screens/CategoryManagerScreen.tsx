@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, FlatList, useWindowDimensions } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SheetManager } from "react-native-actions-sheet";
-import { useFinanceStore } from "../store";
-import { Category } from "../types";
+// import { useFinanceStore } from "../store";
+// import { Category } from "../types";
 import { alertService } from "../utils/alertService";
 import { useTranslation } from "../hooks/useTranslation";
 import { Text } from "../components/ui/Text";
@@ -11,11 +11,15 @@ import { SafeArea } from "@/components/ui/SafeArea";
 import Fab from "@/components/ui/Fab";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { CategoryCard } from "../components/categories/CategoryCard";
+import { useCategoryStore } from "@/store/categoryStore";
+import { Category } from "@/models/category";
+import { ApiLoader } from "@/components/ui/ApiLoader";
 
 export const CategoryManagerScreen = ({ navigation }: any) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { categories, deleteCategory } = useFinanceStore();
+  // const { categories, deleteCategory } = useFinanceStore();
+  const { categories, isLoading, loadCategories } = useCategoryStore();
   const layout = useWindowDimensions();
 
   const [index, setIndex] = useState(0);
@@ -31,43 +35,53 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
   };
 
   const handleEditCategory = (category: Category) => {
-    SheetManager.show("manage-category-sheet", {
-      payload: { category, type: index === 0 ? "expense" : "income" },
-    });
+    // SheetManager.show("manage-category-sheet", {
+    //   payload: { category, type: index === 0 ? "expense" : "income" },
+    // });
   };
 
   const handleDeleteCategory = (category: Category) => {
-    const isSystem = category.isSystem;
-    alertService.show(
-      isSystem
-        ? t("categoryManager.removeTitle")
-        : t("categoryManager.deleteConfirmTitle"),
-      isSystem
-        ? t("categoryManager.removeMessage")
-        : t("categoryManager.deleteConfirmMessage"),
-      [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: isSystem ? t("common.remove") : t("common.delete"),
-          style: "destructive",
-          onPress: () => deleteCategory(category.id),
-        },
-      ],
-    );
+    // const isSystem = category.isSystem;
+    // alertService.show(
+    //   isSystem
+    //     ? t("categoryManager.removeTitle")
+    //     : t("categoryManager.deleteConfirmTitle"),
+    //   isSystem
+    //     ? t("categoryManager.removeMessage")
+    //     : t("categoryManager.deleteConfirmMessage"),
+    //   [
+    //     { text: t("common.cancel"), style: "cancel" },
+    //     {
+    //       text: isSystem ? t("common.remove") : t("common.delete"),
+    //       style: "destructive",
+    //       // onPress: () => deleteCategory(category.id),
+    //     },
+    //   ],
+    // );
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      // await syncNow();
+      await loadCategories();
+    };
+    loadData();
+  }, []);
 
   const renderCategoryItem = ({ item }: { item: Category }) => (
     <CategoryCard
       category={item}
       onPress={() => handleEditCategory(item)}
       onAction={() => handleDeleteCategory(item)}
-      actionIcon={item.isSystem ? "remove-circle-outline" : "trash-outline"}
+      actionIcon={
+        item.systemCategoryId ? "remove-circle-outline" : "trash-outline"
+      }
     />
   );
 
   const ExpenseRoute = () => (
     <FlatList
-      data={categories.filter((c) => c.type === "expense")}
+      data={categories.filter((c) => c.transactionTypeKey === "expense")}
       keyExtractor={(item) => item.id}
       renderItem={renderCategoryItem}
       contentContainerStyle={styles.listContent}
@@ -83,7 +97,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
 
   const IncomeRoute = () => (
     <FlatList
-      data={categories.filter((c) => c.type === "income")}
+      data={categories.filter((c) => c.transactionTypeKey === "income")}
       keyExtractor={(item) => item.id}
       renderItem={renderCategoryItem}
       contentContainerStyle={styles.listContent}
@@ -123,6 +137,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
         renderTabBar={renderTabBar}
       />
       <Fab onPress={handleAddCategory} />
+      <ApiLoader isLoading={isLoading} />
     </SafeArea>
   );
 };

@@ -16,17 +16,21 @@ import { Input } from "../ui/Input";
 import { Icon } from "../ui/Icon";
 import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
 import { useTranslation } from "../../hooks/useTranslation";
-import { useFinanceStore } from "../../store";
+import { useAuthStore, useFinanceStore } from "../../store";
 import { alertService } from "../../utils/alertService";
 import { DEFAULT_CATEGORIES } from "../../data/categories";
 import { CategoryCard } from "../categories/CategoryCard";
+import { useCategoryStore } from "@/store/categoryStore";
+import { Category } from "@/models/category";
 
 const ManageCategoryRoute = ({
   router,
 }: RouteScreenProps<"manage-category-sheet", "add-update-category">) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { addCategory, updateCategory } = useFinanceStore();
+  const { updateCategory } = useFinanceStore();
+  const { user } = useAuthStore();
+  const { addCategory } = useCategoryStore();
   const payload = useSheetPayload("manage-category-sheet");
 
   const isEditing = !!payload?.category;
@@ -53,16 +57,17 @@ const ManageCategoryRoute = ({
     const iconConfig = CATEGORY_ICONS[selectedIconKey];
 
     const categoryData: any = {
+      userId: user?.id!,
       name: name.trim(),
-      icon: iconConfig.name,
-      iconFamily: iconConfig.type,
+      icon: iconConfig.name as string,
+      iconFamily: iconConfig.type as string,
       color: selectedColor,
-      type: payload?.type,
-      isSystem: initialCategory?.isSystem,
+      transactionTypeKey: payload?.type === "income" ? "income" : "expense",
+      systemCategoryId: null,
     };
 
     if (isEditing && initialCategory) {
-      updateCategory(initialCategory.id, categoryData);
+      // updateCategory(initialCategory.id, categoryData);
     } else {
       addCategory(categoryData);
     }

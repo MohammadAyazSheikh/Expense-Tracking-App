@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
-import { supabase } from '@/utils/supabase';
+import { supabase } from '@/libs/supabase';
 import Toast from 'react-native-toast-message';
 import { DEEP_LINKS } from '@/data/constants/deepLinks';
 import { translate } from '@/i18n';

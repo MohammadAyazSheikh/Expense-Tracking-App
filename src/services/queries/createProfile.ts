@@ -1,6 +1,6 @@
 
 import { useMutation } from '@tanstack/react-query';
-import { supabase } from '../utils/supabase';
+import { supabase } from '@/libs/supabase';
 import Toast from 'react-native-toast-message';
 
 interface CreateProfileParams {
@@ -13,10 +13,10 @@ interface CreateProfileParams {
 
 interface ProfileData {
     id: string;
-    first_name: string;
-    last_name: string;
+    first_name: string | null;
+    last_name: string | null;
     avatar_url: string | null;
-    updated_at: string;
+    updated_at: string | null;
 }
 
 // Helper function to decode base64

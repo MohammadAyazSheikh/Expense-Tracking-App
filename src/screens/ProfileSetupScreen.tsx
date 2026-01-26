@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import { View, Image, TouchableOpacity } from "react-native";
-import { Text } from "../components/ui/Text";
-import { Input } from "../components/ui/Input";
-import { Button } from "../components/ui/Button";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { z } from "zod";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Feather } from "@expo/vector-icons";
-import { useAuthStore } from "../store";
+import { useAuthStore } from "@/store";
 import * as ImagePicker from "expo-image-picker";
-import { useCreateProfile } from "../services/createProfile";
+import { Text } from "@/components/ui/Text";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import { ApiLoader } from "@/components/ui/ApiLoader";
+import { ScreenWrapper } from "@/components/ui/ScreenWrapper";
+import { useCreateProfile } from "@/services/queries/createProfile";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
