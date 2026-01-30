@@ -33,35 +33,33 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
   };
 
   const handleEditCategory = (category: Category) => {
-    // SheetManager.show("manage-category-sheet", {
-    //   payload: { category, type: index === 0 ? "expense" : "income" },
-    // });
+    SheetManager.show("manage-category-sheet", {
+      payload: { category, type: index === 0 ? "expense" : "income" },
+    });
   };
 
   const handleDeleteCategory = (category: Category) => {
-    deleteCategory(category.id);
-    // const isSystem = category.isSystem;
-    // alertService.show(
-    //   isSystem
-    //     ? t("categoryManager.removeTitle")
-    //     : t("categoryManager.deleteConfirmTitle"),
-    //   isSystem
-    //     ? t("categoryManager.removeMessage")
-    //     : t("categoryManager.deleteConfirmMessage"),
-    //   [
-    //     { text: t("common.cancel"), style: "cancel" },
-    //     {
-    //       text: isSystem ? t("common.remove") : t("common.delete"),
-    //       style: "destructive",
-    //       // onPress: () => deleteCategory(category.id),
-    //     },
-    //   ],
-    // );
+    const isSystem = category.systemCategoryId;
+    alertService.show(
+      isSystem
+        ? t("categoryManager.removeTitle")
+        : t("categoryManager.deleteConfirmTitle"),
+      isSystem
+        ? t("categoryManager.removeMessage")
+        : t("categoryManager.deleteConfirmMessage"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: isSystem ? t("common.remove") : t("common.delete"),
+          style: "destructive",
+          onPress: () => deleteCategory(category.id),
+        },
+      ],
+    );
   };
 
   useEffect(() => {
     const loadData = async () => {
-      // await syncNow();
       await loadCategories();
     };
     loadData();

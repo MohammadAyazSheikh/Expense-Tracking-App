@@ -99,7 +99,6 @@ class CategorySyncService {
 
     const pendingDeletionsCollection = database.collections.get<PendingDeletions>('pending_deletions')
     const pending = await pendingDeletionsCollection.query().fetch()
-
     for (const deletion of pending) {
       try {
         // Delete from server (creates tombstone)

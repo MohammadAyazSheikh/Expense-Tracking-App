@@ -24,7 +24,8 @@ import { RecordPaymentSheet } from "./components/groups/RecordPaymentSheet";
 import { CategorySheet } from "./components/sheets/CategorySheet";
 import { TagSheet } from "./components/sheets/TagSheet";
 import { ColorPickerSheet } from "./components/sheets/ColorPickerSheet";
-import { Category, Tag } from "./types";
+import { Tag } from "./types";
+import { Category } from "./database/models/category";
 
 declare module "react-native-actions-sheet" {
   interface Sheets {

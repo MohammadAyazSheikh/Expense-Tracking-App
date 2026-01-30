@@ -8,19 +8,20 @@ import ActionSheet, {
   RouteScreenProps,
   Route,
 } from "react-native-actions-sheet";
-import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { Ionicons } from "@expo/vector-icons";
+
 import { Text } from "../ui/Text";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { Icon } from "../ui/Icon";
-import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
-import { useTranslation } from "../../hooks/useTranslation";
-import { useAuthStore, useFinanceStore } from "../../store";
+import { Ionicons } from "@expo/vector-icons";
 import { alertService } from "../../utils/alertService";
-import { DEFAULT_CATEGORIES } from "../../data/categories";
 import { CategoryCard } from "../categories/CategoryCard";
 import { useCategoryStore } from "@/store/categoryStore";
+import { DEFAULT_CATEGORIES } from "../../data/categories";
+import { useAuthStore, useFinanceStore } from "../../store";
+import { useTranslation } from "../../hooks/useTranslation";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
 
 const ManageCategoryRoute = ({
   router,
@@ -29,13 +30,15 @@ const ManageCategoryRoute = ({
   const { t } = useTranslation();
 
   const { user } = useAuthStore();
-  const { addCategory } = useCategoryStore();
+  const { addCategory, updateCategory } = useCategoryStore();
   const payload = useSheetPayload("manage-category-sheet");
 
   const isEditing = !!payload?.category;
+
   const initialCategory = payload?.category;
 
   const [name, setName] = useState(initialCategory?.name || "");
+
   const [selectedIconKey, setSelectedIconKey] = useState(
     initialCategory
       ? Object.keys(CATEGORY_ICONS).find(
@@ -66,7 +69,7 @@ const ManageCategoryRoute = ({
     };
 
     if (isEditing && initialCategory) {
-      // updateCategory(initialCategory.id, categoryData);
+      updateCategory(initialCategory.id, categoryData);
     } else {
       addCategory(categoryData);
     }

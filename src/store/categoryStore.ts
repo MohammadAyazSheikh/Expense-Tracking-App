@@ -1,19 +1,18 @@
-
 import { create } from 'zustand';
 import { database } from '@/libs/database';
-import { categorySyncService } from '@/services/categorySyncService';
+import { categorySyncService } from '@/services/syncServices/categorySyncService';
 import { Category } from '@/database/models/category';
 import { supabase } from '@/libs/supabase';
 import { PendingDeletions } from '@/database/models/local';
 import Toast from 'react-native-toast-message';
-
-
+import { useAuthStore } from './authStore';
 
 interface CategoryStore {
     categories: Category[];
     deleteCategory: (categoryId: string) => Promise<void>;
     loadCategories: () => Promise<void>;
-    addCategory: (data: Category) => Promise<void>;
+    addCategory: (data: Partial<Category>) => Promise<void>;
+    updateCategory: (categoryId: string, data: Partial<Category>) => Promise<void>;
     syncNow: () => Promise<void>;
     isLoading: boolean;
     isSyncing: boolean;
@@ -35,54 +34,90 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
                 type: 'error',
                 text1: error?.message || 'Error loading categories',
             });
-            console.error('Error loading categories:', error);
         } finally {
             set({ isLoading: false });
         }
     },
 
-    addCategory: async (data: Category) => {
-        set({ isLoading: true })
+    addCategory: async (data) => {
+        set({ isLoading: true });
         try {
+            const userId = useAuthStore.getState().user?.id;
+
+            if (!userId) throw new Error('User not authenticated');
+
             const categoriesCollection = database.collections.get<Category>('categories');
 
             await database.write(async () => {
-                await categoriesCollection.create(category => {
-                    category.name = data.name;
-                    category.color = data.color;
-                    category.icon = data.icon;
-                    category.iconFamily = data.iconFamily;
-                    category.transactionTypeKey = data.transactionTypeKey;
-                    category.userId = data.userId;
-                    category.systemCategoryId = data.systemCategoryId;
-                    category.isSynced = false; // Mark as unsynced
+                await categoriesCollection.create((category) => {
+                    category.name = data.name!;
+                    category.color = data.color || null;
+                    category.icon = data.icon || null;
+                    category.iconFamily = data.iconFamily || null;
+                    category.transactionTypeKey = data.transactionTypeKey!;
+                    category.userId = userId;
+                    category.isSynced = false;
                 });
             });
 
-            // Reload local data
             await get().loadCategories();
             Toast.show({
                 type: 'success',
                 text1: 'Category added successfully',
             });
-            // Try to sync immediately
-            categorySyncService.pushChanges(data.userId);
-        }
-        catch (error: any) {
+
+            // Background sync
+            categorySyncService.pushChanges(userId);
+        } catch (error: any) {
             Toast.show({
                 type: 'error',
                 text1: error?.message || 'Error adding category',
             });
-            console.error('Error adding category:', error);
-        }
-        finally {
+        } finally {
             set({ isLoading: false });
         }
     },
+    updateCategory: async (categoryId, data) => {
+        set({ isLoading: true });
+        try {
+            const userId = useAuthStore.getState().user?.id;
 
+            if (!userId) throw new Error('User not authenticated');
+
+            const categoriesCollection = database.collections.get<Category>('categories');
+            const category = await categoriesCollection.find(categoryId);
+
+            await database.write(async () => {
+                await category.update((cat) => {
+                    if (data.name) cat.name = data.name;
+                    if (data.color) cat.color = data.color;
+                    if (data.icon) cat.icon = data.icon;
+                    if (data.iconFamily) cat.iconFamily = data.iconFamily;
+                    if (data.transactionTypeKey) cat.transactionTypeKey = data.transactionTypeKey;
+                    cat.isSynced = false;
+                });
+            });
+
+            await get().loadCategories();
+            Toast.show({
+                type: 'success',
+                text1: 'Category updated successfully',
+            });
+
+            // Background sync
+            categorySyncService.pushChanges(userId);
+        } catch (error: any) {
+            Toast.show({
+                type: 'error',
+                text1: error?.message || 'Error updating category',
+            });
+            console.error('Error updating category:', error);
+        } finally {
+            set({ isLoading: false });
+        }
+    },
     deleteCategory: async (categoryId: string) => {
-
-        set({ isLoading: true })
+        set({ isLoading: true });
         try {
             const categoriesCollection = database.collections.get<Category>('categories');
             const pendingDeletionsCollection = database.collections.get<PendingDeletions>('pending_deletions');
@@ -91,35 +126,30 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
             const serverId = category?.serverId;
 
             await database.write(async () => {
-                // Delete locally
-                await category.destroyPermanently()
-                // Track for sync if it has a server ID
+                await category.destroyPermanently();
+
                 if (serverId) {
-                    await pendingDeletionsCollection.create(deletion => {
+                    await pendingDeletionsCollection.create((deletion) => {
                         deletion.tableName = 'categories';
                         deletion.serverId = serverId;
                         deletion.deletedAt = Date.now();
                     });
                 }
-            })
-            // Reload local data
-            await get()?.loadCategories();
+            });
+
+            await get().loadCategories();
             Toast.show({
                 type: 'success',
                 text1: 'Category deleted successfully',
             });
-            // Try to sync immediately if online
+
             await categorySyncService.pushDeletions();
-            console.log("🔥 Pushed deletions to server")
-        }
-        catch (error: any) {
+        } catch (error: any) {
             Toast.show({
                 type: 'error',
                 text1: error?.message || 'Error deleting category',
             });
-            console.error('Error deleting category:', error);
-        }
-        finally {
+        } finally {
             set({ isLoading: false });
         }
     },
