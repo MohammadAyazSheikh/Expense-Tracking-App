@@ -33,5 +33,22 @@ export const schema = appSchema({
         { name: 'updated_at', type: 'number' },
       ],
     }),
+    //Local-only table to track what we've deleted
+    tableSchema({
+      name: 'pending_deletions',
+      columns: [
+        { name: 'table_name', type: 'string' },
+        { name: 'server_id', type: 'string' },
+        { name: 'deleted_at', type: 'number' },
+      ],
+    }),
+    // Local-only table to track what we've seen
+    tableSchema({
+      name: 'sync_state',
+      columns: [
+        { name: 'table_name', type: 'string' },
+        { name: 'last_sync_at', type: 'number' },
+      ],
+    }),
   ],
 });

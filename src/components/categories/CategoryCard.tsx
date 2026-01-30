@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Text } from "../ui/Text";
 import { Icon, IconType } from "../ui/Icon";
 // import { Category } from "../../types";
-import { Category } from "@/models/category";
+import { Category } from "@/database/models/category";
 
 interface CategoryRowProps {
   category: Category;

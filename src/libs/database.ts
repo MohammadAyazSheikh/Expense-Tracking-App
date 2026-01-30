@@ -1,7 +1,8 @@
 import { Database } from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
-import { schema } from '@/models/schema';
-import { Category, SystemCategory } from '@/models/category';
+import { schema } from '@/database/schema';
+import { Category, SystemCategory } from '@/database/models/category';
+import { PendingDeletions, SyncState } from '@/database/models/local';
 
 const adapter = new SQLiteAdapter({
     schema,
@@ -10,5 +11,5 @@ const adapter = new SQLiteAdapter({
 
 export const database = new Database({
     adapter,
-    modelClasses: [Category, SystemCategory],
+    modelClasses: [Category, SystemCategory, PendingDeletions, SyncState],
 });

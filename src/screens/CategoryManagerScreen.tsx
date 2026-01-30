@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { View, FlatList, useWindowDimensions } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SheetManager } from "react-native-actions-sheet";
-// import { useFinanceStore } from "../store";
-// import { Category } from "../types";
 import { alertService } from "../utils/alertService";
 import { useTranslation } from "../hooks/useTranslation";
 import { Text } from "../components/ui/Text";
@@ -12,14 +10,14 @@ import Fab from "@/components/ui/Fab";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { CategoryCard } from "../components/categories/CategoryCard";
 import { useCategoryStore } from "@/store/categoryStore";
-import { Category } from "@/models/category";
+import { Category } from "@/database/models/category";
 import { ApiLoader } from "@/components/ui/ApiLoader";
 
 export const CategoryManagerScreen = ({ navigation }: any) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  // const { categories, deleteCategory } = useFinanceStore();
-  const { categories, isLoading, loadCategories } = useCategoryStore();
+  const { categories, isLoading, loadCategories, deleteCategory } =
+    useCategoryStore();
   const layout = useWindowDimensions();
 
   const [index, setIndex] = useState(0);
@@ -41,6 +39,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
   };
 
   const handleDeleteCategory = (category: Category) => {
+    deleteCategory(category.id);
     // const isSystem = category.isSystem;
     // alertService.show(
     //   isSystem

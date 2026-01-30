@@ -21,14 +21,13 @@ import { alertService } from "../../utils/alertService";
 import { DEFAULT_CATEGORIES } from "../../data/categories";
 import { CategoryCard } from "../categories/CategoryCard";
 import { useCategoryStore } from "@/store/categoryStore";
-import { Category } from "@/models/category";
 
 const ManageCategoryRoute = ({
   router,
 }: RouteScreenProps<"manage-category-sheet", "add-update-category">) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { updateCategory } = useFinanceStore();
+
   const { user } = useAuthStore();
   const { addCategory } = useCategoryStore();
   const payload = useSheetPayload("manage-category-sheet");
