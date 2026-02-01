@@ -5,6 +5,7 @@ import { supabase } from '@/libs/supabase';
 import Toast from 'react-native-toast-message';
 import { DEEP_LINKS } from '@/data/constants/deepLinks';
 import { translate } from '@/i18n';
+import { cleanupService } from '@/services/syncServices/cleanupService';
 
 interface User {
   id: string;
@@ -41,6 +42,7 @@ interface AuthState {
   updateUser: (userData: Partial<User>) => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
+  reset: () => void;
 }
 
 
@@ -310,6 +312,14 @@ export const useAuthStore = create<AuthState>()(
             set({ isLoading: false });
           }
         },
+        reset: () => {
+          set({
+            user: null,
+            verificationStatus: "SINGED_OUT",
+            isLoading: false,
+            error: null,
+          });
+        },
         // Logout action
         logout: async () => {
 
@@ -329,12 +339,7 @@ export const useAuthStore = create<AuthState>()(
                 text1: "Success",
                 text2: "Logged out successfully!",
               });
-              set({
-                user: null,
-                isLoading: false,
-                error: null,
-                verificationStatus: "SINGED_OUT",
-              });
+              cleanupService.cleanupOnLogout();
             }
           } catch (error: any) {
             Toast.show({

@@ -1,11 +1,11 @@
+// services/baseSyncService.ts
 import { database } from '@/libs/database';
 import { supabase } from '@/libs/supabase';
 import { Q, Model } from '@nozbe/watermelondb';
 import { mmkvStorage } from '@/utils/storage';
 import NetInfo from '@react-native-community/netinfo';
 import { PendingDeletions } from '@/database/models/local';
-import { Database } from '@/types/supabse/supabaseDbTypes';
-import { SupabaseTableNames } from '@/types/supabse/tableTypes';
+import { SupabaseTableNames, SupabaseTables } from '@/types/supabse/tableTypes';
 
 export interface SyncableModel extends Model {
     serverId: string | null;
@@ -13,25 +13,35 @@ export interface SyncableModel extends Model {
     userId?: string;
 }
 
-export interface SyncConfig<T extends SyncableModel, TableName extends SupabaseTableNames> {
-    tableName: string;
-    supabaseTable: TableName;
+export interface SyncConfig<localData extends SyncableModel, serverTableName extends SupabaseTableNames> {
+    localTable: string;
+    supabaseTable: serverTableName;
+
     mapServerToLocal: (
-        serverData: Database['public']['Tables'][TableName]['Row'],
-        model: T
+        serverData: SupabaseTables[serverTableName]['Update'] | SupabaseTables[serverTableName]['Insert'],
+        localData: localData
     ) => void;
+
     mapLocalToServer: (
-        localModel: T
-    ) => Database['public']['Tables'][TableName]['Update'] | Database['public']['Tables'][TableName]['Insert'];
+        localData: localData
+    ) => SupabaseTables[serverTableName]['Update'] | SupabaseTables[serverTableName]['Insert'];
+
+    resolveConflict?: (
+        localData: localData,
+        serverData: SupabaseTables[serverTableName]['Row']
+    ) => 'local' | 'server' | 'merge';
+
+    // 🔥 Optional: Custom merge logic (only called if resolveConflict returns 'merge')
+    mergeConflict?: (
+        localData: localData,
+        serverData: SupabaseTables[serverTableName]['Row'],
+        modelToUpdate: localData
+    ) => void;
 }
 
 
-// Remove the default generic parameter here too
-export class BaseSyncService<
-    T extends SyncableModel,
-    TableName extends SupabaseTableNames
-> {
-    protected config: SyncConfig<T, TableName>;
+export class BaseSyncService<localData extends SyncableModel, serverTableName extends SupabaseTableNames> {
+    protected config: SyncConfig<localData, serverTableName>;
     private syncFlags = {
         pullDeletions: false,
         pushDeletions: false,
@@ -39,12 +49,12 @@ export class BaseSyncService<
         pushChanges: false,
     };
 
-    constructor(config: SyncConfig<T, TableName>) {
+    constructor(config: SyncConfig<localData, serverTableName>) {
         this.config = config;
     }
 
     private get lastSyncKey() {
-        return `last_sync_${this.config.tableName}`;
+        return `last_sync_${this.config.localTable}`;
     }
 
     async getLastSyncTimestamp(): Promise<number> {
@@ -59,7 +69,7 @@ export class BaseSyncService<
     private async checkNetwork(): Promise<boolean> {
         const netState = await NetInfo.fetch();
         if (!netState.isConnected) {
-            console.log(`[${this.config.tableName}] Offline - skipping sync`);
+            console.log(`[${this.config.localTable}] Offline - skipping sync`);
             return false;
         }
         return true;
@@ -81,18 +91,18 @@ export class BaseSyncService<
 
             if (error) throw error;
 
-            console.log(`[${this.config.tableName}] 🔥 Found ${trashData?.length || 0} deletions to apply`);
+            console.log(`[${this.config.localTable}] 🔥 Found ${trashData?.length || 0} deletions to apply`);
+
+            const collection = database.collections.get<T>(this.config.localTable);
 
             await database.write(async () => {
-                const collection = database.collections.get<T>(this.config.tableName);
-
                 for (const trash of trashData || []) {
                     const existing = await collection
                         .query(Q.where('server_id', trash.record_id))
                         .fetch();
 
                     if (existing.length > 0) {
-                        console.log(`[${this.config.tableName}] Deleting local: ${trash.record_id}`);
+                        console.log(`[${this.config.localTable}] Deleting local: ${trash.record_id}`);
                         await existing[0].destroyPermanently();
                     }
                 }
@@ -100,7 +110,7 @@ export class BaseSyncService<
 
             return trashData?.length || 0;
         } catch (error) {
-            console.error(`[${this.config.tableName}] Failed to pull deletions:`, error);
+            console.error(`[${this.config.localTable}] Failed to pull deletions:`, error);
             throw error;
         } finally {
             this.syncFlags.pullDeletions = false;
@@ -116,7 +126,7 @@ export class BaseSyncService<
         try {
             const pendingDeletionsCollection = database.collections.get<PendingDeletions>('pending_deletions');
             const pending = await pendingDeletionsCollection
-                .query(Q.where('table_name', this.config.tableName))
+                .query(Q.where('table_name', this.config.localTable))
                 .fetch();
 
             let successCount = 0;
@@ -137,11 +147,11 @@ export class BaseSyncService<
                         throw error;
                     }
                 } catch (error) {
-                    console.error(`[${this.config.tableName}] Failed to push deletion:`, error);
+                    console.error(`[${this.config.localTable}] Failed to push deletion:`, error);
                 }
             }
 
-            console.log(`[${this.config.tableName}] 🔥 Pushed ${successCount} deletions to server`);
+            console.log(`[${this.config.localTable}] 🔥 Pushed ${successCount} deletions to server`);
             return successCount;
         } finally {
             this.syncFlags.pushDeletions = false;
@@ -158,15 +168,15 @@ export class BaseSyncService<
             const { data: serverData, error } = await supabase
                 .from(this.config.supabaseTable)
                 .select('*')
-                .eq('user_id', userId)
+                // .eq('user_id', userId)
                 .gt('updated_at', new Date(lastSync).toISOString())
                 .order('updated_at', { ascending: true });
 
             if (error) throw error;
 
-            console.log(`[${this.config.tableName}] 🔥 Found ${serverData?.length || 0} updates to apply`);
+            console.log(`[${this.config.localTable}] 🔥 Found ${serverData?.length || 0} updates to apply`);
 
-            const collection = database.collections.get<T>(this.config.tableName);
+            const collection = database.collections.get<localData>(this.config.localTable);
 
             await database.write(async () => {
                 for (const serverRecord of serverData || []) {
@@ -175,17 +185,56 @@ export class BaseSyncService<
                         .fetch();
 
                     if (existing.length > 0) {
-                        // Update existing
-                        await existing[0].update((model) => {
-                            this.config.mapServerToLocal(serverRecord, model);
-                            (model as any).isSynced = true;
-                        });
+                        const localRecord = existing[0];
+
+                        // CONFLICT DETECTION: Check if local record is unsynced
+                        if (!localRecord.isSynced) {
+                            console.log(`[${this.config.localTable}] ⚠️ Conflict detected for ${serverRecord.id}`);
+
+                            // Use custom conflict resolution or default to local wins
+                            const resolution = this.config.resolveConflict
+                                ? this.config.resolveConflict(localRecord, serverRecord)
+                                : 'local'; // Default: local changes win
+
+                            if (resolution === 'server') {
+                                // Server wins - overwrite local
+                                await localRecord.update((model) => {
+                                    this.config.mapServerToLocal(serverRecord, model);
+                                    (model).isSynced = true;
+                                });
+                                console.log(`[${this.config.localTable}] Resolved conflict: server wins`);
+                            } else if (resolution === 'local') {
+                                // Local wins - skip server update
+                                console.log(`[${this.config.localTable}] Resolved conflict: local wins (will push on next sync)`);
+                                // Don't update - local changes will be pushed on next sync
+                            } else {
+                                // Merge - apply custom merge logic
+                                console.log(`[${this.config.localTable}] Resolved conflict: merge`);
+                                await localRecord.update((model) => {
+                                    // Call the merge function if provided
+                                    if (this.config.mergeConflict) {
+                                        this.config.mergeConflict(localRecord, serverRecord, model);
+                                    } else {
+                                        // Default merge: just apply server data
+                                        this.config.mapServerToLocal(serverRecord, model);
+                                    }
+                                    // Mark as unsynced so merged changes get pushed back
+                                    (model as any).isSynced = false;
+                                });
+                            }
+                        } else {
+                            // No conflict - local is synced, safe to update
+                            await localRecord.update((model) => {
+                                this.config.mapServerToLocal(serverRecord, model);
+                                (model).isSynced = true;
+                            });
+                        }
                     } else {
-                        // Create new
+                        // Create new - no conflict possible
                         await collection.create((model) => {
-                            (model as any).serverId = serverRecord.id;
+                            (model).serverId = serverRecord.id;
                             this.config.mapServerToLocal(serverRecord, model);
-                            (model as any).isSynced = true;
+                            (model).isSynced = true;
                         });
                     }
                 }
@@ -193,7 +242,7 @@ export class BaseSyncService<
 
             return serverData?.length || 0;
         } catch (error) {
-            console.error(`[${this.config.tableName}] Failed to pull changes:`, error);
+            console.error(`[${this.config.localTable}] Failed to pull changes:`, error);
             throw error;
         } finally {
             this.syncFlags.pullChanges = false;
@@ -207,7 +256,7 @@ export class BaseSyncService<
         this.syncFlags.pushChanges = true;
 
         try {
-            const collection = database.collections.get<T>(this.config.tableName);
+            const collection = database.collections.get<localData>(this.config.localTable);
             const unsyncedRecords = await collection
                 .query(Q.where('is_synced', false))
                 .fetch();
@@ -224,7 +273,6 @@ export class BaseSyncService<
                             .from(this.config.supabaseTable)
                             .update({
                                 ...updateData,
-                                updated_at: new Date().toISOString(),
                             } as any)
                             .eq('id', record.serverId);
 
@@ -232,7 +280,7 @@ export class BaseSyncService<
 
                         await database.write(async () => {
                             await record.update((r) => {
-                                (r as any).isSynced = true;
+                                (r).isSynced = true;
                             });
                         });
                         successCount++;
@@ -243,8 +291,7 @@ export class BaseSyncService<
                         const { data, error } = await supabase
                             .from(this.config.supabaseTable)
                             .insert({
-                                ...insertData,
-                                user_id: userId,
+                                ...insertData
                             } as any)
                             .select()
                             .single();
@@ -253,41 +300,52 @@ export class BaseSyncService<
 
                         await database.write(async () => {
                             await record.update((r) => {
-                                (r as any).serverId = data.id;
-                                (r as any).isSynced = true;
+                                (r).serverId = data.id;
+                                (r).isSynced = true;
                             });
                         });
                         successCount++;
                     }
                 } catch (error) {
-                    console.error(`[${this.config.tableName}] Failed to sync record:`, record.id, error);
+                    console.error(`[${this.config.localTable}] Failed to sync record:`, record.id, error);
                 }
             }
 
-            console.log(`[${this.config.tableName}] 🔥 Pushed ${successCount} local changes to server`);
+            console.log(`[${this.config.localTable}] 🔥 Pushed ${successCount} local changes to server`);
             return successCount;
         } finally {
             this.syncFlags.pushChanges = false;
         }
     }
 
+
+
     async sync(userId: string) {
         const lastSync = await this.getLastSyncTimestamp();
         const currentTimestamp = Date.now();
 
-        console.log(`[${this.config.tableName}] Starting sync (last: ${new Date(lastSync).toISOString()})`);
+        console.log(`[${this.config.localTable}] Starting sync (last: ${new Date(lastSync).toISOString()})`);
 
+        // 1. Pull deletions first (remove obsolete data)
         const deletionPullCount = await this.pullDeletions(userId, lastSync);
+
+        // 2. Push deletions
         const deletionPushCount = await this.pushDeletions();
+
+        // 3. Pull updates/inserts (with conflict detection)
         const updateCount = await this.pullChanges(userId, lastSync);
+
+        // 4. PUSH LOCAL CHANGES FIRST (before pulling)
         const pushCount = await this.pushChanges(userId);
 
+
+        // 5. Update sync timestamp
         await this.setLastSyncTimestamp(currentTimestamp);
 
         console.log(
-            `[${this.config.tableName}] Sync complete: ${deletionPullCount} deleted, ${deletionPushCount} pushed deletions, ${updateCount} updated, ${pushCount} pushed`
+            `[${this.config.localTable}] Sync complete: ${deletionPullCount} deleted, ${deletionPushCount} pushed deletions, ${pushCount} pushed, ${updateCount} updated`
         );
 
-        return { deletionPullCount, deletionPushCount, updateCount, pushCount };
+        return { deletionPullCount, deletionPushCount, pushCount, updateCount };
     }
 }

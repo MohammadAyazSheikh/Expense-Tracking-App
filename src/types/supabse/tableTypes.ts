@@ -1,11 +1,16 @@
 import { Database } from '@/types/supabse/supabaseDbTypes';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
-type Trash = Database['public']['Tables']['trash']['Row'];
-type Categories = Database['public']['Tables']['categories']['Row'];
-type SystemCategories = Database['public']['Tables']['system_categories']['Row'];
-type TransactionsTypes = Database['public']['Tables']['transaction_types']['Row'];
-type SupabaseTableNames = keyof Database['public']['Tables'];
+type SupabaseTables = Database['public']['Tables'];
+type SupabaseTableNames = keyof SupabaseTables;
+
+type Trash = SupabaseTables['trash']['Row'];
+type Profile = SupabaseTables['profiles']['Row'];
+type Categories = SupabaseTables['categories']['Row'];
+type SystemCategories = SupabaseTables['system_categories']['Row'];
+type TransactionsTypes = SupabaseTables['transaction_types']['Row'];
+
+
+
 
 export {
     Trash,
@@ -13,6 +18,7 @@ export {
     Categories,
     SystemCategories,
     TransactionsTypes,
-    SupabaseTableNames
+    SupabaseTableNames,
+    SupabaseTables
 }
 

@@ -14,6 +14,7 @@ interface CategoryStore {
     addCategory: (data: Partial<Category>) => Promise<void>;
     updateCategory: (categoryId: string, data: Partial<Category>) => Promise<void>;
     syncNow: () => Promise<void>;
+    reset: () => void;
     isLoading: boolean;
     isSyncing: boolean;
 }
@@ -153,7 +154,13 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
             set({ isLoading: false });
         }
     },
-
+    reset: () => {
+        set({
+            categories: [],
+            isLoading: false,
+            isSyncing: false,
+        });
+    },
     syncNow: async () => {
         try {
             set({ isSyncing: true });

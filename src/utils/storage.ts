@@ -1,6 +1,6 @@
 import { createMMKV } from 'react-native-mmkv';
 
-export const storage = createMMKV()
+export const storage = createMMKV();
 
 export const mmkvStorage = {
   setItem: (key: string, value: string) => {
@@ -13,4 +13,7 @@ export const mmkvStorage = {
   removeItem: (key: string) => {
     storage.remove(key);
   },
+  clearAll: () => {
+    storage.clearAll();
+  }
 };
