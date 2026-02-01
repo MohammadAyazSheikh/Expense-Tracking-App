@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message';
 import { DEEP_LINKS } from '@/data/constants/deepLinks';
 import { translate } from '@/i18n';
 import { cleanupService } from '@/services/syncServices/cleanupService';
+import { syncOrchestrator } from '@/services/syncServices/syncOrchestrator';
 
 interface User {
   id: string;
@@ -86,8 +87,8 @@ export const useAuthStore = create<AuthState>()(
                   fullName: userData?.first_name + " " + userData?.last_name,
                 },
                 verificationStatus: session?.user?.confirmed_at ? "VERIFIED" : "VERIFICATION_PENDING",
-
-              })
+              });
+              syncOrchestrator.syncAll(user.id);
             }
           } catch (error: any) {
             const errorMsg = error.message || 'Login failed';
@@ -117,14 +118,9 @@ export const useAuthStore = create<AuthState>()(
                 emailRedirectTo: DEEP_LINKS.VERIFY_EMAIL
               }
             });
-            console.log({
-              data,
-              error,
-            })
             if (error) {
               throw error;
             }
-
             if (data?.user) {
               // Store minimal user data
               set({
@@ -136,7 +132,6 @@ export const useAuthStore = create<AuthState>()(
 
               });
             }
-
             Toast.show({
               type: "success",
               text1: "Success",
@@ -223,6 +218,7 @@ export const useAuthStore = create<AuthState>()(
                     email: data.session.user.email!,
                   },
                 });
+                syncOrchestrator.syncAll(data.session.user.id);
                 Toast.show({
                   type: "success",
                   text1: "Success",
