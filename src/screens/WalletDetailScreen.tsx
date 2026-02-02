@@ -91,28 +91,32 @@ export default function WalletDetailScreen() {
 
   const handleDelete = () => {
     return;
-    alertService.show(t("common.delete"), t("wallets.deleteConfirm"), [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("common.delete"),
-        style: "destructive",
-        onPress: () => {
-          if (wallet) {
-            deleteWallet(wallet.id);
+    alertService.show({
+      title: t("common.delete"),
+      message: t("wallets.deleteConfirm"),
+      buttons: [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.delete"),
+          style: "destructive",
+          onPress: () => {
+            if (wallet) {
+              deleteWallet(wallet.id);
 
-            Toast.show({
-              type: "success",
-              text1: t("common.success"),
-              text2: t("wallets.deletedSuccess"),
-            });
+              Toast.show({
+                type: "success",
+                text1: t("common.success"),
+                text2: t("wallets.deletedSuccess"),
+              });
 
-            setTimeout(() => {
-              navigation.navigate("Wallets");
-            }, 1000);
-          }
+              setTimeout(() => {
+                navigation.navigate("Wallets");
+              }, 1000);
+            }
+          },
         },
-      },
-    ]);
+      ],
+    });
   };
 
   const handleMenuAction = () => {

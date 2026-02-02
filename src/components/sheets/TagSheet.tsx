@@ -30,10 +30,10 @@ export const TagSheet = (props: SheetProps<"tag-sheet">) => {
 
   const handleSave = () => {
     if (!name.trim()) {
-      alertService.show(
-        t("common.error"),
-        t("tags.nameRequired", "Tag name is required"),
-      );
+      alertService.show({
+        title: t("common.error"),
+        message: t("tags.nameRequired", "Tag name is required"),
+      });
       return;
     }
 

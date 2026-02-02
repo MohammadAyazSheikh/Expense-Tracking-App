@@ -51,10 +51,10 @@ export const TagsScreen = () => {
   };
 
   const handleDelete = (id: string, name: string) => {
-    alertService.show(
-      t("tags.deleteConfirmTitle"),
-      t("tags.deleteConfirmMessage"),
-      [
+    alertService.show({
+      title: t("tags.deleteConfirmTitle"),
+      message: t("tags.deleteConfirmMessage"),
+      buttons: [
         { text: t("common.cancel"), style: "cancel" },
         {
           text: t("common.delete"),
@@ -62,7 +62,7 @@ export const TagsScreen = () => {
           onPress: () => deleteTag(id),
         },
       ],
-    );
+    });
   };
 
   const handleAddSuggested = (name: string) => {

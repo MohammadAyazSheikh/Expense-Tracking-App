@@ -71,10 +71,10 @@ export const useAppSettingsStore = create<AppSettingsState>()(
 
           // Only prompt to reload if RTL direction changed
           if (needsRTLChange) {
-            alertService.show(
-              'Language Changed',
-              'Please restart the app for the layout changes to take effect.',
-              [
+            alertService.show({
+              title: 'Language Changed',
+              message: 'Please restart the app for the layout changes to take effect.',
+              buttons: [
                 {
                   text: 'Restart Now',
                   onPress: () => Updates.reloadAsync(),
@@ -84,7 +84,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
                   style: 'cancel',
                 },
               ]
-            );
+            });
           }
         } catch (error) {
           console.error('Error changing locale:', error);

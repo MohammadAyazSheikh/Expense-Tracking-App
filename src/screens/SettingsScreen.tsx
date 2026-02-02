@@ -244,14 +244,18 @@ export const SettingsScreen = () => {
             icon={{ name: "log-out", family: "Feather" }}
             isDestructive
             onPress={() => {
-              alertService.show(t("auth.logOut"), t("auth.logOutMessage"), [
-                { text: t("common.cancel"), style: "cancel" },
-                {
-                  text: t("auth.logOut"),
-                  style: "destructive",
-                  onPress: () => logout(),
-                },
-              ]);
+              alertService.show({
+                title: t("auth.logOut"),
+                message: t("auth.logOutMessage"),
+                buttons: [
+                  { text: t("common.cancel"), style: "cancel" },
+                  {
+                    text: t("auth.logOut"),
+                    style: "destructive",
+                    onPress: () => logout(),
+                  },
+                ],
+              });
             }}
             style={styles.logoutRow}
           />

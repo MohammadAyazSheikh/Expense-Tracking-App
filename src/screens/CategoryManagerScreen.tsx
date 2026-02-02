@@ -41,14 +41,14 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
   const handleDeleteCategory = (category: Category) => {
     const isSystem = category.systemCategoryId;
 
-    alertService.show(
-      isSystem
+    alertService.show({
+      title: isSystem
         ? t("categoryManager.removeTitle")
         : t("categoryManager.deleteConfirmTitle"),
-      isSystem
+      message: isSystem
         ? t("categoryManager.removeMessage")
         : t("categoryManager.deleteConfirmMessage"),
-      [
+      buttons: [
         { text: t("common.cancel"), style: "cancel" },
         {
           text: isSystem ? t("common.remove") : t("common.delete"),
@@ -56,10 +56,10 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
           onPress: async () => await deleteCategory(category.id),
         },
       ],
-      {
+      options: {
         cancelable: true,
       },
-    );
+    });
   };
 
   useEffect(() => {

@@ -53,7 +53,10 @@ const ManageCategory = ({
 
   const handleSave = () => {
     if (!name.trim()) {
-      alertService.show(t("common.error"), t("categoryManager.nameRequired"));
+      alertService.show({
+        title: t("common.error"),
+        message: t("categoryManager.nameRequired"),
+      });
       return;
     }
 
@@ -236,24 +239,27 @@ const SystemPicker = ({
   const categoryType = payload?.type || "expense";
 
   const handleAddSystemCategory = (cat: SystemCategory) => {
-    alertService.show("Do you want to add this category?", "", [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("common.yes"),
-        style: "destructive",
-        onPress: async () => {
-          await addCategory({
-            name: cat.name,
-            icon: cat.icon,
-            color: cat.color,
-            iconFamily: cat.iconFamily,
-            systemCategoryId: cat.serverId,
-            transactionTypeKey: categoryType,
-          });
-          SheetManager.hide("category-sheet");
+    alertService.show({
+      title: "Do you want to add this category?",
+      buttons: [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.yes"),
+          style: "destructive",
+          onPress: async () => {
+            await addCategory({
+              name: cat.name,
+              icon: cat.icon,
+              color: cat.color,
+              iconFamily: cat.iconFamily,
+              systemCategoryId: cat.serverId,
+              transactionTypeKey: categoryType,
+            });
+            SheetManager.hide("category-sheet");
+          },
         },
-      },
-    ]);
+      ],
+    });
   };
 
   return (

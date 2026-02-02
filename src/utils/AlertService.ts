@@ -9,6 +9,13 @@ type AlertOptions = {
     onDismiss?: () => void;
 };
 
+type showAlertParams = {
+    title: string;
+    message?: string;
+    buttons?: AlertButton[];
+    options?: AlertOptions;
+}
+
 export type AlertConfig = {
     title: string;
     message?: string;
@@ -25,7 +32,11 @@ class AlertService {
         this.listener = listener;
     }
 
-    show(title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) {
+    /**
+     * Show alert
+     * @param {showAlertParams} params - Alert parameters
+     */
+    show({ title, message, buttons, options }: showAlertParams) {
         if (this.listener) {
             this.listener({ title, message, buttons, options });
         }
