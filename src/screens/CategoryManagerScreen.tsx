@@ -53,9 +53,12 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
         {
           text: isSystem ? t("common.remove") : t("common.delete"),
           style: "destructive",
-          onPress: () => deleteCategory(category.id),
+          onPress: async () => await deleteCategory(category.id),
         },
       ],
+      {
+        cancelable: true,
+      },
     );
   };
 

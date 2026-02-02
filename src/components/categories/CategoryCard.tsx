@@ -4,8 +4,8 @@ import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Ionicons } from "@expo/vector-icons";
 import { Text } from "../ui/Text";
 import { Icon, IconType } from "../ui/Icon";
-// import { Category } from "../../types";
 import { Category } from "@/database/models/category";
+import { Card } from "../ui/Card";
 
 interface CategoryRowProps {
   category: Category;
@@ -25,13 +25,8 @@ export const CategoryCard = ({
   style,
 }: CategoryRowProps) => {
   const { theme } = useUnistyles();
-
   return (
-    <TouchableOpacity
-      style={[styles.categoryItem, style]}
-      onPress={onPress}
-      disabled={!onPress}
-    >
+    <Card style={[styles.categoryItem, style]} onPress={onPress}>
       <View
         style={[styles.iconContainer, { backgroundColor: category.color! }]}
       >
@@ -46,7 +41,7 @@ export const CategoryCard = ({
         <Text style={styles.categoryName} numberOfLines={1}>
           {category.name}
         </Text>
-        {category?.systemCategoryId && showSystemLabel && (
+        {category.systemCategoryId && showSystemLabel && (
           <Text
             style={{
               fontSize: 10,
@@ -67,7 +62,7 @@ export const CategoryCard = ({
           />
         </TouchableOpacity>
       )}
-    </TouchableOpacity>
+    </Card>
   );
 };
 
@@ -75,15 +70,8 @@ const styles = StyleSheet.create((theme) => ({
   categoryItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.card,
     padding: theme.paddings.md,
-    borderRadius: theme.radius.md,
     marginBottom: theme.margins.sm,
-    shadowColor: theme.colors.foreground,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
   },
   iconContainer: {
     width: 40,

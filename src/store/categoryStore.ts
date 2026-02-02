@@ -59,14 +59,14 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
 
             await database.write(async () => {
                 await categoriesCollection.create((category) => {
+                    category.isSynced = false;
                     category.name = data.name!;
                     category.color = data.color || null;
                     category.icon = data.icon || null;
                     category.iconFamily = data.iconFamily || null;
                     category.transactionTypeKey = data.transactionTypeKey!;
-                    category.userId = userId;
-                    category.isSynced = false;
                     category.systemCategoryId = data?.systemCategoryId || null;
+                    category.userId = userId;
                 });
             });
 

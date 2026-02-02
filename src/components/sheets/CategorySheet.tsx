@@ -17,11 +17,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { alertService } from "../../utils/alertService";
 import { CategoryCard } from "../categories/CategoryCard";
 import { useCategoryStore } from "@/store/categoryStore";
-import { DEFAULT_CATEGORIES } from "../../data/categories";
-import { useAuthStore, useFinanceStore } from "../../store";
+import { useAuthStore } from "../../store";
 import { useTranslation } from "../../hooks/useTranslation";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
+import { SystemCategory } from "@/database/models/category";
+import { ApiLoader } from "../ui/ApiLoader";
 
 const ManageCategory = ({
   router,
@@ -220,7 +221,11 @@ const SystemPicker = ({
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const payload = useSheetPayload("manage-category-sheet");
-  const { systemCategories: systemCat = [] } = useCategoryStore();
+  const {
+    systemCategories: systemCat = [],
+    addCategory,
+    isLoading,
+  } = useCategoryStore();
 
   const systemCategories = useMemo(
     () => systemCat.filter((cat) => cat.transactionTypeKey === payload?.type),
@@ -230,9 +235,25 @@ const SystemPicker = ({
   // Prefer params from navigation (local override), fallback to sheet payload
   const categoryType = payload?.type || "expense";
 
-  const handleAddSystemCategory = (cat: (typeof DEFAULT_CATEGORIES)[0]) => {
-    // addCategory(cat);
-    SheetManager.hide("category-sheet");
+  const handleAddSystemCategory = (cat: SystemCategory) => {
+    alertService.show("Do you want to add this category?", "", [
+      { text: t("common.cancel"), style: "cancel" },
+      {
+        text: t("common.yes"),
+        style: "destructive",
+        onPress: async () => {
+          await addCategory({
+            name: cat.name,
+            icon: cat.icon,
+            color: cat.color,
+            iconFamily: cat.iconFamily,
+            systemCategoryId: cat.serverId,
+            transactionTypeKey: categoryType,
+          });
+          SheetManager.hide("category-sheet");
+        },
+      },
+    ]);
   };
 
   return (
@@ -266,7 +287,7 @@ const SystemPicker = ({
           systemCategories.map((cat) => (
             <CategoryCard
               key={cat.id}
-              category={cat}
+              category={cat as any}
               onAction={() => handleAddSystemCategory(cat)}
               actionIcon="add-circle"
               style={{ paddingRight: 8 }}
@@ -274,6 +295,7 @@ const SystemPicker = ({
           ))
         )}
       </ScrollView>
+      <ApiLoader isLoading={isLoading} />
     </View>
   );
 };

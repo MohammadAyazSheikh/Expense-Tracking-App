@@ -91,7 +91,7 @@ export const CustomAlert = () => {
 
   if (!config) return null;
 
-  const buttons = config.buttons || [{ text: "OK", onPress: () => {} }];
+  const buttons = config?.buttons || [{ text: "OK", onPress: () => {} }];
 
   return (
     <Modal
@@ -108,9 +108,9 @@ export const CustomAlert = () => {
           >
             <View style={styles.contentContainer}>
               <Text weight="semiBold" style={styles.title}>
-                {config.title}
+                {config?.title}
               </Text>
-              {config.message && (
+              {config?.message && (
                 <Text style={styles.message}>{config.message}</Text>
               )}
             </View>
@@ -184,7 +184,7 @@ const styles = StyleSheet.create((theme) => ({
   },
   buttonText: {
     fontSize: theme.fontSize.md,
-    color: theme.colors.primary, // Or system blue
+    color: theme.colors.primary,
     fontWeight: "600",
     variants: {
       variant: {
