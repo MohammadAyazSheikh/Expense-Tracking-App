@@ -66,7 +66,6 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
                     category.iconFamily = data.iconFamily || null;
                     category.transactionTypeKey = data.transactionTypeKey!;
                     category.systemCategoryId = data?.systemCategoryId || null;
-                    category.userId = userId;
                 });
             });
 
