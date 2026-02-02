@@ -19,6 +19,7 @@ const categorySyncConfig: SyncConfig<Category, 'categories'> = {
             color: localModel.color,
             icon: localModel.icon,
             icon_family: localModel.iconFamily,
+            system_category_id: localModel.systemCategoryId,
             transaction_type_key: localModel.transactionTypeKey,
         };
     },
