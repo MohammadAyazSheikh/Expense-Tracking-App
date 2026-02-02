@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { LegendList } from "@legendapp/list";
+import { View, TouchableOpacity, Pressable } from "react-native";
 import ActionSheet, {
   ScrollView,
   SheetProps,
@@ -20,7 +21,11 @@ import { useCategoryStore } from "@/store/categoryStore";
 import { useAuthStore } from "../../store";
 import { useTranslation } from "../../hooks/useTranslation";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
-import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
+import {
+  CATEGORY_GROUPS,
+  CATEGORY_ICONS,
+  CategoryGroup,
+} from "../../utils/categoryIcons";
 import { SystemCategory } from "@/database/models/category";
 import { ApiLoader } from "../ui/ApiLoader";
 
@@ -29,7 +34,6 @@ const ManageCategory = ({
 }: RouteScreenProps<"manage-category-sheet", "add-update-category">) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-
   const { user } = useAuthStore();
   const { addCategory, updateCategory } = useCategoryStore();
   const payload = useSheetPayload("manage-category-sheet");
@@ -47,6 +51,7 @@ const ManageCategory = ({
         ) || CATEGORY_GROUPS[0].data[0]
       : CATEGORY_GROUPS[0].data[0],
   );
+
   const [selectedColor, setSelectedColor] = useState(
     initialCategory?.color || "#FF6B6B",
   );
@@ -96,30 +101,9 @@ const ManageCategory = ({
 
   const selectedIconConfig = CATEGORY_ICONS[selectedIconKey];
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text variant="h3">
-          {isEditing
-            ? t("categoryManager.editCategory", {
-                type: payload?.type?.toLocaleUpperCase(),
-              })
-            : t("categoryManager.newCategory", {
-                type: payload?.type?.toLocaleUpperCase(),
-              })}
-        </Text>
-        <TouchableOpacity
-          onPress={() => SheetManager.hide("manage-category-sheet")}
-        >
-          <Ionicons name="close" size={24} color={theme.colors.foreground} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100, width: "100%" }}
-      >
+  const HeaderComponent = useCallback(
+    () => (
+      <View>
         {!isEditing && (
           <TouchableOpacity
             style={styles.pickSystemButton}
@@ -187,26 +171,58 @@ const ManageCategory = ({
         <Text weight="semiBold" style={styles.sectionTitle}>
           {t("categoryManager.selectIcon")}
         </Text>
+      </View>
+    ),
+    [selectedColor, selectedIconConfig],
+  );
+  const renderItem = useCallback(
+    ({ item }: { item: CategoryGroup }) => (
+      <View key={item.title}>
+        <Text style={{ marginVertical: 8, fontSize: 12 }}>{item.title}</Text>
+        <View style={styles.grid}>
+          {item.data.map((iconKey: string, index: number) => (
+            <IconItem
+              key={index}
+              iconKey={iconKey}
+              isSelected={selectedIconKey === iconKey}
+              onPress={() => setSelectedIconKey(iconKey)}
+            />
+          ))}
+        </View>
+      </View>
+    ),
+    [selectedIconKey],
+  );
 
-        {CATEGORY_GROUPS.map((group) => (
-          <View key={group.title}>
-            <Text style={{ marginVertical: 8, fontSize: 12 }}>
-              {group.title}
-            </Text>
-            <View style={styles.grid}>
-              {group.data.map((iconKey) => (
-                <IconItem
-                  key={iconKey}
-                  iconKey={iconKey}
-                  isSelected={selectedIconKey === iconKey}
-                  onPress={() => setSelectedIconKey(iconKey)}
-                />
-              ))}
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text variant="h3">
+          {isEditing
+            ? t("categoryManager.editCategory", {
+                type: payload?.type?.toLocaleUpperCase(),
+              })
+            : t("categoryManager.newCategory", {
+                type: payload?.type?.toLocaleUpperCase(),
+              })}
+        </Text>
+        <TouchableOpacity
+          onPress={() => SheetManager.hide("manage-category-sheet")}
+        >
+          <Ionicons name="close" size={24} color={theme.colors.foreground} />
+        </TouchableOpacity>
+      </View>
 
+      <LegendList
+        recycleItems
+        data={CATEGORY_GROUPS}
+        estimatedItemSize={100}
+        keyExtractor={(item: CategoryGroup) => item.title}
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        renderItem={renderItem}
+        ListHeaderComponent={<HeaderComponent />}
+      />
       <View style={styles.footer}>
         <Button
           title={isEditing ? t("common.update") : t("common.save")}
@@ -321,14 +337,14 @@ const IconItem = ({
   if (!iconConfig) return null;
 
   return (
-    <TouchableOpacity style={styles.iconItem} onPress={onPress}>
+    <Pressable style={[styles.iconItem]} onPress={onPress}>
       <Icon
         type={iconConfig.type as any}
         name={iconConfig.name}
         size={24}
-        color={isSelected ? theme.colors.primary : theme.colors.foreground}
+        color={isSelected ? theme.colors.primary : theme.colors.mutedForeground}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -349,118 +365,126 @@ export const CategorySheet = (props: SheetProps<"manage-category-sheet">) => {
 
   return (
     <ActionSheet
+      useBottomSafeAreaPadding
       id={sheetId}
       routes={routes}
       initialRoute="add-update-category"
-      enableRouterBackNavigation={true}
-      gestureEnabled={true}
+      enableRouterBackNavigation
+      gestureEnabled={false}
       indicatorStyle={{ backgroundColor: theme.colors.border }}
       containerStyle={{ height: "90%" }}
     />
   );
 };
 
-const styles = StyleSheet.create((theme, rt) => ({
-  container: {
-    padding: theme.paddings.lg,
-    paddingBottom: rt.insets.bottom + theme.paddings.lg,
-    backgroundColor: theme.colors.card,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    height: "100%",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.margins.lg,
-  },
-  content: {
-    flex: 1,
-  },
-  sectionTitle: {
-    marginTop: theme.margins.lg,
-    marginBottom: theme.margins.sm,
-    color: theme.colors.mutedForeground,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  colorPreview: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  previewContainer: {
-    alignItems: "center",
-    marginVertical: theme.margins.md,
-  },
-  previewIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: theme.margins.sm,
-  },
-  footer: {
-    gap: theme.margins.md,
-    marginTop: theme.margins.lg,
-  },
-  pickSystemButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: theme.colors.background,
-    padding: theme.paddings.md,
-    borderRadius: theme.radius.md,
-    marginBottom: theme.margins.lg,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  pickSystemContent: {
-    flex: 1,
-    paddingHorizontal: theme.paddings.md,
-  },
-  pickSystemIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primary + "15",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  backButton: {
-    marginRight: theme.margins.md,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: theme.paddings.xl,
-  },
+const MIN = 50;
+const G = 10;
 
-  iconItem: {
-    width: 48,
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.background,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    variants: {
-      selected: {
-        true: {
-          borderColor: theme.colors.primary,
-          backgroundColor: theme.colors.primary + "10",
+const styles = StyleSheet.create((theme, rt) => {
+  const W = rt.screen.width - theme.margins.lg * 2;
+  const columns = Math.floor(W / (MIN + G));
+  const itemSize = (W - G * (columns - 1)) / columns;
+  return {
+    container: {
+      padding: theme.paddings.lg,
+      backgroundColor: theme.colors.card,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      height: "100%",
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: theme.margins.lg,
+    },
+    content: {
+      flex: 1,
+    },
+    sectionTitle: {
+      marginTop: theme.margins.lg,
+      marginBottom: theme.margins.sm,
+      color: theme.colors.mutedForeground,
+    },
+
+    colorPreview: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    previewContainer: {
+      alignItems: "center",
+      marginVertical: theme.margins.md,
+    },
+    previewIcon: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: theme.margins.sm,
+    },
+    footer: {
+      gap: theme.margins.md,
+      marginTop: theme.margins.lg,
+    },
+    pickSystemButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: theme.colors.background,
+      padding: theme.paddings.md,
+      borderRadius: theme.radius.md,
+      marginBottom: theme.margins.lg,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    pickSystemContent: {
+      flex: 1,
+      paddingHorizontal: theme.paddings.md,
+    },
+    pickSystemIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.colors.primary + "15",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    backButton: {
+      marginRight: theme.margins.md,
+    },
+    emptyState: {
+      alignItems: "center",
+      justifyContent: "center",
+      padding: theme.paddings.xl,
+    },
+    grid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+    },
+    iconItem: {
+      width: itemSize,
+      height: itemSize,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.background,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      variants: {
+        selected: {
+          true: {
+            borderColor: theme.colors.primary,
+            backgroundColor: theme.colors.primary + "10",
+          },
         },
       },
     },
-  },
-}));
+  };
+});
