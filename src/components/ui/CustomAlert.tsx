@@ -86,7 +86,12 @@ export const CustomAlert = () => {
 
   const handleButtonPress = (btn: AlertButton) => {
     setVisible(false);
-    btn.onPress?.();
+    // Add a delay to allow the modal to close properly before triggering the action
+    // This prevents issues where the action might trigger another modal (like a loader)
+    // causing conflicts or UI freezes.
+    setTimeout(() => {
+      btn.onPress?.();
+    }, 500);
   };
 
   if (!config) return null;
