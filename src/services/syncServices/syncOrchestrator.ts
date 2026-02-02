@@ -1,9 +1,11 @@
 
 import { categorySyncService } from './categorySyncService';
+import { systemCategorySyncService } from './systemCategorySyncService';
 
 export class SyncOrchestrator {
     private services = [
         categorySyncService,
+        systemCategorySyncService,
     ];
 
     //for full sync

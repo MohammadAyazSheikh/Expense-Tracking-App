@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { View, TouchableOpacity } from "react-native";
 import ActionSheet, {
   ScrollView,
@@ -23,7 +23,7 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { CATEGORY_GROUPS, CATEGORY_ICONS } from "../../utils/categoryIcons";
 
-const ManageCategoryRoute = ({
+const ManageCategory = ({
   router,
 }: RouteScreenProps<"manage-category-sheet", "add-update-category">) => {
   const { theme } = useUnistyles();
@@ -214,28 +214,24 @@ const ManageCategoryRoute = ({
   );
 };
 
-const SystemPickerRoute = ({
+const SystemPicker = ({
   router,
 }: RouteScreenProps<"manage-category-sheet", "system-category-picker">) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { categories, addCategory } = useFinanceStore();
-
   const payload = useSheetPayload("manage-category-sheet");
+  const { systemCategories: systemCat = [] } = useCategoryStore();
+
+  const systemCategories = useMemo(
+    () => systemCat.filter((cat) => cat.transactionTypeKey === payload?.type),
+    [systemCat, payload?.type],
+  );
 
   // Prefer params from navigation (local override), fallback to sheet payload
   const categoryType = payload?.type || "expense";
 
-  const availableSystemCategories = React.useMemo(() => {
-    return DEFAULT_CATEGORIES.filter(
-      (dc) =>
-        dc.type === categoryType &&
-        !categories.some((uc) => uc.name === dc.name && uc.type === dc.type),
-    );
-  }, [categories, categoryType]);
-
   const handleAddSystemCategory = (cat: (typeof DEFAULT_CATEGORIES)[0]) => {
-    addCategory(cat);
+    // addCategory(cat);
     SheetManager.hide("category-sheet");
   };
 
@@ -260,14 +256,14 @@ const SystemPickerRoute = ({
         style={styles.content}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {availableSystemCategories.length === 0 ? (
+        {systemCategories.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={{ color: theme.colors.mutedForeground }}>
               No more system categories available for {categoryType}.
             </Text>
           </View>
         ) : (
-          availableSystemCategories.map((cat) => (
+          systemCategories.map((cat) => (
             <CategoryCard
               key={cat.id}
               category={cat}
@@ -311,11 +307,11 @@ const IconItem = ({
 const routes: Route[] = [
   {
     name: "add-update-category",
-    component: ManageCategoryRoute,
+    component: ManageCategory,
   },
   {
     name: "system-category-picker",
-    component: SystemPickerRoute,
+    component: SystemPicker,
   },
 ];
 

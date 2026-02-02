@@ -1,4 +1,3 @@
-// services/baseSyncService.ts
 import { database } from '@/libs/database';
 import { supabase } from '@/libs/supabase';
 import { Q, Model } from '@nozbe/watermelondb';
@@ -31,7 +30,6 @@ export interface SyncConfig<localData extends SyncableModel, serverTableName ext
         serverData: SupabaseTables[serverTableName]['Row']
     ) => 'local' | 'server' | 'merge';
 
-    // 🔥 Optional: Custom merge logic (only called if resolveConflict returns 'merge')
     mergeConflict?: (
         localData: localData,
         serverData: SupabaseTables[serverTableName]['Row'],

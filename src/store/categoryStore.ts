@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { database } from '@/libs/database';
 import { categorySyncService } from '@/services/syncServices/categorySyncService';
-import { Category } from '@/database/models/category';
+import { Category, SystemCategory } from '@/database/models/category';
 import { supabase } from '@/libs/supabase';
 import { PendingDeletions } from '@/database/models/local';
 import Toast from 'react-native-toast-message';
@@ -9,6 +9,7 @@ import { useAuthStore } from './authStore';
 
 interface CategoryStore {
     categories: Category[];
+    systemCategories?: SystemCategory[];
     deleteCategory: (categoryId: string) => Promise<void>;
     loadCategories: () => Promise<void>;
     addCategory: (data: Partial<Category>) => Promise<void>;
@@ -27,9 +28,16 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
     loadCategories: async () => {
         try {
             set({ isLoading: true });
+
             const categoriesCollection = database.collections.get<Category>('categories');
             const categories = await categoriesCollection.query().fetch();
-            set({ categories });
+
+            const systemCategoriesCollection = database.collections.get<SystemCategory>('system_categories');
+            const systemCat = await systemCategoriesCollection.query().fetch();
+            const systemCategories = systemCat.filter((cat) => !categories.find((c) => c.systemCategoryId === cat.serverId));
+
+            set({ categories, systemCategories });
+
         } catch (error: any) {
             Toast.show({
                 type: 'error',
@@ -58,10 +66,12 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
                     category.transactionTypeKey = data.transactionTypeKey!;
                     category.userId = userId;
                     category.isSynced = false;
+                    category.systemCategoryId = data?.systemCategoryId || null;
                 });
             });
 
             await get().loadCategories();
+
             Toast.show({
                 type: 'success',
                 text1: 'Category added successfully',
@@ -139,6 +149,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
             });
 
             await get().loadCategories();
+
             Toast.show({
                 type: 'success',
                 text1: 'Category deleted successfully',

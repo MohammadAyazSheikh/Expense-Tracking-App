@@ -28,7 +28,7 @@ export class SystemCategory extends Model {
     @field('icon') icon!: string | null;
     @field('icon_family') iconFamily!: string | null;
     @field('transaction_type_key') transactionTypeKey!: string;
-
+    @field('is_active') isActive!: boolean;
     // Sync fields
     @field('server_id') serverId!: string | null; // Supabase UUID
     @field('is_synced') isSynced!: boolean;

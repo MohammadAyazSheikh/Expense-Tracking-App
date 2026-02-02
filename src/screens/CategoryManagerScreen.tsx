@@ -40,6 +40,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
 
   const handleDeleteCategory = (category: Category) => {
     const isSystem = category.systemCategoryId;
+
     alertService.show(
       isSystem
         ? t("categoryManager.removeTitle")

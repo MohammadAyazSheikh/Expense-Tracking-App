@@ -28,6 +28,7 @@ export const schema = appSchema({
         { name: 'icon_family', type: 'string', isOptional: true },
         { name: 'transaction_type_key', type: 'string' },
         { name: 'is_active', type: 'boolean' },
+        { name: 'is_synced', type: 'boolean' },
         { name: 'server_id', type: 'string' },
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' },
