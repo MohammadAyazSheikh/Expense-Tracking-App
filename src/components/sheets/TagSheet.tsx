@@ -13,12 +13,13 @@ import { useTranslation } from "../../hooks/useTranslation";
 import { useFinanceStore } from "../../store";
 import { Tag } from "../../types";
 import { alertService } from "../../utils/alertService";
+import { useTagStore } from "@/store/tagStore";
 
 export const TagSheet = (props: SheetProps<"tag-sheet">) => {
   const { sheetId, payload } = props;
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { addTag, updateTag } = useFinanceStore();
+  const { addTag, updateTag } = useTagStore();
 
   const isEditing = !!payload?.tag;
   const initialTag = payload?.tag;

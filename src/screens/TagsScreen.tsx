@@ -1,24 +1,22 @@
-import React, { useLayoutEffect, useState } from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import React, { useEffect } from "react";
+import { View, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { LegendList } from "@legendapp/list";
+import { Tag } from "../types";
+import Fab from "@/components/ui/Fab";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
-import { Input } from "../components/ui/Input";
 import { Badge } from "../components/ui/Badge";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../hooks/useTranslation";
-import { useFinanceStore } from "../store";
-import { Tag } from "../types";
 import { SheetManager } from "react-native-actions-sheet";
 import { alertService } from "../utils/alertService";
 import { SafeArea } from "@/components/ui/SafeArea";
-import { Header } from "@/components/ui/Headers";
-import Fab from "@/components/ui/Fab";
+import { useTagStore } from "@/store/tagStore";
 
 const SUGGESTED_TAGS = [
   "Travel",
@@ -34,11 +32,8 @@ const SUGGESTED_TAGS = [
 export const TagsScreen = () => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
+  const { tags, deleteTag, addTag, loadTags } = useTagStore();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
-  const tags = useFinanceStore((state) => state.tags);
-  const deleteTag = useFinanceStore((state) => state.deleteTag);
-  const addTag = useFinanceStore((state) => state.addTag);
 
   const handleAddTag = () => {
     SheetManager.show("tag-sheet");
@@ -77,6 +72,10 @@ export const TagsScreen = () => {
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     addTag({ name, color: randomColor });
   };
+
+  useEffect(() => {
+    loadTags();
+  }, []);
 
   return (
     <SafeArea applyBottomInset style={styles.container}>

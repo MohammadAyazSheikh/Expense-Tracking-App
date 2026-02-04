@@ -13,7 +13,6 @@ const tagSyncConfig: SyncConfig<Tag, 'tags'> = {
         return {
             name: localModel.name,
             color: localModel.color,
-            user_id: localModel.userId,
         };
     },
     resolveConflict: (localModel, serverData) => {
