@@ -4,7 +4,7 @@ import { Q, Model } from '@nozbe/watermelondb';
 import { mmkvStorage } from '@/utils/storage';
 import NetInfo from '@react-native-community/netinfo';
 import { PendingDeletions } from '@/database/models/local';
-import { SupabaseTableNames, SupabaseTables } from '@/types/supabse/tableTypes';
+import { SupabaseTableNames, SupabaseTables } from '@/types/supabase/tableTypes';
 
 export interface SyncableModel extends Model {
     serverId: string | null;

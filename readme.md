@@ -1,3 +1,3 @@
 # Cmd to fetch db types from supabase
 
-`npx supabase gen types typescript --project-id bmkppucdzggfoxsqwcat --schema public > src/types/supabaseDbTypes.ts`
+`npx supabase gen types typescript --project-id bmkppucdzggfoxsqwcat --schema public > src/types/supabase/supabaseDbTypes.ts`

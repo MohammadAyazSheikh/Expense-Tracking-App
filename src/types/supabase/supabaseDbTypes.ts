@@ -1,3 +1,4 @@
+
 export type Json =
     | string
     | number
@@ -145,6 +146,33 @@ export type Database = {
                     },
                 ]
             }
+            tags: {
+                Row: {
+                    color: string | null
+                    created_at: string
+                    id: string
+                    name: string
+                    updated_at: string
+                    user_id: string
+                }
+                Insert: {
+                    color?: string | null
+                    created_at?: string
+                    id?: string
+                    name: string
+                    updated_at?: string
+                    user_id: string
+                }
+                Update: {
+                    color?: string | null
+                    created_at?: string
+                    id?: string
+                    name?: string
+                    updated_at?: string
+                    user_id?: string
+                }
+                Relationships: []
+            }
             transaction_types: {
                 Row: {
                     created_at: string | null
@@ -202,8 +230,18 @@ export type Database = {
         }
         Functions: {
             is_admin: { Args: never; Returns: boolean }
-            store_in_trash: {
+            store_in_trash:
+            | {
                 Args: { p_record: Json; p_schema: string; p_table: string }
+                Returns: undefined
+            }
+            | {
+                Args: {
+                    p_record: Json
+                    p_record_id: string
+                    p_schema: string
+                    p_table: string
+                }
                 Returns: undefined
             }
         }
