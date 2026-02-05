@@ -2,8 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { getLocales } from 'expo-localization';
 import { I18nManager } from 'react-native';
-import moment from 'moment';
-import 'moment/locale/ar'; // Import Arabic locale
+import dateTime from '@/utils/dateTime';
 import { SupportedLocale, SUPPORTED_LOCALES, isRTL } from './types';
 
 // Import translations
@@ -30,16 +29,6 @@ type Path<T> = PathImpl2<T> extends string | keyof T ? PathImpl2<T> : keyof T;
 // Generate the union type of all possible translation keys
 export type TranslationKeys = Path<typeof en>;
 
-// ============================================
-// Locale mapping for Moment.js
-// ============================================
-
-const MOMENT_LOCALE_MAP: Record<SupportedLocale, string> = {
-  en: 'en',
-  ar: 'ar',
-  ur: 'ur',
-};
-
 
 // ============================================
 // Resources configuration
@@ -51,14 +40,6 @@ const resources = {
   ur: { translation: ur },
 };
 
-
-/**
- * Sets the Moment.js locale to match the app locale
- */
-export const setMomentLocale = (locale: SupportedLocale) => {
-  const momentLocale = MOMENT_LOCALE_MAP[locale];
-  moment.locale("en");
-};
 
 export const getDeviceLocale = (): SupportedLocale => {
   //if device locale is supported by our app then return it, otherwise return 'en'
@@ -86,20 +67,20 @@ i18n.use(initReactI18next).init({
   },
 });
 
-// Set initial Moment locale
-setMomentLocale(getDeviceLocale());
+
 
 export const changeLanguage = async (locale: SupportedLocale) => {
   await i18n.changeLanguage(locale);
 
-  // Sync Moment.js locale
-  setMomentLocale(locale);
+  // Sync DateTime locale
+  dateTime.locale(locale);
 
   // Handle RTL
   const shouldBeRTL = isRTL(locale);
   I18nManager.allowRTL(shouldBeRTL);
   I18nManager.forceRTL(shouldBeRTL);
 };
+
 
 /**
  * Get current active locale

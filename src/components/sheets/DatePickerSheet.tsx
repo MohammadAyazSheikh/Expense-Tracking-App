@@ -6,10 +6,10 @@ import ActionSheet, {
 } from "react-native-actions-sheet";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Calendar, DateData } from "react-native-calendars";
+import dateTime from "@/utils/dateTime";
 import { Text } from "../ui/Text";
 import { Icon } from "../ui/Icon";
 import { Button } from "../ui/Button";
-import moment from "moment";
 
 type ViewMode = "calendar" | "month" | "year";
 
@@ -31,8 +31,8 @@ const MONTHS = [
 export const DatePickerSheet = (props: SheetProps<"date-picker-sheet">) => {
   const { theme } = useUnistyles();
   const initialDate = props.payload?.date
-    ? moment(props.payload.date)
-    : moment();
+    ? dateTime(props.payload.date)
+    : dateTime();
 
   const [currentDate, setCurrentDate] = useState(initialDate);
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
@@ -55,7 +55,7 @@ export const DatePickerSheet = (props: SheetProps<"date-picker-sheet">) => {
   };
 
   const years = useMemo(() => {
-    const currentYear = moment().year();
+    const currentYear = dateTime().year();
     const startYear = currentYear - 10 + yearOffset;
     return Array.from({ length: 20 }, (_, i) => startYear + i);
   }, [yearOffset]);
@@ -72,8 +72,8 @@ export const DatePickerSheet = (props: SheetProps<"date-picker-sheet">) => {
           {viewMode === "year"
             ? "Select Year"
             : viewMode === "month"
-            ? "Select Month"
-            : currentDate.format("MMMM YYYY")}
+              ? "Select Month"
+              : currentDate.format("MMMM YYYY")}
         </Text>
         <Icon
           type="Feather"
@@ -134,18 +134,18 @@ export const DatePickerSheet = (props: SheetProps<"date-picker-sheet">) => {
   );
 
   const selectedDateString = useMemo(() => {
-    return props.payload?.date || moment().format("YYYY-MM-DD");
+    return props.payload?.date || dateTime().format("YYYY-MM-DD");
   }, [props.payload?.date]);
 
   const markedDates = useMemo(
     () => ({
-      [moment(selectedDateString).format("YYYY-MM-DD")]: {
+      [dateTime(selectedDateString).format("YYYY-MM-DD")]: {
         selected: true,
         selectedColor: theme.colors.primary,
         selectedTextColor: "#ffffff",
       },
     }),
-    [selectedDateString, theme.colors.primary]
+    [selectedDateString, theme.colors.primary],
   );
 
   const renderCalendar = () => (
