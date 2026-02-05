@@ -14,7 +14,7 @@ import { Badge } from "../components/ui/Badge";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
-import { alertService } from "../utils/alertService";
+import { alertService } from "@/utils/alertService";
 import { SafeArea } from "@/components/ui/SafeArea";
 import { useTagStore } from "@/store/tagStore";
 
@@ -28,10 +28,42 @@ const SUGGESTED_TAGS = [
   "Online",
   "Cash",
 ];
+type TagItemProps = {
+  data: Tag;
+  onEdit: (tag: Tag) => void;
+  onDelete: (id: string, name: string) => void;
+};
+
+export const TagItem = ({ data, onEdit, onDelete }: TagItemProps) => {
+  const { theme } = useUnistyles();
+  return (
+    <Card key={data.id} style={styles.tagCard}>
+      <TouchableOpacity style={styles.tagContent} onPress={() => onEdit(data)}>
+        <View style={styles.tagInfo}>
+          <View style={[styles.tagDot, { backgroundColor: data.color }]} />
+          <Text weight="medium" numberOfLines={1}>
+            {data.name}
+          </Text>
+        </View>
+        <View style={styles.tagActions}>
+          <TouchableOpacity
+            onPress={() => onDelete(data.id, data.name)}
+            style={styles.actionButton}
+          >
+            <Ionicons
+              name="trash-outline"
+              size={16}
+              color={theme.colors.destructive}
+            />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    </Card>
+  );
+};
 
 export const TagsScreen = () => {
   const { t } = useTranslation();
-  const { theme } = useUnistyles();
   const { tags, deleteTag, addTag, loadTags } = useTagStore();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
@@ -77,116 +109,76 @@ export const TagsScreen = () => {
     loadTags();
   }, []);
 
+  const renderItem = ({ item }: { item: Tag }) => {
+    return (
+      <TagItem data={item} onEdit={handleEditTag} onDelete={handleDelete} />
+    );
+  };
   return (
     <SafeArea applyBottomInset style={styles.container}>
-      <SafeArea scrollable>
-        <View style={styles.content}>
-          {/* Tags List */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text weight="semiBold" style={styles.sectionTitle}>
-                {t("tags.yourTags", "Your Tags")}
-              </Text>
-              <Badge variant="secondary">
-                {tags.length} {t("tags.total", "Total")}
-              </Badge>
-            </View>
-
-            {tags.length === 0 ? (
-              <Card style={styles.emptyState}>
-                <Ionicons
-                  name="pricetag-outline"
-                  size={48}
-                  color={theme.colors.mutedForeground}
-                />
-                <Text style={styles.emptyText}>
-                  {t("tags.noTags", "No tags created yet")}
-                </Text>
-                <Button
-                  title={t("tags.createFirst", "Create Your First Tag")}
-                  icon={<Ionicons name="add" size={18} color="white" />}
-                  onPress={handleAddTag}
-                  style={{ marginTop: 16 }}
-                />
-              </Card>
-            ) : (
-              <View style={styles.tagsGrid}>
-                {tags.map((tag) => (
-                  <Card key={tag.id} style={styles.tagCard}>
-                    <TouchableOpacity
-                      style={styles.tagContent}
-                      onPress={() => handleEditTag(tag)}
-                    >
-                      <View style={styles.tagInfo}>
-                        <View
-                          style={[
-                            styles.tagDot,
-                            { backgroundColor: tag.color },
-                          ]}
-                        />
-                        <Text weight="medium" numberOfLines={1}>
-                          {tag.name}
-                        </Text>
-                      </View>
-                      <View style={styles.tagActions}>
-                        <TouchableOpacity
-                          onPress={() => handleDelete(tag.id, tag.name)}
-                          style={styles.actionButton}
-                        >
-                          <Ionicons
-                            name="trash-outline"
-                            size={16}
-                            color={theme.colors.destructive}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </TouchableOpacity>
-                  </Card>
-                ))}
-              </View>
-            )}
+      <LegendList
+        numColumns={2}
+        columnWrapperStyle={styles?.columnWrapperStyle}
+        recycleItems
+        data={tags}
+        estimatedItemSize={50}
+        keyExtractor={(item: Tag) => item.id}
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        renderItem={renderItem}
+        ListHeaderComponent={
+          <View style={styles.sectionHeader}>
+            <Text weight="semiBold" style={styles.sectionTitle}>
+              {t("tags.yourTags", "Your Tags")}
+            </Text>
+            <Badge variant="secondary">
+              {tags.length} {t("tags.total", "Total")}
+            </Badge>
           </View>
+        }
+        ListFooterComponent={
+          <View style={styles.footer}>
+            {/* Suggested Tags */}
+            <Card style={styles.suggestedCard}>
+              <Text weight="semiBold" style={styles.suggestedTitle}>
+                {t("tags.suggested", "Suggested Tags")}
+              </Text>
+              <View style={styles.suggestedTags}>
+                {SUGGESTED_TAGS.map((suggestion) => {
+                  const exists = tags.some(
+                    (t) => t.name.toLowerCase() === suggestion.toLowerCase(),
+                  );
+                  return (
+                    <Button
+                      key={suggestion}
+                      title={suggestion}
+                      icon={<Ionicons name="add" size={14} />}
+                      variant="outline"
+                      size="sm"
+                      disabled={exists}
+                      onPress={() => handleAddSuggested(suggestion)}
+                      style={styles.suggestedButton}
+                    />
+                  );
+                })}
+              </View>
+            </Card>
 
-          {/* Suggested Tags */}
-          <Card style={styles.suggestedCard}>
-            <Text weight="semiBold" style={styles.suggestedTitle}>
-              {t("tags.suggested", "Suggested Tags")}
-            </Text>
-            <View style={styles.suggestedTags}>
-              {SUGGESTED_TAGS.map((suggestion) => {
-                const exists = tags.some(
-                  (t) => t.name.toLowerCase() === suggestion.toLowerCase(),
-                );
-                return (
-                  <Button
-                    key={suggestion}
-                    title={suggestion}
-                    icon={<Ionicons name="add" size={14} />}
-                    variant="outline"
-                    size="sm"
-                    disabled={exists}
-                    onPress={() => handleAddSuggested(suggestion)}
-                    style={styles.suggestedButton}
-                  />
-                );
-              })}
-            </View>
-          </Card>
-
-          {/* Info Card */}
-          <Card style={styles.infoCard}>
-            <Text weight="semiBold" style={styles.infoTitle}>
-              💡 {t("tags.tip", "Tip")}
-            </Text>
-            <Text style={styles.infoText}>
-              {t(
-                "tags.tipDescription",
-                "Tags help you filter and analyze expenses across different categories. Use them to track project-specific spending or personal goals.",
-              )}
-            </Text>
-          </Card>
-        </View>
-      </SafeArea>
+            {/* Info Card */}
+            <Card style={styles.infoCard}>
+              <Text weight="semiBold" style={styles.infoTitle}>
+                💡 {t("tags.tip", "Tip")}
+              </Text>
+              <Text style={styles.infoText}>
+                {t(
+                  "tags.tipDescription",
+                  "Tags help you filter and analyze expenses across different categories. Use them to track project-specific spending or personal goals.",
+                )}
+              </Text>
+            </Card>
+          </View>
+        }
+      />
       <Fab onPress={handleAddTag} />
     </SafeArea>
   );
@@ -196,6 +188,9 @@ const styles = StyleSheet.create((theme) => ({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  columnWrapperStyle: {
+    gap: theme.margins.sm,
   },
   headerDescription: {
     color: "rgba(255, 255, 255, 0.9)",
@@ -238,7 +233,7 @@ const styles = StyleSheet.create((theme) => ({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: theme.margins.xs,
+    marginBottom: theme.margins.md,
   },
   sectionTitle: {
     fontSize: theme.fontSize.md,
@@ -258,7 +253,7 @@ const styles = StyleSheet.create((theme) => ({
     gap: theme.margins.sm,
   },
   tagCard: {
-    width: "48%",
+    flex: 1,
     padding: theme.paddings.md,
   },
   tagContent: {
@@ -285,6 +280,9 @@ const styles = StyleSheet.create((theme) => ({
   actionButton: {
     padding: theme.paddings.xs,
   },
+  footer: {
+    marginTop: theme.margins.md,
+  },
   suggestedCard: {
     padding: theme.paddings.lg,
   },
@@ -302,8 +300,9 @@ const styles = StyleSheet.create((theme) => ({
   },
   infoCard: {
     padding: theme.paddings.lg,
-    backgroundColor: theme.colors.primary + "10",
-    borderColor: theme.colors.primary + "20",
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+    marginTop: theme.margins.sm,
   },
   infoTitle: {
     fontSize: theme.fontSize.md,

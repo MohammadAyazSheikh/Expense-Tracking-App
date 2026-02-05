@@ -216,7 +216,7 @@ const ManageCategory = ({
       <LegendList
         recycleItems
         data={CATEGORY_GROUPS}
-        estimatedItemSize={100}
+        estimatedItemSize={50}
         keyExtractor={(item: CategoryGroup) => item.title}
         style={styles.content}
         showsVerticalScrollIndicator={false}
