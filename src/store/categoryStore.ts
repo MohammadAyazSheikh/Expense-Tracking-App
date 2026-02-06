@@ -64,7 +64,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
                     category.color = data.color!;
                     category.icon = data.icon!;
                     category.iconFamily = data.iconFamily!;
-                    category.transactionTypeKey = data.transactionTypeKey!;
+                    category.transactionTypeId = data.transactionTypeId!;
                     category.systemCategoryId = data?.systemCategoryId || null;
                 });
             });
@@ -103,7 +103,7 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
                     if (data.color) cat.color = data.color;
                     if (data.icon) cat.icon = data.icon;
                     if (data.iconFamily) cat.iconFamily = data.iconFamily;
-                    if (data.transactionTypeKey) cat.transactionTypeKey = data.transactionTypeKey;
+                    if (data.transactionTypeId) cat.transactionTypeId = data.transactionTypeId;
                     cat.isSynced = false;
                 });
             });

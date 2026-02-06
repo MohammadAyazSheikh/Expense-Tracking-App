@@ -28,6 +28,7 @@ import {
 } from "../../utils/categoryIcons";
 import { SystemCategory } from "@/database/models/category";
 import { ApiLoader } from "../ui/ApiLoader";
+import { transactionTypes } from "@/data/dbConstantData";
 
 const ManageCategory = ({
   router,
@@ -73,7 +74,10 @@ const ManageCategory = ({
       icon: iconConfig.name as string,
       iconFamily: iconConfig.type as string,
       color: selectedColor,
-      transactionTypeKey: payload?.type === "income" ? "income" : "expense",
+      transactionTypeId:
+        payload?.type === "expense"
+          ? transactionTypes[0].id
+          : transactionTypes[1].id,
       systemCategoryId: null,
     };
 
@@ -163,7 +167,7 @@ const ManageCategory = ({
           </Text>
           <Input
             value={name}
-            onChangeText={setName}
+            onChangeText={(text) => setName(text)}
             placeholder={t("categoryManager.namePlaceholder")}
           />
         </View>
@@ -173,7 +177,7 @@ const ManageCategory = ({
         </Text>
       </View>
     ),
-    [selectedColor, selectedIconConfig],
+    [selectedColor, selectedIconConfig, name, setName],
   );
   const renderItem = useCallback(
     ({ item }: { item: CategoryGroup }) => (
@@ -240,6 +244,10 @@ const SystemPicker = ({
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const payload = useSheetPayload("manage-category-sheet");
+  const transactionTypeId =
+    payload?.type === "expense"
+      ? transactionTypes[0].id
+      : transactionTypes[1].id;
   const {
     systemCategories: systemCat = [],
     addCategory,
@@ -247,35 +255,45 @@ const SystemPicker = ({
   } = useCategoryStore();
 
   const systemCategories = useMemo(
-    () => systemCat.filter((cat) => cat.transactionTypeKey === payload?.type),
-    [systemCat, payload?.type],
+    () =>
+      systemCat.filter((cat) => cat.transactionTypeId === transactionTypeId),
+    [systemCat, transactionTypeId],
   );
 
   // Prefer params from navigation (local override), fallback to sheet payload
   const categoryType = payload?.type || "expense";
 
-  const handleAddSystemCategory = (cat: SystemCategory) => {
-    alertService.show({
-      title: "Do you want to add this category?",
-      buttons: [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("common.yes"),
-          style: "destructive",
-          onPress: async () => {
-            await addCategory({
-              name: cat.name,
-              icon: cat.icon,
-              color: cat.color,
-              iconFamily: cat.iconFamily,
-              systemCategoryId: cat.serverId,
-              transactionTypeKey: categoryType,
-            });
-            SheetManager.hide("category-sheet");
-          },
-        },
-      ],
+  const handleAddSystemCategory = async (cat: SystemCategory) => {
+    await addCategory({
+      name: cat.name,
+      icon: cat.icon,
+      color: cat.color,
+      iconFamily: cat.iconFamily,
+      systemCategoryId: cat.serverId,
+      transactionTypeId,
     });
+    SheetManager.hide("manage-category-sheet");
+    // alertService.show({
+    //   title: "Do you want to add this category?",
+    //   buttons: [
+    //     { text: t("common.cancel"), style: "cancel" },
+    //     {
+    //       text: t("common.yes"),
+    //       style: "destructive",
+    //       onPress: async () => {
+    //         await addCategory({
+    //           name: cat.name,
+    //           icon: cat.icon,
+    //           color: cat.color,
+    //           iconFamily: cat.iconFamily,
+    //           systemCategoryId: cat.serverId,
+    //           transactionTypeId,
+    //         });
+    //         SheetManager.hide("category-sheet");
+    //       },
+    //     },
+    //   ],
+    // });
   };
 
   return (

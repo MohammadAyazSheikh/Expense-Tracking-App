@@ -9,7 +9,7 @@ const categorySyncConfig: SyncConfig<Category, 'categories'> = {
         model.color = serverData.color!;
         model.icon = serverData.icon!;
         model.iconFamily = serverData.icon_family!;
-        model.transactionTypeKey = serverData.transaction_type_key!;
+        model.transactionTypeId = serverData.transaction_type_id!;
         model.systemCategoryId = serverData.system_category_id!;
         model.userId = serverData.user_id!;
     },
@@ -20,7 +20,7 @@ const categorySyncConfig: SyncConfig<Category, 'categories'> = {
             icon: localModel.icon,
             icon_family: localModel.iconFamily,
             system_category_id: localModel.systemCategoryId,
-            transaction_type_key: localModel.transactionTypeKey,
+            transaction_type_id: localModel.transactionTypeId,
         };
     },
     resolveConflict: (localModel, serverData) => {
