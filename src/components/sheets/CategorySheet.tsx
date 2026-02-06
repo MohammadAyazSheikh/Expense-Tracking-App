@@ -142,11 +142,11 @@ const ManageCategory = ({
           <Ionicons name="close" size={24} color={theme.colors.foreground} />
         </TouchableOpacity>
       </View>
-
       <LegendList
         recycleItems
         data={CATEGORY_GROUPS}
         estimatedItemSize={50}
+        extraData={selectedIconKey}
         keyExtractor={(item: CategoryGroup) => item.title}
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -384,7 +384,13 @@ const IconItem = ({
   if (!iconConfig) return null;
 
   return (
-    <Pressable style={[styles.iconItem]} onPress={onPress}>
+    <Pressable
+      style={[
+        styles.iconItem,
+        isSelected && { borderColor: theme.colors.primary },
+      ]}
+      onPress={onPress}
+    >
       <Icon
         type={iconConfig.type as any}
         name={iconConfig.name}
