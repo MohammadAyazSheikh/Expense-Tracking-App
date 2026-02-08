@@ -68,6 +68,90 @@ export type Database = {
           },
         ]
       }
+      currencies: {
+        Row: {
+          code: string
+          created_at: string
+          decimal_places: number
+          id: string
+          is_active: boolean
+          name: string
+          symbol: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          decimal_places?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          symbol: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          decimal_places?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          symbol?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      exchange_rates: {
+        Row: {
+          base_currency_id: string
+          created_at: string
+          id: string
+          quote_currency_id: string
+          rate: number
+          rate_date: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          base_currency_id: string
+          created_at?: string
+          id?: string
+          quote_currency_id: string
+          rate: number
+          rate_date: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          base_currency_id?: string
+          created_at?: string
+          id?: string
+          quote_currency_id?: string
+          rate?: number
+          rate_date?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exchange_rates_base_currency_id_fkey"
+            columns: ["base_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exchange_rates_quote_currency_id_fkey"
+            columns: ["quote_currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -178,18 +262,21 @@ export type Database = {
           id: string
           key: string
           label: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           key: string
           label: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           key?: string
           label?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -202,6 +289,7 @@ export type Database = {
           record_id: string
           schema_name: string | null
           table_name: string
+          updated_at: string | null
         }
         Insert: {
           deleted_at?: string | null
@@ -211,6 +299,7 @@ export type Database = {
           record_id: string
           schema_name?: string | null
           table_name: string
+          updated_at?: string | null
         }
         Update: {
           deleted_at?: string | null
@@ -220,24 +309,31 @@ export type Database = {
           record_id?: string
           schema_name?: string | null
           table_name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       wallet_types: {
         Row: {
+          created_at: string | null
           id: string
           key: string
           label: string
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
           id?: string
           key: string
           label: string
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
           key?: string
           label?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -246,6 +342,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      call_sync_exchange_rates: { Args: never; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
       store_in_trash:
         | {
