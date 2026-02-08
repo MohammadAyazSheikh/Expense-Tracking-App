@@ -4,7 +4,7 @@ import { SystemCategory } from '@/database/models/category';
 const systemCategorySyncConfig: SyncConfig<SystemCategory, 'system_categories'> = {
     localTable: "system_categories",
     supabaseTable: "system_categories",
-    mapServerToLocal: (serverData, model) => {
+    mapServerToLocal: async (serverData, model) => {
         model.name = serverData.name!;
         model.color = serverData.color!;
         model.icon = serverData.icon!;
@@ -13,7 +13,7 @@ const systemCategorySyncConfig: SyncConfig<SystemCategory, 'system_categories'> 
         model.transactionTypeId = serverData.transaction_type_id!;
     },
     //we don't need to map local to server because we are not creating system categories from local
-    mapLocalToServer: (localModel) => ({}),
+    mapLocalToServer: async (localModel) => ({}),
     resolveConflict: (localModel, serverData) => "server",
 
 };

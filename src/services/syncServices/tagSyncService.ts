@@ -4,12 +4,12 @@ import { Tag } from '@/database/models/tags';
 const tagSyncConfig: SyncConfig<Tag, 'tags'> = {
     localTable: "tags",
     supabaseTable: "tags",
-    mapServerToLocal: (serverData, model) => {
+    mapServerToLocal: async (serverData, model) => {
         model.name = serverData.name!;
         model.color = serverData.color!;
         model.userId = serverData.user_id!;
     },
-    mapLocalToServer: (localModel) => {
+    mapLocalToServer: async (localModel) => {
         return {
             name: localModel.name,
             color: localModel.color,
