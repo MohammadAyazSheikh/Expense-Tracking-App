@@ -5,7 +5,7 @@ import { Category, SystemCategory } from '@/database/models/category';
 import { supabase } from '@/libs/supabase';
 import { PendingDeletions } from '@/database/models/local';
 import Toast from 'react-native-toast-message';
-import { useAuthStore } from './authStore';
+import { useAuthStore } from '@/store';
 
 interface CategoryStore {
     categories: Category[];

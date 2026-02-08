@@ -10,10 +10,9 @@ import { Text } from "../ui/Text";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { useTranslation } from "../../hooks/useTranslation";
-import { useFinanceStore } from "../../store";
 import { Tag } from "../../types";
 import { alertService } from "../../utils/alertService";
-import { useTagStore } from "@/store/tagStore";
+import { useTagStore } from "@/store";
 
 export const TagSheet = (props: SheetProps<"tag-sheet">) => {
   const { sheetId, payload } = props;

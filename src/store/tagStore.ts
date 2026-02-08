@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 import { database } from '@/libs/database';
-import { categorySyncService } from '@/services/syncServices/categorySyncService';
-import { Category } from '@/database/models/category';
 import { supabase } from '@/libs/supabase';
 import { PendingDeletions } from '@/database/models/local';
 import Toast from 'react-native-toast-message';
-import { useAuthStore } from './authStore';
+import { useAuthStore } from '@/store';
 import { Tag } from '@/database/models/tags';
 import { tagSyncService } from '@/services/syncServices/tagSyncService';
 

@@ -9,7 +9,7 @@ import { SafeArea } from "@/components/ui/SafeArea";
 import Fab from "@/components/ui/Fab";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { CategoryCard } from "../components/categories/CategoryCard";
-import { useCategoryStore } from "@/store/categoryStore";
+import { useCategoryStore } from "@/store";
 import { Category } from "@/database/models/category";
 import { ApiLoader } from "@/components/ui/ApiLoader";
 import { transactionTypes } from "@/data/dbConstantData";

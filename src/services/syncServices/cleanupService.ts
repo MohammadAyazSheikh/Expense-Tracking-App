@@ -1,7 +1,6 @@
 import { database } from '@/libs/database';
 import { mmkvStorage } from '@/utils/storage';
-import { useCategoryStore } from '@/store/categoryStore';
-import { useAuthStore } from '@/store';
+import { useAuthStore, useCategoryStore } from '@/store';
 
 class CleanupService {
     /**

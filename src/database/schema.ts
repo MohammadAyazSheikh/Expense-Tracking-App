@@ -79,6 +79,9 @@ export const schema = appSchema({
       columns: [
         { name: 'key', type: 'string' },
         { name: 'label', type: 'string' },
+        { name: 'color', type: 'string' },
+        { name: 'icon', type: 'string' },
+        { name: 'icon_family', type: 'string' },
         { name: 'is_synced', type: 'boolean' },
         { name: 'server_id', type: 'string', isOptional: true },
         { name: 'created_at', type: 'number' },

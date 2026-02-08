@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { View, ScrollView, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
@@ -16,15 +16,7 @@ import { Header } from "../components/ui/Headers";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { StackNavigationProp } from "@react-navigation/stack";
-
-const walletTypes = [
-  { id: "cash", icon: "wallet", label: "Cash", color: "#2E7D32" },
-  { id: "bank", icon: "bank", label: "Bank", color: "#1565C0" },
-  { id: "card", icon: "credit-card", label: "Card", color: "#6A1B9A" },
-  { id: "digital", icon: "smartphone", label: "Digital", color: "#0277BD" },
-  { id: "crypto", icon: "bitcoin", label: "Crypto", color: "#F57F17" },
-  { id: "savings", icon: "piggy-bank", label: "Savings", color: "#C62828" },
-];
+import { useWalletTypeStore } from "@/store";
 
 const currencies = ["USD", "EUR", "GBP", "PKR", "INR", "AED"];
 
@@ -33,7 +25,7 @@ export const AddWalletScreen = () => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const { addWallet } = useFinanceStore();
-
+  const { walletTypes, loadWalletTypes } = useWalletTypeStore();
   const {
     control,
     handleSubmit,
@@ -82,7 +74,9 @@ export const AddWalletScreen = () => {
       text2: t("wallets.addedSuccess"),
     });
   };
-
+  useEffect(() => {
+    loadWalletTypes();
+  }, []);
   return (
     <ScreenWrapper style={{ height: "100%" }}>
       <Header
@@ -104,7 +98,7 @@ export const AddWalletScreen = () => {
             <CategoryItem
               key={`${item.id}-${item.label}`}
               item={{
-                name: t(`wallets.types.${item.id}` as any),
+                name: t(`wallets.types.${item.key}` as any, item.key),
                 color: item.color,
                 icon: item.icon,
                 iconFamily: "MaterialCommunityIcons",
@@ -150,10 +144,10 @@ export const AddWalletScreen = () => {
                       ? currency === "USD"
                         ? "$"
                         : currency === "EUR"
-                        ? "€"
-                        : currency === "GBP"
-                        ? "£"
-                        : currency
+                          ? "€"
+                          : currency === "GBP"
+                            ? "£"
+                            : currency
                       : "$"}
                   </Text>
                 }

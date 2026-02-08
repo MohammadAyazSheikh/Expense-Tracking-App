@@ -6,6 +6,9 @@ export class WalletTypes extends Model {
 
     @field('key') key!: string;
     @field('label') label!: string;
+    @field('color') color!: string;
+    @field('icon') icon!: string;
+    @field('icon_family') iconFamily!: string;
     @field('is_synced') isSynced!: boolean;
     @field('server_id') serverId!: string | null;
     @readonly @date('created_at') createdAt!: Date;

@@ -17,8 +17,7 @@ import { Icon } from "../ui/Icon";
 import { Ionicons } from "@expo/vector-icons";
 import { alertService } from "../../utils/alertService";
 import { CategoryCard } from "../categories/CategoryCard";
-import { useCategoryStore } from "@/store/categoryStore";
-import { useAuthStore } from "../../store";
+import { useCategoryStore, useAuthStore } from "@/store";
 import { useTranslation } from "../../hooks/useTranslation";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
