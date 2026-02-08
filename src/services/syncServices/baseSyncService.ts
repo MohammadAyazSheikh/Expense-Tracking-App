@@ -64,6 +64,19 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
         await mmkvStorage.setItem(this.lastSyncKey, timestamp.toString());
     }
 
+
+    protected async getLocalIdFromServerId(
+        tableName: string,
+        serverId: string
+    ): Promise<string | null> {
+        const collection = database.collections.get(tableName);
+        const records = await collection
+            .query(Q.where('server_id', serverId))
+            .fetch();
+
+        return records.length > 0 ? records[0].id : null;
+    }
+
     private async checkNetwork(): Promise<boolean> {
         const netState = await NetInfo.fetch();
         if (!netState.isConnected) {

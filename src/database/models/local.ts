@@ -10,9 +10,9 @@ export class PendingDeletions extends Model {
 }
 
 
-export class SyncState extends Model {
-    static table = 'sync_state';
+// export class SyncState extends Model {
+//     static table = 'sync_state';
 
-    @field('table_name') tableName!: string;
-    @field('last_synced_at') lastSyncedAt!: number;
-}
+//     @field('table_name') tableName!: string;
+//     @field('last_synced_at') lastSyncedAt!: number;
+// }
