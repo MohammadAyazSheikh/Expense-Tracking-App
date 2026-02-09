@@ -45,7 +45,8 @@ export const schema = appSchema({
         { name: 'created_at', type: 'number' },
         { name: 'updated_at', type: 'number' },
       ],
-    }), tableSchema({
+    }),
+    tableSchema({
       name: 'currencies',
       columns: [
         { name: 'code', type: 'string' },

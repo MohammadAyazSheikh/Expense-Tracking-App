@@ -1,26 +1,30 @@
+import { Appearance } from 'react-native';
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import * as Updates from 'expo-updates';
 import { mmkvStorage } from '../utils/storage';
+import { getLocales, Locale } from 'expo-localization';
+import { UnistylesRuntime } from 'react-native-unistyles';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { alertService } from '../utils/alertService';
 import { SupportedLanguage, isRTL } from '../i18n/types';
 import { changeLanguage, getDeviceLanguage } from '../i18n';
-import * as Updates from 'expo-updates';
-import { Appearance } from 'react-native';
-import { UnistylesRuntime } from 'react-native-unistyles';
+import { Currencies } from '@/database/models/currency';
+import { database } from '@/libs/database';
+import { Q } from '@nozbe/watermelondb';
 
+
+const locale = getLocales()[0];
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface AppSettingsState {
-  // State
+  //user selected settings
   language: SupportedLanguage;
+  currency: Partial<Currencies>,
   isRTL: boolean;
   theme: ThemeMode;
-  // currency: {
-  //   currencyCode: string;
-  //   currencySymbol: string;
-  // };
-
   effectiveTheme: 'light' | 'dark';
+  //device locale
+  deviceLocale: Locale;
   isLoading: boolean;
 
   // Actions
@@ -28,6 +32,8 @@ interface AppSettingsState {
   changeLanguage: (newLanguage: SupportedLanguage) => Promise<void>;
   changeTheme: (newTheme: ThemeMode) => void;
   updateSystemTheme: () => void;
+  updateCurrency: (currency: Partial<Currencies>) => void;
+  setDefaultCurrency: () => Promise<void>;
 }
 
 const getSystemTheme = (): 'light' | 'dark' => {
@@ -45,9 +51,19 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       language: getDeviceLanguage(),
       isRTL: false,
       theme: 'system',
+      deviceLocale: locale,
       effectiveTheme: getSystemTheme(),
       isLoading: true,
-
+      locale,
+      currency: {
+        code: locale.currencyCode!,
+        name: locale.currencyCode!,
+        symbol: locale.currencySymbol!,
+        decimalPlaces: 2,
+        isActive: true,
+        type: "fiat",
+        isSynced: true,
+      },
       // Initialize app settings
       initialize: async () => {
         try {
@@ -112,6 +128,25 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         const { theme } = get();
         if (theme === 'system') {
           set({ effectiveTheme: getSystemTheme() });
+        }
+      },
+      updateCurrency: (currency) => {
+        set({ currency });
+      },
+      setDefaultCurrency: async () => {
+        try {
+          const [currency] = await database
+            .get<Currencies>('currencies')
+            .query(Q.where('code', get()?.deviceLocale?.currencyCode))
+            .fetch()
+
+          if (currency) {
+            set({ currency })
+          }
+          console.warn("Device default currency not found in local db")
+        }
+        catch (e) {
+          console.error('Error setting default currency:', e);
         }
       },
     }),

@@ -2,34 +2,34 @@ import { create } from 'zustand';
 import { database } from '@/libs/database';
 import { supabase } from '@/libs/supabase';
 import Toast from 'react-native-toast-message';
-import { WalletTypes } from '@/database/models/wallet';
-import { walletTypeSyncService } from '@/services/syncServices/walletTypeSyncService';
+import { Currencies } from '@/database/models/currency';
+import { currenciesSyncService } from '@/services/syncServices/currenciesSyncService';
 
-interface WalletTypeStore {
-    walletTypes: WalletTypes[];
-    loadWalletTypes: () => Promise<void>;
+interface CurrencyStore {
+    currencies: Currencies[];
+    loadCurrencies: () => Promise<void>;
     syncNow: () => Promise<void>;
     reset: () => void;
     isLoading: boolean;
     isSyncing: boolean;
 }
 
-export const useWalletTypeStore = create<WalletTypeStore>((set, get) => ({
-    walletTypes: [],
+export const useCurrencyStore = create<CurrencyStore>((set, get) => ({
+    currencies: [],
     isLoading: false,
     isSyncing: false,
 
-    loadWalletTypes: async () => {
+    loadCurrencies: async () => {
         try {
             set({ isLoading: true });
-            const walletTypesCollection = database.collections.get<WalletTypes>('wallet_types');
-            const walletTypes = await walletTypesCollection.query().fetch();
-            set({ walletTypes });
+            const currencyCollection = database.collections.get<Currencies>("currencies");
+            const currencies = await currencyCollection.query().fetch();
+            set({ currencies });
 
         } catch (error: any) {
             Toast.show({
                 type: 'error',
-                text1: error?.message || 'Error loading wallet types',
+                text1: error?.message || 'Error loading currencies',
             });
         } finally {
             set({ isLoading: false });
@@ -38,7 +38,7 @@ export const useWalletTypeStore = create<WalletTypeStore>((set, get) => ({
 
     reset: () => {
         set({
-            walletTypes: [],
+            currencies: [],
             isLoading: false,
             isSyncing: false,
         });
@@ -48,11 +48,11 @@ export const useWalletTypeStore = create<WalletTypeStore>((set, get) => ({
             set({ isSyncing: true });
             const user = await supabase.auth.getUser();
             if (user.data.user) {
-                await walletTypeSyncService.sync(user.data.user.id);
-                await get().loadWalletTypes();
+                await currenciesSyncService.sync(user.data.user.id);
+                await get().loadCurrencies();
             }
         } catch (error) {
-            console.error('Error syncing wallet types:', error);
+            console.error('Error syncing currencies:', error);
         } finally {
             set({ isSyncing: false });
         }

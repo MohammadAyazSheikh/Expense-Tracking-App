@@ -1,7 +1,8 @@
-export { useAppSettingsStore } from './appSettingsStore';
+export { useTagStore } from './tagStore';
 export { useAuthStore } from './authStore';
 export { useFinanceStore } from './financeStore';
-export { useKeyboardStore } from './keyboardStore';
+export { useCurrencyStore } from './currencyStore';
 export { useCategoryStore } from './categoryStore';
-export { useTagStore } from './tagStore';
+export { useKeyboardStore } from './keyboardStore';
 export { useWalletTypeStore } from './walletTypeStore';
+export { useAppSettingsStore } from './appSettingsStore';

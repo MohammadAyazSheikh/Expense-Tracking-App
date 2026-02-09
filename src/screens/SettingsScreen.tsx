@@ -154,39 +154,17 @@ export const SettingsScreen = () => {
             </Text>
             <Text style={styles.profileEmail}>{user?.email}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => navigation.navigate("Profile")}
-          >
-            <Text style={{ color: "white", fontSize: 12 }}>
-              {t("common.edit")}
-            </Text>
-          </TouchableOpacity>
         </View>
       </Header>
       <View style={styles.content}>
         {/* Quick Toggles */}
         <SettingsGroup cardStyle={{ padding: theme.paddings.lg }}>
           <SettingsRow
-            label={t("settings.darkMode")}
-            description={t("settings.switchThemes")}
-            variant="toggle"
-            rightElement={
-              <Switch
-                value={appTheme == "dark"}
-                onValueChange={() => {
-                  changeTheme(appTheme == "dark" ? "light" : "dark");
-                }}
-              />
-            }
-          />
-          <SettingsRow
             label={t("settings.language")}
             description={t("settings.changeLanguage")}
             icon={{ name: "globe", family: "Feather" }}
             iconColor={theme.colors.primary}
             variant="toggle"
-            showSeparator
             rightElement={
               <Button
                 title={SUPPORTED_LANGUAGES[language].nativeName}
@@ -194,6 +172,20 @@ export const SettingsScreen = () => {
                 size="sm"
                 onPress={() => {
                   changeLanguage(language == "en" ? "ur" : "en");
+                }}
+              />
+            }
+          />
+          <SettingsRow
+            label={t("settings.darkMode")}
+            description={t("settings.switchThemes")}
+            variant="toggle"
+            showSeparator
+            rightElement={
+              <Switch
+                value={appTheme == "dark"}
+                onValueChange={() => {
+                  changeTheme(appTheme == "dark" ? "light" : "dark");
                 }}
               />
             }
@@ -326,12 +318,6 @@ const styles = StyleSheet.create((theme) => ({
   profileEmail: {
     color: "rgba(255, 255, 255, 0.9)",
     fontSize: 14,
-  },
-  editButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: theme.paddings.sm,
-    paddingVertical: 4,
-    borderRadius: theme.radius.md,
   },
   content: {
     padding: theme.paddings.md,
