@@ -49,7 +49,7 @@ export const SelectItem = ({
         <Text weight={selected ? "bold" : "regular"} style={[styles.itemName]}>
           {title}
         </Text>
-        {<View style={styles.itemRight}>{rightIcon}</View>}
+        {rightIcon}
       </View>
       {multiSelect ? (
         <Checkbox checked={selected} />
@@ -198,13 +198,9 @@ const styles = StyleSheet.create((theme, rt) => ({
     alignItems: "center",
     gap: 12,
   },
-  itemRight: {
-    flex: 1,
-    alignItems: "flex-end",
-    paddingRight: theme.paddings.md,
-  },
   itemName: {
     fontSize: theme.fontSize.md,
     color: theme.colors.foreground,
+    flex: 1,
   },
 }));

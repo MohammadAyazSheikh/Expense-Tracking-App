@@ -175,11 +175,15 @@ const mainRoutes = ({ theme }: { theme: typeof lightTheme }) => {
       <Stack.Screen name="Friends" component={FriendsScreen} />
       <Stack.Screen name="FriendDetail" component={FriendDetailScreen} />
       <Stack.Screen name="Wallets" component={WalletsScreen} />
-      <Stack.Screen name="AddWallet" component={AddWalletScreen} />
       <Stack.Screen name="EditWallet" component={EditWalletScreen} />
       <Stack.Screen name="WalletDetail" component={WalletDetailScreen} />
       <Stack.Screen name="WalletStatement" component={WalletStatementScreen} />
       <Stack.Screen name="Transfer" component={TransferScreen} />
+      <Stack.Screen
+        name="AddWallet"
+        component={AddWalletScreen}
+        options={{ headerShown: true, title: t("wallets.addWallet") }}
+      />
       <Stack.Screen
         name="AppSettings"
         component={AppSettingsScreen}

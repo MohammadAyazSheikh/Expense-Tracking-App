@@ -25,7 +25,7 @@ export const AppSettingsScreen = () => {
     (currency) => ({
       label: `${currency.name}`,
       value: currency.id.toString(),
-      rightIcon: <Text style={{ flex: 1 }}>{`${currency.code}`}</Text>,
+      rightIcon: <Text>{`${currency.code}`}</Text>,
     }),
     [currencies],
   );

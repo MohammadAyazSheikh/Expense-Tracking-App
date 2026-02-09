@@ -1,5 +1,5 @@
 import { Model, Relation } from '@nozbe/watermelondb';
-import { field, readonly, date, relation } from '@nozbe/watermelondb/decorators';
+import { field, readonly, date, relation, immutableRelation } from '@nozbe/watermelondb/decorators';
 
 export class Currencies extends Model {
     static table = 'currencies';
@@ -30,6 +30,6 @@ export class ExchangeRates extends Model {
     @readonly @date('updated_at') updatedAt!: Date;
 
     // Relations
-    @relation('currencies', 'base_currency_id') baseCurrency!: Relation<Currencies>;
-    @relation('currencies', 'quote_currency_id') quoteCurrency!: Relation<Currencies>;
+    @immutableRelation('currencies', 'base_currency_id') baseCurrency!: Relation<Currencies>;
+    @immutableRelation('currencies', 'quote_currency_id') quoteCurrency!: Relation<Currencies>;
 }

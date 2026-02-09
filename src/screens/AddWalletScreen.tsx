@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
+import { Button, DropDownButton } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { Switch } from "../components/ui/Switch";
@@ -11,14 +11,12 @@ import { useTranslation } from "../hooks/useTranslation";
 import { useFinanceStore } from "../store";
 import Toast from "react-native-toast-message";
 import { CategoryItem } from "../screens/AddExpenseScreen";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Header } from "../components/ui/Headers";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useWalletTypeStore } from "@/store";
-
-const currencies = ["USD", "EUR", "GBP", "PKR", "INR", "AED"];
+import { useWalletTypeStore, useCurrencyStore } from "@/store";
+import { SheetManager } from "react-native-actions-sheet";
+import { SafeArea } from "@/components/ui/SafeArea";
 
 export const AddWalletScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -26,6 +24,25 @@ export const AddWalletScreen = () => {
   const { t } = useTranslation();
   const { addWallet } = useFinanceStore();
   const { walletTypes, loadWalletTypes } = useWalletTypeStore();
+  const { exchangeRates, loadExchangeRates, getRatesForCurrency } =
+    useCurrencyStore();
+
+  const currencyOptions = useMemo(
+    () =>
+      getRatesForCurrency()
+        .sort((a, b) =>
+          a.sourceCurrency.code.localeCompare(b.sourceCurrency.code),
+        )
+        .map((rate) => ({
+          label: `${rate.sourceCurrency.name}`,
+          value: rate.id,
+          rightIcon: (
+            <Text variant="h3">{`1 ${rate.sourceCurrency.code} = ${rate.rate.toPrecision(3)} ${rate.targetCurrency.code}`}</Text>
+          ),
+        })),
+    [exchangeRates],
+  );
+
   const {
     control,
     handleSubmit,
@@ -74,17 +91,23 @@ export const AddWalletScreen = () => {
       text2: t("wallets.addedSuccess"),
     });
   };
+
+  const handleSelectCurrency = async () => {
+    const result = await SheetManager.show("select-sheet", {
+      payload: {
+        options: currencyOptions,
+        title: "Select Currency",
+        // selectedValue: currency.id,
+      },
+    });
+  };
+
   useEffect(() => {
     loadWalletTypes();
+    loadExchangeRates();
   }, []);
   return (
-    <ScreenWrapper style={{ height: "100%" }}>
-      <Header
-        onBack={() => {
-          navigation.goBack();
-        }}
-        title={t("wallets.addWallet")}
-      />
+    <SafeArea applyBottomInset scrollable>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -126,6 +149,11 @@ export const AddWalletScreen = () => {
             )}
           />
 
+          <DropDownButton
+            label={t("wallets.currency")}
+            selectedValue={""}
+            onPress={handleSelectCurrency}
+          />
           <Controller
             control={control}
             name="balance"
@@ -140,52 +168,12 @@ export const AddWalletScreen = () => {
                 error={errors.balance?.message as string}
                 leftIcon={
                   <Text weight="bold" style={{ marginRight: 4 }}>
-                    {currencies.find((c) => c === currency)
-                      ? currency === "USD"
-                        ? "$"
-                        : currency === "EUR"
-                          ? "€"
-                          : currency === "GBP"
-                            ? "£"
-                            : currency
-                      : "$"}
+                    $
                   </Text>
                 }
               />
             )}
           />
-
-          <View style={styles.row}>
-            {/* Simplified currency selector for now */}
-            <Text style={styles.label}>{t("wallets.currency")}</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 8 }}
-            >
-              {currencies.map((c) => (
-                <Pressable
-                  key={c}
-                  onPress={() => setValue("currency", c)}
-                  style={[
-                    styles.currencyChip,
-                    currency === c && {
-                      backgroundColor: theme.colors.primary,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      color: currency === c ? "white" : theme.colors.foreground,
-                      fontSize: 12,
-                    }}
-                  >
-                    {c}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
 
           {(type === "bank" || type === "card") && (
             <Controller
@@ -243,7 +231,7 @@ export const AddWalletScreen = () => {
 
         <Button title={t("common.save")} onPress={handleSubmit(onSubmit)} />
       </ScrollView>
-    </ScreenWrapper>
+    </SafeArea>
   );
 };
 
@@ -270,26 +258,6 @@ export const styles = StyleSheet.create((theme, rt) => ({
   formCard: {
     padding: theme.paddings.md,
     gap: theme.margins.md,
-  },
-  row: {
-    flexDirection: "row",
-    gap: theme.margins.md,
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: theme.colors.foreground,
-  },
-  currencyChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    minWidth: 36,
-    alignItems: "center",
-    justifyContent: "center",
   },
   settingsCard: {
     padding: theme.paddings.md,

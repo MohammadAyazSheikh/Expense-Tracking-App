@@ -67,7 +67,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
     }
 
 
-    protected async getLocalIdFromServerId(
+    async getLocalIdFromServerId(
         tableName: string,
         serverId: string
     ): Promise<string | null> {

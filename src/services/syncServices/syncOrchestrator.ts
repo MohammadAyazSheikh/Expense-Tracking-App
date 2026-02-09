@@ -1,6 +1,7 @@
 
 import { categorySyncService } from './categorySyncService';
 import { currenciesSyncService } from './currenciesSyncService';
+import { exchangeRatesSyncService } from './exchangeRatesSyncService';
 import { systemCategorySyncService } from './systemCategorySyncService';
 import { tagSyncService } from './tagSyncService';
 import { walletTypeSyncService } from './walletTypeSyncService';
@@ -10,8 +11,11 @@ export class SyncOrchestrator {
         tagSyncService,
         categorySyncService,
         walletTypeSyncService,
-        currenciesSyncService,
         systemCategorySyncService,
+
+        //don't change the order of below services because they have relations with each other
+        currenciesSyncService,
+        exchangeRatesSyncService,
     ];
 
     //for full sync
