@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvStorage } from '../utils/storage';
 import { alertService } from '../utils/alertService';
-import { SupportedLocale, isRTL } from '../i18n/types';
-import { changeLanguage, getDeviceLocale } from '../i18n';
+import { SupportedLanguage, isRTL } from '../i18n/types';
+import { changeLanguage, getDeviceLanguage } from '../i18n';
 import * as Updates from 'expo-updates';
 import { Appearance } from 'react-native';
 import { UnistylesRuntime } from 'react-native-unistyles';
@@ -12,7 +12,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface AppSettingsState {
   // State
-  locale: SupportedLocale;
+  language: SupportedLanguage;
   isRTL: boolean;
   theme: ThemeMode;
   // currency: {
@@ -25,7 +25,7 @@ interface AppSettingsState {
 
   // Actions
   initialize: () => Promise<void>;
-  changeLocale: (newLocale: SupportedLocale) => Promise<void>;
+  changeLanguage: (newLanguage: SupportedLanguage) => Promise<void>;
   changeTheme: (newTheme: ThemeMode) => void;
   updateSystemTheme: () => void;
 }
@@ -42,7 +42,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
   persist(
     (set, get) => ({
       // Initial state
-      locale: getDeviceLocale(),
+      language: getDeviceLanguage(),
       isRTL: false,
       theme: 'system',
       effectiveTheme: getSystemTheme(),
@@ -51,8 +51,8 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       // Initialize app settings
       initialize: async () => {
         try {
-          const { locale } = get();
-          await changeLanguage(locale);
+          const { language } = get();
+          await changeLanguage(language);
           set({ isLoading: false });
         } catch (error) {
           console.error('Error initializing app settings:', error);
@@ -60,17 +60,17 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         }
       },
 
-      // Change locale
-      changeLocale: async (newLocale: SupportedLocale) => {
+      // Change language  
+      changeLanguage: async (newLanguage: SupportedLanguage) => {
         try {
           const currentIsRTL = get().isRTL;
-          const newIsRTL = isRTL(newLocale);
+          const newIsRTL = isRTL(newLanguage);
           const needsRTLChange = newIsRTL !== currentIsRTL;
 
-          await changeLanguage(newLocale);
+          await changeLanguage(newLanguage);
 
           set({
-            locale: newLocale,
+            language: newLanguage,
             isRTL: newIsRTL,
           });
 
@@ -92,7 +92,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
             });
           }
         } catch (error) {
-          console.error('Error changing locale:', error);
+          console.error('Error changing language:', error);
           throw error;
         }
       },
@@ -119,7 +119,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       name: 'app-settings-storage',
       storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({
-        locale: state.locale,
+        language: state.language,
         isRTL: state.isRTL,
         theme: state.theme,
         effectiveTheme: state.effectiveTheme,

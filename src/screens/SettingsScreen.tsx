@@ -11,7 +11,7 @@ import { Switch } from "../components/ui/Switch";
 import { SettingsGroup } from "../components/ui/SettingsGroup";
 import { SettingsRow } from "../components/ui/SettingsRow";
 import { useAppSettingsStore, useAuthStore } from "../store";
-import { SUPPORTED_LOCALES } from "../i18n/types";
+import { SUPPORTED_LANGUAGES } from "../i18n/types";
 import { useTranslation } from "../hooks/useTranslation";
 import { ApiLoader } from "@/components/ui/ApiLoader";
 import { SafeArea } from "@/components/ui/SafeArea";
@@ -24,8 +24,8 @@ export const SettingsScreen = () => {
   const {
     theme: appTheme,
     changeTheme,
-    locale,
-    changeLocale,
+    language,
+    changeLanguage,
   } = useAppSettingsStore();
   const { logout, isLoading, user } = useAuthStore();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -189,11 +189,11 @@ export const SettingsScreen = () => {
             showSeparator
             rightElement={
               <Button
-                title={SUPPORTED_LOCALES[locale].nativeName}
+                title={SUPPORTED_LANGUAGES[language].nativeName}
                 variant="outline"
                 size="sm"
                 onPress={() => {
-                  changeLocale(locale == "en" ? "ur" : "en");
+                  changeLanguage(language == "en" ? "ur" : "en");
                 }}
               />
             }
