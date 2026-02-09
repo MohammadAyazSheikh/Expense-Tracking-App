@@ -51,9 +51,7 @@ export default function WalletStatementScreen() {
       },
     });
 
-    if (result) {
-      setDateFilter(result);
-    }
+    if (result) setDateFilter(result?.value);
   };
 
   const handleTypeFilter = async () => {
@@ -71,9 +69,7 @@ export default function WalletStatementScreen() {
       },
     });
 
-    if (result) {
-      setFilterType(result as any);
-    }
+    if (result) setFilterType(result?.value as any);
   };
 
   if (!wallet) {

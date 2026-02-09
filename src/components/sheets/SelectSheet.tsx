@@ -18,6 +18,7 @@ export interface SelectorOption {
   value: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  originalItem?: any;
 }
 
 type ItemProps = {
@@ -80,8 +81,9 @@ export const SelectSheet = (props: SheetProps) => {
     opt.label.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleSelect = (value: string) => {
-    SheetManager.hide("select-sheet", { payload: value });
+  const handleSelect = (value: string, originalItem: any) => {
+    payload?.onSelect?.(value, originalItem);
+    SheetManager.hide("select-sheet", { payload: { value, originalItem } });
   };
 
   return (
@@ -98,7 +100,9 @@ export const SelectSheet = (props: SheetProps) => {
         </Text>
         <Pressable
           onPress={() =>
-            SheetManager.hide("select-sheet", { payload: selectedValue })
+            SheetManager.hide("select-sheet", {
+              payload: undefined,
+            })
           }
         >
           <Icon
@@ -137,7 +141,7 @@ export const SelectSheet = (props: SheetProps) => {
           <SelectItem
             title={item.label}
             selected={selectedValue === item.value}
-            onPress={() => handleSelect(item.value)}
+            onPress={() => handleSelect(item.value, item?.originalItem)}
             leftIcon={item.leftIcon}
             rightIcon={item.rightIcon}
           />

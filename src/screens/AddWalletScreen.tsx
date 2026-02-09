@@ -2,13 +2,14 @@ import React, { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { View, ScrollView } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import * as z from "zod";
 import { Text } from "../components/ui/Text";
 import { Button, DropDownButton } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { Switch } from "../components/ui/Switch";
 import { useTranslation } from "../hooks/useTranslation";
-import { useFinanceStore } from "../store";
+import { useAppSettingsStore } from "../store";
 import Toast from "react-native-toast-message";
 import { CategoryItem } from "../screens/AddExpenseScreen";
 import { useNavigation } from "@react-navigation/native";
@@ -17,31 +18,42 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useWalletTypeStore, useCurrencyStore } from "@/store";
 import { SheetManager } from "react-native-actions-sheet";
 import { SafeArea } from "@/components/ui/SafeArea";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const walletSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  balance: z
+    .string()
+    .min(1, "Balance is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid balance format"),
+  walletType: z.object({
+    id: z.string(),
+    key: z.string(),
+  }),
+  currency: z.object({
+    id: z.string(),
+    code: z.string(),
+    decimalPlaces: z.number(),
+    isActive: z.boolean(),
+    name: z.string(),
+    symbol: z.string(),
+    type: z.string(),
+  }),
+  accountNumber: z.string().optional(),
+  includeInTotal: z.boolean(),
+  isDefault: z.boolean(),
+});
+
+type WalletFormValues = z.infer<typeof walletSchema>;
 
 export const AddWalletScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { addWallet } = useFinanceStore();
+  const { currency } = useAppSettingsStore();
   const { walletTypes, loadWalletTypes } = useWalletTypeStore();
   const { exchangeRates, loadExchangeRates, getRatesForCurrency } =
     useCurrencyStore();
-
-  const currencyOptions = useMemo(
-    () =>
-      getRatesForCurrency()
-        .sort((a, b) =>
-          a.sourceCurrency.code.localeCompare(b.sourceCurrency.code),
-        )
-        .map((rate) => ({
-          label: `${rate.sourceCurrency.name}`,
-          value: rate.id,
-          rightIcon: (
-            <Text variant="h3">{`1 ${rate.sourceCurrency.code} = ${rate.rate.toPrecision(3)} ${rate.targetCurrency.code}`}</Text>
-          ),
-        })),
-    [exchangeRates],
-  );
 
   const {
     control,
@@ -49,38 +61,48 @@ export const AddWalletScreen = () => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm({
+  } = useForm<WalletFormValues>({
+    resolver: zodResolver(walletSchema),
     defaultValues: {
       name: "",
       balance: "",
-      type: "cash",
-      currency: "USD",
+      walletType: walletTypes[0],
+      currency: currency,
       accountNumber: "",
       includeInTotal: true,
       isDefault: false,
     },
   });
 
-  const type = watch("type");
-  const currency = watch("currency");
+  const selectedCurrency = watch("currency");
   const includeInTotal = watch("includeInTotal");
   const isDefault = watch("isDefault");
+  const walletKey = watch("walletType");
 
-  const onSubmit = (data: any) => {
-    const selectedType = walletTypes.find((t) => t.id === data.type);
+  const currencyOptions = useMemo(() => {
+    // If wallet type is 'crypto', show crypto currencies
+    // Otherwise show fiat currencies
+    const isCryptoWallet = walletKey?.key === "crypto";
 
-    addWallet({
-      name: data.name,
-      balance: parseFloat(data.balance),
-      type: data.type,
-      color: selectedType?.color || theme.colors.primary,
-      icon: selectedType?.icon || "wallet",
-      accountNumber: data.accountNumber,
-      currency: data.currency,
-      includeInTotal: data.includeInTotal,
-      isDefault: data.isDefault,
-    });
+    return getRatesForCurrency()
+      .filter((rate) => {
+        const isRateCrypto = rate.sourceCurrency.type === "crypto";
+        return isCryptoWallet ? isRateCrypto : !isRateCrypto;
+      })
+      .sort((a, b) =>
+        a.sourceCurrency.code.localeCompare(b.sourceCurrency.code),
+      )
+      .map((rate) => ({
+        label: `${rate.sourceCurrency.name}`,
+        value: rate.sourceCurrency.id,
+        rightIcon: (
+          <Text variant="h3">{`1 ${rate.sourceCurrency.code} = ${rate.rate.toPrecision(3)} ${rate.targetCurrency.code}`}</Text>
+        ),
+        originalItem: rate.sourceCurrency,
+      }));
+  }, [exchangeRates, walletKey]);
 
+  const onSubmit = (data: WalletFormValues) => {
     setTimeout(() => {
       navigation.goBack();
     }, 1000);
@@ -95,17 +117,20 @@ export const AddWalletScreen = () => {
   const handleSelectCurrency = async () => {
     const result = await SheetManager.show("select-sheet", {
       payload: {
+        selectedValue: selectedCurrency?.id,
         options: currencyOptions,
         title: "Select Currency",
-        // selectedValue: currency.id,
       },
     });
+
+    if (result) setValue("currency", result?.originalItem);
   };
 
   useEffect(() => {
     loadWalletTypes();
     loadExchangeRates();
   }, []);
+
   return (
     <SafeArea applyBottomInset scrollable>
       <ScrollView
@@ -124,40 +149,56 @@ export const AddWalletScreen = () => {
                 name: t(`wallets.types.${item.key}` as any, item.key),
                 color: item.color,
                 icon: item.icon,
-                iconFamily: "MaterialCommunityIcons",
+                iconFamily: item.iconFamily as any,
               }}
-              isSelected={type === item.id}
-              onPress={() => setValue("type", item.id)}
+              isSelected={walletKey?.key === item.key}
+              onPress={() =>
+                setValue("walletType", {
+                  id: item.id,
+                  key: item.key,
+                })
+              }
             />
           ))}
         </View>
+        {errors.walletType?.key && (
+          <Text style={{ color: theme.colors.destructive }}>
+            {errors.walletType?.key.message}
+          </Text>
+        )}
 
         {/* Basic Info */}
         <Card style={styles.formCard}>
           <Controller
             control={control}
             name="name"
-            rules={{ required: t("wallets.fillRequired") }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t("wallets.name")}
                 placeholder="e.g. Main Account"
                 value={value}
                 onChangeText={onChange}
-                error={errors.name?.message as string}
+                error={errors.name?.message}
               />
             )}
           />
 
-          <DropDownButton
-            label={t("wallets.currency")}
-            selectedValue={""}
-            onPress={handleSelectCurrency}
+          <Controller
+            control={control}
+            name="currency"
+            render={({ field: { onChange, value } }) => (
+              <DropDownButton
+                label={t("wallets.currency")}
+                selectedValue={value?.name}
+                onPress={handleSelectCurrency}
+                error={errors.currency?.message}
+              />
+            )}
           />
+
           <Controller
             control={control}
             name="balance"
-            rules={{ required: t("wallets.fillRequired") }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t("wallets.initialBalance")}
@@ -165,17 +206,17 @@ export const AddWalletScreen = () => {
                 keyboardType="numeric"
                 value={value}
                 onChangeText={onChange}
-                error={errors.balance?.message as string}
+                error={errors.balance?.message}
                 leftIcon={
                   <Text weight="bold" style={{ marginRight: 4 }}>
-                    $
+                    {selectedCurrency?.code || "$"}
                   </Text>
                 }
               />
             )}
           />
 
-          {(type === "bank" || type === "card") && (
+          {(walletKey?.key === "bank" || walletKey?.key === "card") && (
             <Controller
               control={control}
               name="accountNumber"
@@ -183,7 +224,7 @@ export const AddWalletScreen = () => {
                 <Input
                   label={t("wallets.accountNumber")}
                   placeholder="**** **** **** 1234"
-                  value={value}
+                  value={value ?? ""}
                   onChangeText={onChange}
                   keyboardType="number-pad"
                 />

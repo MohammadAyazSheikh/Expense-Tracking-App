@@ -38,15 +38,16 @@ export const AppSettingsScreen = () => {
         selectedValue: currency.id,
       },
     });
-    if (result) {
+    if (result?.value) {
       try {
         const [currency] = await database
           .get<Currencies>("currencies")
-          .query(Q.where("id", result))
+          .query(Q.where("id", result.value))
           .fetch();
 
         if (currency) {
           updateCurrency(currency);
+          return;
         }
         console.warn("currency not found in local db");
       } catch (e) {
