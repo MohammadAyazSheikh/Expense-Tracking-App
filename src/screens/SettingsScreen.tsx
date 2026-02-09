@@ -8,11 +8,10 @@ import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { Switch } from "../components/ui/Switch";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { SettingsGroup } from "../components/ui/SettingsGroup";
 import { SettingsRow } from "../components/ui/SettingsRow";
 import { useAppSettingsStore, useAuthStore } from "../store";
-import { SUPPORTED_LOCALES } from "../i18n/types";
+import { SUPPORTED_LANGUAGES } from "../i18n/types";
 import { useTranslation } from "../hooks/useTranslation";
 import { ApiLoader } from "@/components/ui/ApiLoader";
 import { SafeArea } from "@/components/ui/SafeArea";
@@ -25,8 +24,8 @@ export const SettingsScreen = () => {
   const {
     theme: appTheme,
     changeTheme,
-    locale,
-    changeLocale,
+    language,
+    changeLanguage,
   } = useAppSettingsStore();
   const { logout, isLoading, user } = useAuthStore();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -96,6 +95,15 @@ export const SettingsScreen = () => {
         },
         {
           icon: {
+            name: "settings",
+            family: "Feather",
+          },
+          label: t("settings.appSettings"),
+          badge: null,
+          path: "AppSettings",
+        },
+        {
+          icon: {
             name: "file-text",
             family: "Feather",
           },
@@ -146,46 +154,38 @@ export const SettingsScreen = () => {
             </Text>
             <Text style={styles.profileEmail}>{user?.email}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => navigation.navigate("Profile")}
-          >
-            <Text style={{ color: "white", fontSize: 12 }}>
-              {t("common.edit")}
-            </Text>
-          </TouchableOpacity>
         </View>
       </Header>
       <View style={styles.content}>
         {/* Quick Toggles */}
         <SettingsGroup cardStyle={{ padding: theme.paddings.lg }}>
           <SettingsRow
-            label={t("settings.darkMode")}
-            description={t("settings.switchThemes")}
-            variant="toggle"
-            rightElement={
-              <Switch
-                value={appTheme == "dark"}
-                onValueChange={() => {
-                  changeTheme(appTheme == "dark" ? "light" : "dark");
-                }}
-              />
-            }
-          />
-          <SettingsRow
             label={t("settings.language")}
             description={t("settings.changeLanguage")}
             icon={{ name: "globe", family: "Feather" }}
             iconColor={theme.colors.primary}
             variant="toggle"
-            showSeparator
             rightElement={
               <Button
-                title={SUPPORTED_LOCALES[locale].nativeName}
+                title={SUPPORTED_LANGUAGES[language].nativeName}
                 variant="outline"
                 size="sm"
                 onPress={() => {
-                  changeLocale(locale == "en" ? "ur" : "en");
+                  changeLanguage(language == "en" ? "ur" : "en");
+                }}
+              />
+            }
+          />
+          <SettingsRow
+            label={t("settings.darkMode")}
+            description={t("settings.switchThemes")}
+            variant="toggle"
+            showSeparator
+            rightElement={
+              <Switch
+                value={appTheme == "dark"}
+                onValueChange={() => {
+                  changeTheme(appTheme == "dark" ? "light" : "dark");
                 }}
               />
             }
@@ -318,12 +318,6 @@ const styles = StyleSheet.create((theme) => ({
   profileEmail: {
     color: "rgba(255, 255, 255, 0.9)",
     fontSize: 14,
-  },
-  editButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: theme.paddings.sm,
-    paddingVertical: 4,
-    borderRadius: theme.radius.md,
   },
   content: {
     padding: theme.paddings.md,

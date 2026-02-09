@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, FlatList, useWindowDimensions } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SheetManager } from "react-native-actions-sheet";
@@ -9,22 +9,36 @@ import { SafeArea } from "@/components/ui/SafeArea";
 import Fab from "@/components/ui/Fab";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { CategoryCard } from "../components/categories/CategoryCard";
-import { useCategoryStore } from "@/store/categoryStore";
+import { useCategoryStore } from "@/store";
 import { Category } from "@/database/models/category";
 import { ApiLoader } from "@/components/ui/ApiLoader";
+import { transactionTypes } from "@/data/dbConstantData";
 
 export const CategoryManagerScreen = ({ navigation }: any) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const { categories, isLoading, loadCategories, deleteCategory } =
     useCategoryStore();
-  const layout = useWindowDimensions();
 
+  const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     { key: "expense", title: t("transactions.expenses") },
     { key: "income", title: t("transactions.income") },
   ]);
+
+  const { incomeCategories, expenseCategories } = useMemo(() => {
+    const incomeCategories: Category[] = [];
+    const expenseCategories: Category[] = [];
+    categories.forEach((c) => {
+      if (c.transactionTypeId === transactionTypes[0].id) {
+        expenseCategories.push(c);
+      } else if (c.transactionTypeId === transactionTypes[1].id) {
+        incomeCategories.push(c);
+      }
+    });
+    return { incomeCategories, expenseCategories };
+  }, [categories]);
 
   const handleAddCategory = () => {
     SheetManager.show("manage-category-sheet", {
@@ -82,7 +96,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
 
   const ExpenseRoute = () => (
     <FlatList
-      data={categories.filter((c) => c.transactionTypeKey === "expense")}
+      data={expenseCategories}
       keyExtractor={(item) => item.id}
       renderItem={renderCategoryItem}
       contentContainerStyle={styles.listContent}
@@ -98,7 +112,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
 
   const IncomeRoute = () => (
     <FlatList
-      data={categories.filter((c) => c.transactionTypeKey === "income")}
+      data={incomeCategories}
       keyExtractor={(item) => item.id}
       renderItem={renderCategoryItem}
       contentContainerStyle={styles.listContent}

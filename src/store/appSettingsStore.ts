@@ -1,28 +1,39 @@
-import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-import { mmkvStorage } from '../utils/storage';
-import { alertService } from '../utils/alertService';
-import { SupportedLocale, isRTL } from '../i18n/types';
-import { changeLanguage, getDeviceLocale } from '../i18n';
-import * as Updates from 'expo-updates';
 import { Appearance } from 'react-native';
+import { create } from 'zustand';
+import * as Updates from 'expo-updates';
+import { mmkvStorage } from '../utils/storage';
+import { getLocales, Locale } from 'expo-localization';
 import { UnistylesRuntime } from 'react-native-unistyles';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { alertService } from '../utils/alertService';
+import { SupportedLanguage, isRTL } from '../i18n/types';
+import { changeLanguage, getDeviceLanguage } from '../i18n';
+import { Currencies } from '@/database/models/currency';
+import { database } from '@/libs/database';
+import { Q } from '@nozbe/watermelondb';
 
+
+const locale = getLocales()[0];
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface AppSettingsState {
-  // State
-  locale: SupportedLocale;
+  //user selected settings
+  language: SupportedLanguage;
+  currency: Partial<Currencies>,
   isRTL: boolean;
   theme: ThemeMode;
   effectiveTheme: 'light' | 'dark';
+  //device locale
+  deviceLocale: Locale;
   isLoading: boolean;
 
   // Actions
   initialize: () => Promise<void>;
-  changeLocale: (newLocale: SupportedLocale) => Promise<void>;
+  changeLanguage: (newLanguage: SupportedLanguage) => Promise<void>;
   changeTheme: (newTheme: ThemeMode) => void;
   updateSystemTheme: () => void;
+  updateCurrency: (currency: Partial<Currencies>) => void;
+  setDefaultCurrency: () => Promise<void>;
 }
 
 const getSystemTheme = (): 'light' | 'dark' => {
@@ -37,17 +48,27 @@ export const useAppSettingsStore = create<AppSettingsState>()(
   persist(
     (set, get) => ({
       // Initial state
-      locale: getDeviceLocale(),
+      language: getDeviceLanguage(),
       isRTL: false,
       theme: 'system',
+      deviceLocale: locale,
       effectiveTheme: getSystemTheme(),
       isLoading: true,
-
+      locale,
+      currency: {
+        code: locale.currencyCode!,
+        name: locale.currencyCode!,
+        symbol: locale.currencySymbol!,
+        decimalPlaces: 2,
+        isActive: true,
+        type: "fiat",
+        isSynced: true,
+      },
       // Initialize app settings
       initialize: async () => {
         try {
-          const { locale } = get();
-          await changeLanguage(locale);
+          const { language } = get();
+          await changeLanguage(language);
           set({ isLoading: false });
         } catch (error) {
           console.error('Error initializing app settings:', error);
@@ -55,17 +76,17 @@ export const useAppSettingsStore = create<AppSettingsState>()(
         }
       },
 
-      // Change locale
-      changeLocale: async (newLocale: SupportedLocale) => {
+      // Change language  
+      changeLanguage: async (newLanguage: SupportedLanguage) => {
         try {
           const currentIsRTL = get().isRTL;
-          const newIsRTL = isRTL(newLocale);
+          const newIsRTL = isRTL(newLanguage);
           const needsRTLChange = newIsRTL !== currentIsRTL;
 
-          await changeLanguage(newLocale);
+          await changeLanguage(newLanguage);
 
           set({
-            locale: newLocale,
+            language: newLanguage,
             isRTL: newIsRTL,
           });
 
@@ -87,7 +108,7 @@ export const useAppSettingsStore = create<AppSettingsState>()(
             });
           }
         } catch (error) {
-          console.error('Error changing locale:', error);
+          console.error('Error changing language:', error);
           throw error;
         }
       },
@@ -109,12 +130,31 @@ export const useAppSettingsStore = create<AppSettingsState>()(
           set({ effectiveTheme: getSystemTheme() });
         }
       },
+      updateCurrency: (currency) => {
+        set({ currency });
+      },
+      setDefaultCurrency: async () => {
+        try {
+          const [currency] = await database
+            .get<Currencies>('currencies')
+            .query(Q.where('code', get()?.deviceLocale?.currencyCode))
+            .fetch()
+
+          if (currency) {
+            set({ currency })
+          }
+          console.warn("Device default currency not found in local db")
+        }
+        catch (e) {
+          console.error('Error setting default currency:', e);
+        }
+      },
     }),
     {
       name: 'app-settings-storage',
       storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({
-        locale: state.locale,
+        language: state.language,
         isRTL: state.isRTL,
         theme: state.theme,
         effectiveTheme: state.effectiveTheme,

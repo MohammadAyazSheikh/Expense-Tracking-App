@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import { getLocales } from 'expo-localization';
 import { I18nManager } from 'react-native';
 import dateTime from '@/utils/dateTime';
-import { SupportedLocale, SUPPORTED_LOCALES, isRTL } from './types';
+import { SupportedLanguage, SUPPORTED_LANGUAGES, isRTL } from './types';
 
 // Import translations
 import en from './locales/en.json';
@@ -41,20 +41,20 @@ const resources = {
 };
 
 
-export const getDeviceLocale = (): SupportedLocale => {
-  //if device locale is supported by our app then return it, otherwise return 'en'
-  const deviceLocale = getLocales()[0].languageCode;
-  return (Object.keys(SUPPORTED_LOCALES) as SupportedLocale[]).includes(
-    deviceLocale as SupportedLocale
+export const getDeviceLanguage = (): SupportedLanguage => {
+  //if device language is supported by our app then return it, otherwise return 'en'
+  const deviceLanguage = getLocales()[0].languageCode;
+  return (Object.keys(SUPPORTED_LANGUAGES) as SupportedLanguage[]).includes(
+    deviceLanguage as SupportedLanguage
   )
-    ? (deviceLocale as SupportedLocale)
+    ? (deviceLanguage as SupportedLanguage)
     : 'en';
 };
 
 // Initialize i18n
 i18n.use(initReactI18next).init({
   resources,
-  lng: getDeviceLocale(),
+  lng: getDeviceLanguage(),
   fallbackLng: 'en',
   defaultNS: 'translation',
   nsSeparator: false,
@@ -69,24 +69,24 @@ i18n.use(initReactI18next).init({
 
 
 
-export const changeLanguage = async (locale: SupportedLocale) => {
-  await i18n.changeLanguage(locale);
+export const changeLanguage = async (language: SupportedLanguage) => {
+  await i18n.changeLanguage(language);
 
   // Sync DateTime locale
-  dateTime.locale(locale);
+  dateTime.locale(language);
 
   // Handle RTL
-  const shouldBeRTL = isRTL(locale);
+  const shouldBeRTL = isRTL(language);
   I18nManager.allowRTL(shouldBeRTL);
   I18nManager.forceRTL(shouldBeRTL);
 };
 
 
 /**
- * Get current active locale
+ * Get current active language
  */
-export const getCurrentLocale = (): SupportedLocale => {
-  return i18n.language as SupportedLocale;
+export const getCurrentLanguage = (): SupportedLanguage => {
+  return i18n.language as SupportedLanguage;
 };
 
 // ============================================

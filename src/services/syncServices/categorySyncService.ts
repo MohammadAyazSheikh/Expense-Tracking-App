@@ -4,23 +4,23 @@ import { Category } from '@/database/models/category';
 const categorySyncConfig: SyncConfig<Category, 'categories'> = {
     localTable: "categories",
     supabaseTable: "categories",
-    mapServerToLocal: (serverData, model) => {
+    mapServerToLocal: async (serverData, model) => {
         model.name = serverData.name!;
         model.color = serverData.color!;
         model.icon = serverData.icon!;
         model.iconFamily = serverData.icon_family!;
-        model.transactionTypeKey = serverData.transaction_type_key!;
+        model.transactionTypeId = serverData.transaction_type_id!;
         model.systemCategoryId = serverData.system_category_id!;
         model.userId = serverData.user_id!;
     },
-    mapLocalToServer: (localModel) => {
+    mapLocalToServer: async (localModel) => {
         return {
             name: localModel.name,
             color: localModel.color,
             icon: localModel.icon,
             icon_family: localModel.iconFamily,
             system_category_id: localModel.systemCategoryId,
-            transaction_type_key: localModel.transactionTypeKey,
+            transaction_type_id: localModel.transactionTypeId,
         };
     },
     resolveConflict: (localModel, serverData) => {

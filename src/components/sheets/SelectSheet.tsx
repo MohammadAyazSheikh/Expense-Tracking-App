@@ -4,8 +4,9 @@ import ActionSheet, {
   SheetProps,
   SheetManager,
   useSheetPayload,
-  FlatList,
+  ScrollView,
 } from "react-native-actions-sheet";
+import { LegendList } from "@legendapp/list";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { Text } from "../ui/Text";
 import { Icon } from "../ui/Icon";
@@ -16,6 +17,7 @@ export interface SelectorOption {
   label: string;
   value: string;
   leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 type ItemProps = {
@@ -47,7 +49,7 @@ export const SelectItem = ({
         <Text weight={selected ? "bold" : "regular"} style={[styles.itemName]}>
           {title}
         </Text>
-        {rightIcon}
+        {<View style={styles.itemRight}>{rightIcon}</View>}
       </View>
       {multiSelect ? (
         <Checkbox checked={selected} />
@@ -75,7 +77,7 @@ export const SelectSheet = (props: SheetProps) => {
   const [search, setSearch] = useState("");
 
   const filteredOptions = options.filter((opt) =>
-    opt.label.toLowerCase().includes(search.toLowerCase())
+    opt.label.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleSelect = (value: string) => {
@@ -123,12 +125,13 @@ export const SelectSheet = (props: SheetProps) => {
           }
         />
       </View>
-      <FlatList
+      <LegendList
         contentContainerStyle={styles.content}
         data={filteredOptions}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No options found</Text>
         }
+        renderScrollComponent={(props) => <ScrollView {...props} />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({ item }) => (
           <SelectItem
@@ -136,6 +139,7 @@ export const SelectSheet = (props: SheetProps) => {
             selected={selectedValue === item.value}
             onPress={() => handleSelect(item.value)}
             leftIcon={item.leftIcon}
+            rightIcon={item.rightIcon}
           />
         )}
       />
@@ -193,6 +197,11 @@ const styles = StyleSheet.create((theme, rt) => ({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+  },
+  itemRight: {
+    flex: 1,
+    alignItems: "flex-end",
+    paddingRight: theme.paddings.md,
   },
   itemName: {
     fontSize: theme.fontSize.md,

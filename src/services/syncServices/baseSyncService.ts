@@ -18,12 +18,14 @@ export interface SyncConfig<localData extends SyncableModel, serverTableName ext
 
     mapServerToLocal: (
         serverData: SupabaseTables[serverTableName]['Update'] | SupabaseTables[serverTableName]['Insert'],
-        localData: localData
-    ) => void;
+        localData: localData,
+        service: BaseSyncService<localData, serverTableName>
+    ) => Promise<void>;
 
     mapLocalToServer: (
-        localData: localData
-    ) => SupabaseTables[serverTableName]['Update'] | SupabaseTables[serverTableName]['Insert'];
+        localData: localData,
+        service: BaseSyncService<localData, serverTableName>
+    ) => Promise<SupabaseTables[serverTableName]['Update'] | SupabaseTables[serverTableName]['Insert']>;
 
     resolveConflict?: (
         localData: localData,
@@ -62,6 +64,19 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
 
     async setLastSyncTimestamp(timestamp: number) {
         await mmkvStorage.setItem(this.lastSyncKey, timestamp.toString());
+    }
+
+
+    protected async getLocalIdFromServerId(
+        tableName: string,
+        serverId: string
+    ): Promise<string | null> {
+        const collection = database.collections.get(tableName);
+        const records = await collection
+            .query(Q.where('server_id', serverId))
+            .fetch();
+
+        return records.length > 0 ? records[0].id : null;
     }
 
     private async checkNetwork(): Promise<boolean> {
@@ -166,7 +181,6 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
             const { data: serverData, error } = await supabase
                 .from(this.config.supabaseTable)
                 .select('*')
-                // .eq('user_id', userId)
                 .gt('updated_at', new Date(lastSync).toISOString())
                 .order('updated_at', { ascending: true });
 
@@ -176,67 +190,62 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
 
             const collection = database.collections.get<localData>(this.config.localTable);
 
-            await database.write(async () => {
-                for (const serverRecord of serverData || []) {
-                    const existing = await collection
-                        .query(Q.where('server_id', serverRecord.id))
-                        .fetch();
+            // Process each record
+            for (const serverRecord of serverData || []) {
+                const existing = await collection
+                    .query(Q.where('server_id', serverRecord.id))
+                    .fetch();
 
+
+                const preparedData: any = {};
+
+                await this.config.mapServerToLocal(serverRecord, preparedData, this);
+
+                await database.write(async () => {
                     if (existing.length > 0) {
                         const localRecord = existing[0];
 
-                        // CONFLICT DETECTION: Check if local record is unsynced
                         if (!localRecord.isSynced) {
                             console.log(`[${this.config.localTable}] ⚠️ Conflict detected for ${serverRecord.id}`);
 
-                            // Use custom conflict resolution or default to local wins
                             const resolution = this.config.resolveConflict
                                 ? this.config.resolveConflict(localRecord, serverRecord)
-                                : 'local'; // Default: local changes win
+                                : 'local';
 
                             if (resolution === 'server') {
-                                // Server wins - overwrite local
                                 await localRecord.update((model) => {
-                                    this.config.mapServerToLocal(serverRecord, model);
-                                    (model).isSynced = true;
+                                    Object.assign(model, preparedData);
+                                    (model as any).isSynced = true;
                                 });
                                 console.log(`[${this.config.localTable}] Resolved conflict: server wins`);
                             } else if (resolution === 'local') {
-                                // Local wins - skip server update
-                                console.log(`[${this.config.localTable}] Resolved conflict: local wins (will push on next sync)`);
-                                // Don't update - local changes will be pushed on next sync
+                                console.log(`[${this.config.localTable}] Resolved conflict: local wins`);
                             } else {
-                                // Merge - apply custom merge logic
                                 console.log(`[${this.config.localTable}] Resolved conflict: merge`);
                                 await localRecord.update((model) => {
-                                    // Call the merge function if provided
                                     if (this.config.mergeConflict) {
                                         this.config.mergeConflict(localRecord, serverRecord, model);
                                     } else {
-                                        // Default merge: just apply server data
-                                        this.config.mapServerToLocal(serverRecord, model);
+                                        Object.assign(model, preparedData);
                                     }
-                                    // Mark as unsynced so merged changes get pushed back
                                     (model as any).isSynced = false;
                                 });
                             }
                         } else {
-                            // No conflict - local is synced, safe to update
                             await localRecord.update((model) => {
-                                this.config.mapServerToLocal(serverRecord, model);
-                                (model).isSynced = true;
+                                Object.assign(model, preparedData);
+                                (model as any).isSynced = true;
                             });
                         }
                     } else {
-                        // Create new - no conflict possible
                         await collection.create((model) => {
-                            (model).serverId = serverRecord.id;
-                            this.config.mapServerToLocal(serverRecord, model);
-                            (model).isSynced = true;
+                            (model as any).serverId = serverRecord.id;
+                            Object.assign(model, preparedData);
+                            (model as any).isSynced = true;
                         });
                     }
-                }
-            });
+                });
+            }
 
             return serverData?.length || 0;
         } catch (error) {
@@ -265,7 +274,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                 try {
                     if (record.serverId) {
                         // Update existing
-                        const updateData = this.config.mapLocalToServer(record);
+                        const updateData = await this.config.mapLocalToServer(record, this);
 
                         const { error } = await supabase
                             .from(this.config.supabaseTable)
@@ -284,7 +293,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                         successCount++;
                     } else {
                         // Insert new
-                        const insertData = this.config.mapLocalToServer(record);
+                        const insertData = await this.config.mapLocalToServer(record, this);
 
                         const { data, error } = await supabase
                             .from(this.config.supabaseTable)

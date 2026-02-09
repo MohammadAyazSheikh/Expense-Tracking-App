@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 // import 'dayjs/locale/ur'
-// import { getCurrentLocale } from "./fontUtils";
+// import { getCurrentLanguage } from "./fontUtils";
 // import utc from "dayjs/plugin/utc";
 // import isBetween from 'dayjs/plugin/isBetween';
 // import relativeTime from 'dayjs/plugin/relativeTime';
@@ -17,6 +17,6 @@ import dayjs from "dayjs";
 // dayjs.extend(isSameOrBefore);
 // dayjs.extend(localizedFormat);
 // dayjs.extend(customParseFormat);
-// dayjs.locale(getCurrentLocale() || "en");
+// dayjs.locale(getCurrentLanguage() || "en");
 
 export default dayjs;

@@ -1,6 +1,6 @@
 import { useAppSettingsStore } from "../store/index";
 import { getFontFamily, FontWeight } from "../fonts/config";
-import { SupportedLocale } from "../i18n/types";
+import { SUPPORTED_LANGUAGES, SupportedLanguage } from "../i18n/types";
 
 /**
  * Get current font family outside of React components
@@ -11,30 +11,30 @@ import { SupportedLocale } from "../i18n/types";
  * - API callbacks
  */
 export const getCurrentFont = (weight: FontWeight = "regular"): string => {
-  const { locale } = useAppSettingsStore();
-  return getFontFamily(locale, weight);
+  const { language } = useAppSettingsStore();
+  return getFontFamily(language, weight);
 };
 
 /**
- * Get all fonts for current locale
+ * Get all fonts for current language
  */
 export const getCurrentFonts = () => {
-  const { locale } = useAppSettingsStore();
+  const { language } = useAppSettingsStore();
   return {
-    regular: getFontFamily(locale, "regular"),
-    medium: getFontFamily(locale, "medium"),
-    semiBold: getFontFamily(locale, "semiBold"),
-    bold: getFontFamily(locale, "bold"),
-    extraBold: getFontFamily(locale, "extraBold"),
-    italic: getFontFamily(locale, "italic"),
-    black: getFontFamily(locale, "black"),
+    regular: getFontFamily(language, "regular"),
+    medium: getFontFamily(language, "medium"),
+    semiBold: getFontFamily(language, "semiBold"),
+    bold: getFontFamily(language, "bold"),
+    extraBold: getFontFamily(language, "extraBold"),
+    italic: getFontFamily(language, "italic"),
+    black: getFontFamily(language, "black"),
   };
 };
 
 /**
- * Get current locale
+ * Get current language
  */
-export const getCurrentLocale = (): SupportedLocale => {
-  const { locale } = useAppSettingsStore();
-  return locale;
+export const getCurrentLanguage = (): SupportedLanguage => {
+  const { language } = useAppSettingsStore();
+  return language;
 };

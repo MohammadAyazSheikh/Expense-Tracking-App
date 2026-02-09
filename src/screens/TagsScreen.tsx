@@ -16,7 +16,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
 import { alertService } from "@/utils/alertService";
 import { SafeArea } from "@/components/ui/SafeArea";
-import { useTagStore } from "@/store/tagStore";
+import { useTagStore } from "@/store";
 
 const SUGGESTED_TAGS = [
   "Travel",

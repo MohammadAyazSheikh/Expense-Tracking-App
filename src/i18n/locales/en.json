@@ -422,6 +422,7 @@
     },
     "settings": {
         "title": "Settings",
+        "appSettings": "App Settings",
         "account": "Account",
         "preferences": "Preferences",
         "support": "Support",

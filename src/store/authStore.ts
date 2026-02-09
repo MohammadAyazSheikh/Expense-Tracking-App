@@ -7,6 +7,7 @@ import { DEEP_LINKS } from '@/data/constants/deepLinks';
 import { translate } from '@/i18n';
 import { cleanupService } from '@/services/syncServices/cleanupService';
 import { syncOrchestrator } from '@/services/syncServices/syncOrchestrator';
+import { useAppSettingsStore } from './appSettingsStore';
 
 interface User {
   id: string;
@@ -31,6 +32,11 @@ interface AuthState {
   login: (data: { user: { email: string, password: string }, onSuccess?: () => void }) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  changePassword: (data: { password: string }) => Promise<void>;
+  updateUser: (userData: Partial<User>) => void;
+  clearError: () => void;
+  setLoading: (loading: boolean) => void;
+  reset: () => void;
   confirmEmail: (codes: {
     access_token: string | null,
     refresh_token: string | null,
@@ -39,11 +45,7 @@ interface AuthState {
     error_code?: string | null,
     error_description?: string | null
   }) => Promise<void>;
-  changePassword: (data: { password: string }) => Promise<void>;
-  updateUser: (userData: Partial<User>) => void;
-  clearError: () => void;
-  setLoading: (loading: boolean) => void;
-  reset: () => void;
+
 }
 
 
@@ -88,7 +90,8 @@ export const useAuthStore = create<AuthState>()(
                 },
                 verificationStatus: session?.user?.confirmed_at ? "VERIFIED" : "VERIFICATION_PENDING",
               });
-              syncOrchestrator.syncAll(user.id);
+              await syncOrchestrator.syncAll(user.id);
+              await useAppSettingsStore.getState().setDefaultCurrency();
             }
           } catch (error: any) {
             const errorMsg = error.message || 'Login failed';
@@ -122,14 +125,12 @@ export const useAuthStore = create<AuthState>()(
               throw error;
             }
             if (data?.user) {
-              // Store minimal user data
               set({
                 user: {
                   id: data?.user?.id,
                   email: data?.user?.email!,
                 },
                 verificationStatus: "VERIFICATION_PENDING",
-
               });
             }
             Toast.show({
@@ -186,7 +187,7 @@ export const useAuthStore = create<AuthState>()(
             if (error) throw error;
 
             if (data.session) {
-              // if user forgets password
+              // if user verifies after forget password
               if (type === 'recovery') {
 
                 const { data: userData, error } =
@@ -205,9 +206,11 @@ export const useAuthStore = create<AuthState>()(
                     avatar: userData?.avatar_url,
                     fullName: userData?.first_name + " " + userData?.last_name,
                   },
+                  //force him to update password
                   verificationStatus: "RESET_PASSWORD",
                 });
-
+                await syncOrchestrator.syncAll(data.session.user.id);
+                await useAppSettingsStore.getState().setDefaultCurrency();
               } else {
                 // if user verifies email after signup
                 set({
@@ -218,12 +221,13 @@ export const useAuthStore = create<AuthState>()(
                     email: data.session.user.email!,
                   },
                 });
-                syncOrchestrator.syncAll(data.session.user.id);
                 Toast.show({
                   type: "success",
                   text1: "Success",
                   text2: "Email VERIFIED successfully!",
                 });
+                await syncOrchestrator.syncAll(data.session.user.id);
+                await useAppSettingsStore.getState().setDefaultCurrency();
               }
             }
           } catch (error: any) {

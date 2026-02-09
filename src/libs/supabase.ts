@@ -1,7 +1,7 @@
 import { AppState, Platform } from 'react-native'
 import 'react-native-url-polyfill/auto'
 import { mmkvStorage } from '@/utils/storage'
-import { Database } from '@/types/supabse/supabaseDbTypes'
+import { Database } from '@/types/supabase/supabaseDbTypes'
 import { createClient, processLock } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!

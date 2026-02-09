@@ -1,4 +1,4 @@
-import { SupportedLocale } from '../i18n/types';
+import { SupportedLanguage } from '../i18n/types';
 
 export interface FontConfig {
   regular: string;
@@ -10,8 +10,8 @@ export interface FontConfig {
   black: string;
 }
 
-// Defining fonts for each locale
-const FONTS: Record<SupportedLocale, FontConfig> = {
+// Defining fonts for each language
+const FONTS: Record<SupportedLanguage, FontConfig> = {
   en: {
     regular: 'Nunito-Regular',
     medium: 'Nunito-Medium',
@@ -51,14 +51,14 @@ export type FontWeight =
   | 'italic'
   | 'black';
 
-// Get font family based on locale and weight
-export const getFontFamily = (locale: SupportedLocale, weight: FontWeight = 'regular'): string => {
-  return FONTS[locale][weight];
+// Get font family based on language and weight
+export const getFontFamily = (language: SupportedLanguage, weight: FontWeight = 'regular'): string => {
+  return FONTS[language][weight];
 };
 
-// Get all fonts for a locale
-export const getFontsForLocale = (locale: SupportedLocale): FontConfig => {
-  return FONTS[locale];
+// Get all fonts for a language
+export const getFontsForLanguage = (language: SupportedLanguage): FontConfig => {
+  return FONTS[language];
 };
 
 export default FONTS;

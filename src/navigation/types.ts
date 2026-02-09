@@ -43,7 +43,8 @@ export type RootStackParamList = {
   EditWallet: { walletId: string };
   WalletDetail: { walletId: string };
   WalletStatement: { walletId: string };
-  Transfer: undefined
+  Transfer: undefined;
+  AppSettings: undefined;
 };
 
 export type MainTabParamList = {

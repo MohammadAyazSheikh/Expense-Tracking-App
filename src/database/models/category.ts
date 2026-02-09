@@ -8,7 +8,7 @@ export class Category extends Model {
     @field('color') color!: string;
     @field('icon') icon!: string;
     @field('icon_family') iconFamily!: string;
-    @field('transaction_type_key') transactionTypeKey!: string;
+    @field('transaction_type_id') transactionTypeId!: string;
     @field('user_id') userId!: string;
     @field('system_category_id') systemCategoryId!: string | null;
 
@@ -27,7 +27,7 @@ export class SystemCategory extends Model {
     @field('color') color!: string;
     @field('icon') icon!: string;
     @field('icon_family') iconFamily!: string;
-    @field('transaction_type_key') transactionTypeKey!: string;
+    @field('transaction_type_id') transactionTypeId!: string;
     @field('is_active') isActive!: boolean;
     // Sync fields
     @field('server_id') serverId!: string | null;

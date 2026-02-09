@@ -1,4 +1,3 @@
-
 export type Json =
     | string
     | number
@@ -24,7 +23,7 @@ export type Database = {
                     id: string
                     name: string
                     system_category_id: string | null
-                    transaction_type_key: string
+                    transaction_type_id: string
                     updated_at: string
                     user_id: string
                 }
@@ -36,7 +35,7 @@ export type Database = {
                     id?: string
                     name: string
                     system_category_id?: string | null
-                    transaction_type_key: string
+                    transaction_type_id: string
                     updated_at?: string
                     user_id: string
                 }
@@ -48,7 +47,7 @@ export type Database = {
                     id?: string
                     name?: string
                     system_category_id?: string | null
-                    transaction_type_key?: string
+                    transaction_type_id?: string
                     updated_at?: string
                     user_id?: string
                 }
@@ -61,11 +60,95 @@ export type Database = {
                         referencedColumns: ["id"]
                     },
                     {
-                        foreignKeyName: "fk_categories_transaction_type"
-                        columns: ["transaction_type_key"]
+                        foreignKeyName: "categories_transaction_type_id_fkey"
+                        columns: ["transaction_type_id"]
                         isOneToOne: false
                         referencedRelation: "transaction_types"
-                        referencedColumns: ["key"]
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            currencies: {
+                Row: {
+                    code: string
+                    created_at: string
+                    decimal_places: number
+                    id: string
+                    is_active: boolean
+                    name: string
+                    symbol: string
+                    type: string
+                    updated_at: string
+                }
+                Insert: {
+                    code: string
+                    created_at?: string
+                    decimal_places?: number
+                    id?: string
+                    is_active?: boolean
+                    name: string
+                    symbol: string
+                    type: string
+                    updated_at?: string
+                }
+                Update: {
+                    code?: string
+                    created_at?: string
+                    decimal_places?: number
+                    id?: string
+                    is_active?: boolean
+                    name?: string
+                    symbol?: string
+                    type?: string
+                    updated_at?: string
+                }
+                Relationships: []
+            }
+            exchange_rates: {
+                Row: {
+                    base_currency_id: string
+                    created_at: string
+                    id: string
+                    quote_currency_id: string
+                    rate: number
+                    rate_date: string
+                    source: string
+                    updated_at: string
+                }
+                Insert: {
+                    base_currency_id: string
+                    created_at?: string
+                    id?: string
+                    quote_currency_id: string
+                    rate: number
+                    rate_date: string
+                    source: string
+                    updated_at?: string
+                }
+                Update: {
+                    base_currency_id?: string
+                    created_at?: string
+                    id?: string
+                    quote_currency_id?: string
+                    rate?: number
+                    rate_date?: string
+                    source?: string
+                    updated_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "exchange_rates_base_currency_id_fkey"
+                        columns: ["base_currency_id"]
+                        isOneToOne: false
+                        referencedRelation: "currencies"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "exchange_rates_quote_currency_id_fkey"
+                        columns: ["quote_currency_id"]
+                        isOneToOne: false
+                        referencedRelation: "currencies"
+                        referencedColumns: ["id"]
                     },
                 ]
             }
@@ -111,7 +194,7 @@ export type Database = {
                     id: string
                     is_active: boolean
                     name: string
-                    transaction_type_key: string
+                    transaction_type_id: string
                     updated_at: string
                 }
                 Insert: {
@@ -122,7 +205,7 @@ export type Database = {
                     id?: string
                     is_active?: boolean
                     name: string
-                    transaction_type_key: string
+                    transaction_type_id: string
                     updated_at?: string
                 }
                 Update: {
@@ -133,16 +216,16 @@ export type Database = {
                     id?: string
                     is_active?: boolean
                     name?: string
-                    transaction_type_key?: string
+                    transaction_type_id?: string
                     updated_at?: string
                 }
                 Relationships: [
                     {
-                        foreignKeyName: "fk_system_categories_transaction_type"
-                        columns: ["transaction_type_key"]
+                        foreignKeyName: "system_categories_transaction_type_id_fkey"
+                        columns: ["transaction_type_id"]
                         isOneToOne: false
                         referencedRelation: "transaction_types"
-                        referencedColumns: ["key"]
+                        referencedColumns: ["id"]
                     },
                 ]
             }
@@ -176,21 +259,24 @@ export type Database = {
             transaction_types: {
                 Row: {
                     created_at: string | null
+                    id: string
                     key: string
                     label: string
-                    metadata: Json | null
+                    updated_at: string | null
                 }
                 Insert: {
                     created_at?: string | null
+                    id?: string
                     key: string
                     label: string
-                    metadata?: Json | null
+                    updated_at?: string | null
                 }
                 Update: {
                     created_at?: string | null
+                    id?: string
                     key?: string
                     label?: string
-                    metadata?: Json | null
+                    updated_at?: string | null
                 }
                 Relationships: []
             }
@@ -203,6 +289,7 @@ export type Database = {
                     record_id: string
                     schema_name: string | null
                     table_name: string
+                    updated_at: string | null
                 }
                 Insert: {
                     deleted_at?: string | null
@@ -212,6 +299,7 @@ export type Database = {
                     record_id: string
                     schema_name?: string | null
                     table_name: string
+                    updated_at?: string | null
                 }
                 Update: {
                     deleted_at?: string | null
@@ -221,6 +309,40 @@ export type Database = {
                     record_id?: string
                     schema_name?: string | null
                     table_name?: string
+                    updated_at?: string | null
+                }
+                Relationships: []
+            }
+            wallet_types: {
+                Row: {
+                    color: string | null
+                    created_at: string
+                    icon: string | null
+                    icon_family: string | null
+                    id: string
+                    key: string
+                    label: string
+                    updated_at: string
+                }
+                Insert: {
+                    color?: string | null
+                    created_at?: string
+                    icon?: string | null
+                    icon_family?: string | null
+                    id?: string
+                    key: string
+                    label: string
+                    updated_at?: string
+                }
+                Update: {
+                    color?: string | null
+                    created_at?: string
+                    icon?: string | null
+                    icon_family?: string | null
+                    id?: string
+                    key?: string
+                    label?: string
+                    updated_at?: string
                 }
                 Relationships: []
             }
@@ -229,6 +351,7 @@ export type Database = {
             [_ in never]: never
         }
         Functions: {
+            call_sync_exchange_rates: { Args: never; Returns: undefined }
             is_admin: { Args: never; Returns: boolean }
             store_in_trash:
             | {

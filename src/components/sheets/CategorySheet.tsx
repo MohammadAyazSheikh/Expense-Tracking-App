@@ -17,8 +17,7 @@ import { Icon } from "../ui/Icon";
 import { Ionicons } from "@expo/vector-icons";
 import { alertService } from "../../utils/alertService";
 import { CategoryCard } from "../categories/CategoryCard";
-import { useCategoryStore } from "@/store/categoryStore";
-import { useAuthStore } from "../../store";
+import { useCategoryStore, useAuthStore } from "@/store";
 import { useTranslation } from "../../hooks/useTranslation";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
@@ -26,8 +25,9 @@ import {
   CATEGORY_ICONS,
   CategoryGroup,
 } from "../../utils/categoryIcons";
-import { SystemCategory } from "@/database/models/category";
+import { Category, SystemCategory } from "@/database/models/category";
 import { ApiLoader } from "../ui/ApiLoader";
+import { transactionTypes } from "@/data/dbConstantData";
 
 const ManageCategory = ({
   router,
@@ -55,7 +55,7 @@ const ManageCategory = ({
   const [selectedColor, setSelectedColor] = useState(
     initialCategory?.color || "#FF6B6B",
   );
-
+  console.log(selectedIconKey);
   const handleSave = () => {
     if (!name.trim()) {
       alertService.show({
@@ -73,7 +73,10 @@ const ManageCategory = ({
       icon: iconConfig.name as string,
       iconFamily: iconConfig.type as string,
       color: selectedColor,
-      transactionTypeKey: payload?.type === "income" ? "income" : "expense",
+      transactionTypeId:
+        payload?.type === "expense"
+          ? transactionTypes[0].id
+          : transactionTypes[1].id,
       systemCategoryId: null,
     };
 
@@ -101,80 +104,6 @@ const ManageCategory = ({
 
   const selectedIconConfig = CATEGORY_ICONS[selectedIconKey];
 
-  const HeaderComponent = useCallback(
-    () => (
-      <View>
-        {!isEditing && (
-          <TouchableOpacity
-            style={styles.pickSystemButton}
-            onPress={() =>
-              router.navigate("system-category-picker", {
-                payload: { type: payload?.type },
-              })
-            }
-          >
-            <View style={styles.pickSystemIcon}>
-              <Ionicons
-                name="grid-outline"
-                size={20}
-                color={theme.colors.muted}
-              />
-            </View>
-            <View style={styles.pickSystemContent}>
-              <Text weight="semiBold">
-                {t("categoryManager.suggestedCategories")}
-              </Text>
-              <Text style={{ color: theme.colors.mutedForeground }}>
-                Pick from standard {payload?.type} categories
-              </Text>
-            </View>
-
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={theme.colors.mutedForeground}
-            />
-          </TouchableOpacity>
-        )}
-
-        <View style={styles.previewContainer}>
-          <View
-            style={[styles.previewIcon, { backgroundColor: selectedColor }]}
-          >
-            {selectedIconConfig && (
-              <Icon
-                type={selectedIconConfig.type as any}
-                name={selectedIconConfig.name as any}
-                size={40}
-                color="white"
-              />
-            )}
-          </View>
-          <TouchableOpacity onPress={openColorPicker}>
-            <Text style={{ color: theme.colors.primary }}>
-              {t("categoryManager.changeColor")}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View>
-          <Text weight="medium" style={{ marginBottom: 8 }}>
-            {t("categoryManager.categoryName")}
-          </Text>
-          <Input
-            value={name}
-            onChangeText={setName}
-            placeholder={t("categoryManager.namePlaceholder")}
-          />
-        </View>
-
-        <Text weight="semiBold" style={styles.sectionTitle}>
-          {t("categoryManager.selectIcon")}
-        </Text>
-      </View>
-    ),
-    [selectedColor, selectedIconConfig],
-  );
   const renderItem = useCallback(
     ({ item }: { item: CategoryGroup }) => (
       <View key={item.title}>
@@ -212,16 +141,27 @@ const ManageCategory = ({
           <Ionicons name="close" size={24} color={theme.colors.foreground} />
         </TouchableOpacity>
       </View>
-
       <LegendList
         recycleItems
         data={CATEGORY_GROUPS}
         estimatedItemSize={50}
+        extraData={selectedIconKey}
         keyExtractor={(item: CategoryGroup) => item.title}
         style={styles.content}
         showsVerticalScrollIndicator={false}
         renderItem={renderItem}
-        ListHeaderComponent={<HeaderComponent />}
+        ListHeaderComponent={
+          <CategoryFormHeader
+            isEditing={isEditing}
+            router={router}
+            type={payload.type!}
+            selectedColor={selectedColor}
+            selectedIconConfig={selectedIconConfig}
+            openColorPicker={openColorPicker}
+            name={name}
+            setName={setName}
+          />
+        }
       />
       <View style={styles.footer}>
         <Button
@@ -234,12 +174,109 @@ const ManageCategory = ({
   );
 };
 
+const CategoryFormHeader = ({
+  isEditing,
+  router,
+  type,
+  selectedColor,
+  selectedIconConfig,
+  openColorPicker,
+  name,
+  setName,
+}: {
+  isEditing: boolean;
+  router: any;
+  type: "expense" | "income";
+  category?: Category;
+  selectedColor: string;
+  selectedIconConfig: any;
+  openColorPicker: () => void;
+  name: string;
+  setName: (text: string) => void;
+}) => {
+  const { theme } = useUnistyles();
+  const { t } = useTranslation();
+  return (
+    <View>
+      {!isEditing && (
+        <TouchableOpacity
+          style={styles.pickSystemButton}
+          onPress={() =>
+            router.navigate("system-category-picker", {
+              payload: { type },
+            })
+          }
+        >
+          <View style={styles.pickSystemIcon}>
+            <Ionicons
+              name="grid-outline"
+              size={20}
+              color={theme.colors.muted}
+            />
+          </View>
+          <View style={styles.pickSystemContent}>
+            <Text weight="semiBold">
+              {t("categoryManager.suggestedCategories")}
+            </Text>
+            <Text style={{ color: theme.colors.mutedForeground }}>
+              Pick from standard {type} categories
+            </Text>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={theme.colors.mutedForeground}
+          />
+        </TouchableOpacity>
+      )}
+
+      <View style={styles.previewContainer}>
+        <View style={[styles.previewIcon, { backgroundColor: selectedColor }]}>
+          {selectedIconConfig && (
+            <Icon
+              type={selectedIconConfig.type as any}
+              name={selectedIconConfig.name as any}
+              size={40}
+              color="white"
+            />
+          )}
+        </View>
+        <TouchableOpacity onPress={openColorPicker}>
+          <Text style={{ color: theme.colors.primary }}>
+            {t("categoryManager.changeColor")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View>
+        <Text weight="medium" style={{ marginBottom: 8 }}>
+          {t("categoryManager.categoryName")}
+        </Text>
+        <Input
+          value={name}
+          onChangeText={setName}
+          placeholder={t("categoryManager.namePlaceholder")}
+        />
+      </View>
+
+      <Text weight="semiBold" style={styles.sectionTitle}>
+        {t("categoryManager.selectIcon")}
+      </Text>
+    </View>
+  );
+};
+
 const SystemPicker = ({
   router,
 }: RouteScreenProps<"manage-category-sheet", "system-category-picker">) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const payload = useSheetPayload("manage-category-sheet");
+  const transactionTypeId =
+    payload?.type === "expense"
+      ? transactionTypes[0].id
+      : transactionTypes[1].id;
   const {
     systemCategories: systemCat = [],
     addCategory,
@@ -247,35 +284,45 @@ const SystemPicker = ({
   } = useCategoryStore();
 
   const systemCategories = useMemo(
-    () => systemCat.filter((cat) => cat.transactionTypeKey === payload?.type),
-    [systemCat, payload?.type],
+    () =>
+      systemCat.filter((cat) => cat.transactionTypeId === transactionTypeId),
+    [systemCat, transactionTypeId],
   );
 
   // Prefer params from navigation (local override), fallback to sheet payload
   const categoryType = payload?.type || "expense";
 
-  const handleAddSystemCategory = (cat: SystemCategory) => {
-    alertService.show({
-      title: "Do you want to add this category?",
-      buttons: [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("common.yes"),
-          style: "destructive",
-          onPress: async () => {
-            await addCategory({
-              name: cat.name,
-              icon: cat.icon,
-              color: cat.color,
-              iconFamily: cat.iconFamily,
-              systemCategoryId: cat.serverId,
-              transactionTypeKey: categoryType,
-            });
-            SheetManager.hide("category-sheet");
-          },
-        },
-      ],
+  const handleAddSystemCategory = async (cat: SystemCategory) => {
+    await addCategory({
+      name: cat.name,
+      icon: cat.icon,
+      color: cat.color,
+      iconFamily: cat.iconFamily,
+      systemCategoryId: cat.serverId,
+      transactionTypeId,
     });
+    SheetManager.hide("manage-category-sheet");
+    // alertService.show({
+    //   title: "Do you want to add this category?",
+    //   buttons: [
+    //     { text: t("common.cancel"), style: "cancel" },
+    //     {
+    //       text: t("common.yes"),
+    //       style: "destructive",
+    //       onPress: async () => {
+    //         await addCategory({
+    //           name: cat.name,
+    //           icon: cat.icon,
+    //           color: cat.color,
+    //           iconFamily: cat.iconFamily,
+    //           systemCategoryId: cat.serverId,
+    //           transactionTypeId,
+    //         });
+    //         SheetManager.hide("category-sheet");
+    //       },
+    //     },
+    //   ],
+    // });
   };
 
   return (
@@ -332,12 +379,17 @@ const IconItem = ({
   onPress: () => void;
 }) => {
   const { theme } = useUnistyles();
-
   const iconConfig = CATEGORY_ICONS[iconKey];
   if (!iconConfig) return null;
 
   return (
-    <Pressable style={[styles.iconItem]} onPress={onPress}>
+    <Pressable
+      style={[
+        styles.iconItem,
+        isSelected && { borderColor: theme.colors.primary },
+      ]}
+      onPress={onPress}
+    >
       <Icon
         type={iconConfig.type as any}
         name={iconConfig.name}
