@@ -1,47 +1,48 @@
 import React from "react";
-import { Text } from "@/components/ui/Text";
-import { createStackNavigator } from "@react-navigation/stack";
-import { RootStackParamList } from "./types";
-import { TabNavigator } from "./TabNavigator";
-import { IndexScreen } from "../screens/IndexScreen";
-import { OnboardingScreen } from "../screens/OnboardingScreen";
-import { AuthScreen } from "../screens/AuthScreen";
-import { NotFoundScreen } from "../screens/Placeholders";
-import { ProfileScreen } from "../screens/ProfileScreen";
-import { WalletsScreen } from "../screens/WalletsScreen";
-import { SecurityScreen } from "../screens/SecurityScreen";
-import { HelpSupportScreen } from "../screens/HelpSupportScreen";
-import { SmartSenseScreen } from "../screens/SmartSenseScreen";
-import { CategoryManagerScreen } from "../screens/CategoryManagerScreen";
-import { useAuthStore } from "../store";
+import { useAuthStore } from "@/store";
 import { translate as t } from "@/i18n";
-import { TransactionDetailScreen } from "../screens/TransactionDetailScreen";
-import { CalendarScreen } from "../screens/CalendarScreen";
-import { TagsScreen } from "../screens/TagsScreen";
-import { AddExpenseScreen } from "../screens/AddExpenseScreen";
-import { Header } from "../components/ui/Headers";
-import { ForgotPasswordScreen } from "../screens/auth/ForgotPasswordScreen";
-import { ChangePasswordScreen } from "../screens/auth/ResetPasswordScreen";
-import { EmailVerificationPendingScreen } from "../screens/auth/EmailVerificationPendingScreen";
-import { ProfileSetupScreen } from "../screens/ProfileSetupScreen";
-import { CreateBudgetScreen } from "../screens/CreateBudgetScreen";
-import { GroupsScreen } from "../screens/GroupsScreen";
-import { CreateGroupScreen } from "../screens/CreateGroupScreen";
-import { GroupDetailScreen } from "../screens/GroupDetailScreen";
-import { AddGroupExpenseScreen } from "../screens/AddGroupExpenseScreen";
-import { SettleUpScreen } from "../screens/SettleUpScreen";
-import { FriendsScreen } from "../screens/FriendsScreen";
-import { FriendDetailScreen } from "../screens/FriendDetailScreen";
-import { BudgetScreen } from "../screens/BudgetScreen";
-import WalletDetailScreen from "../screens/WalletDetailScreen";
-import WalletStatementScreen from "../screens/WalletStatementScreen";
-import { AddWalletScreen } from "../screens/AddWalletScreen";
-import { EditWalletScreen } from "../screens/EditWalletScreen";
-import { TransferScreen } from "../screens/TransferScreen";
-import { NotificationsScreen } from "../screens/NotificationsScreen";
-import { NotificationSettingsScreen } from "../screens/NotificationSettingsScreen";
-import { useUnistyles } from "react-native-unistyles";
 import { lightTheme } from "@/styles/theme";
+import { Header } from "@/components/ui/Headers";
+import { useUnistyles } from "react-native-unistyles";
+import { Text } from "@/components/ui/Text";
+import { TabNavigator } from "./TabNavigator";
+import { RootStackParamList } from "./types";
+import { createStackNavigator } from "@react-navigation/stack";
+import { IndexScreen } from "@/screens/IndexScreen";
+import { OnboardingScreen } from "@/screens/OnboardingScreen";
+import { AuthScreen } from "@/screens/AuthScreen";
+import { NotFoundScreen } from "@/screens/Placeholders";
+import { ProfileScreen } from "@/screens/ProfileScreen";
+import { WalletsScreen } from "@/screens/WalletsScreen";
+import { SecurityScreen } from "@/screens/SecurityScreen";
+import { HelpSupportScreen } from "@/screens/HelpSupportScreen";
+import { SmartSenseScreen } from "@/screens/SmartSenseScreen";
+import { CategoryManagerScreen } from "@/screens/CategoryManagerScreen";
+import { TransactionDetailScreen } from "@/screens/TransactionDetailScreen";
+import { CalendarScreen } from "@/screens/CalendarScreen";
+import { TagsScreen } from "@/screens/TagsScreen";
+import { AddExpenseScreen } from "@/screens/AddExpenseScreen";
+import { ForgotPasswordScreen } from "@/screens/auth/ForgotPasswordScreen";
+import { ChangePasswordScreen } from "@/screens/auth/ResetPasswordScreen";
+import { EmailVerificationPendingScreen } from "@/screens/auth/EmailVerificationPendingScreen";
+import { ProfileSetupScreen } from "@/screens/ProfileSetupScreen";
+import { CreateBudgetScreen } from "@/screens/CreateBudgetScreen";
+import { GroupsScreen } from "@/screens/GroupsScreen";
+import { CreateGroupScreen } from "@/screens/CreateGroupScreen";
+import { GroupDetailScreen } from "@/screens/GroupDetailScreen";
+import { AddGroupExpenseScreen } from "@/screens/AddGroupExpenseScreen";
+import { SettleUpScreen } from "@/screens/SettleUpScreen";
+import { FriendsScreen } from "@/screens/FriendsScreen";
+import { FriendDetailScreen } from "@/screens/FriendDetailScreen";
+import { BudgetScreen } from "@/screens/BudgetScreen";
+import WalletDetailScreen from "@/screens/WalletDetailScreen";
+import WalletStatementScreen from "@/screens/WalletStatementScreen";
+import { AddWalletScreen } from "@/screens/AddWalletScreen";
+import { EditWalletScreen } from "@/screens/EditWalletScreen";
+import { TransferScreen } from "@/screens/TransferScreen";
+import { NotificationsScreen } from "@/screens/NotificationsScreen";
+import { NotificationSettingsScreen } from "@/screens/NotificationSettingsScreen";
+import { AppSettingsScreen } from "@/screens/AppSettingsScreen";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -158,20 +159,45 @@ const mainRoutes = ({ theme }: { theme: typeof lightTheme }) => {
       <Stack.Screen name="MainTab" component={TabNavigator} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
-      <Stack.Screen
-        name="NotificationSettings"
-        component={NotificationSettingsScreen}
-      />
       <Stack.Screen name="Security" component={SecurityScreen} />
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} />
       <Stack.Screen name="SmartSense" component={SmartSenseScreen} />
+      <Stack.Screen name="Calendar" component={CalendarScreen} />
+      <Stack.Screen name="EditExpense" component={AddExpenseScreen} />
+      <Stack.Screen name="Budget" component={BudgetScreen} />
+      <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
+      <Stack.Screen name="Groups" component={GroupsScreen} />
+      <Stack.Screen name="AddGroupExpense" component={AddGroupExpenseScreen} />
+      <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
+      <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+      <Stack.Screen name="SettleUp" component={SettleUpScreen} />
+      <Stack.Screen name="Friends" component={FriendsScreen} />
+      <Stack.Screen name="FriendDetail" component={FriendDetailScreen} />
+      <Stack.Screen name="Wallets" component={WalletsScreen} />
+      <Stack.Screen name="AddWallet" component={AddWalletScreen} />
+      <Stack.Screen name="EditWallet" component={EditWalletScreen} />
+      <Stack.Screen name="WalletDetail" component={WalletDetailScreen} />
+      <Stack.Screen name="WalletStatement" component={WalletStatementScreen} />
+      <Stack.Screen name="Transfer" component={TransferScreen} />
+      <Stack.Screen
+        name="AppSettings"
+        component={AppSettingsScreen}
+        options={{ headerShown: true, title: t("settings.appSettings") }}
+      />
+      <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+      />
       <Stack.Screen
         name="CategoryManager"
         options={{ headerShown: true, title: t("categoryManager.title") }}
         component={CategoryManagerScreen}
       />
-      <Stack.Screen name="Calendar" component={CalendarScreen} />
+      <Stack.Screen
+        name="TransactionDetail"
+        component={TransactionDetailScreen}
+      />
       <Stack.Screen
         name="TagManager"
         component={TagsScreen}
@@ -198,26 +224,6 @@ const mainRoutes = ({ theme }: { theme: typeof lightTheme }) => {
           ),
         }}
       />
-      <Stack.Screen name="EditExpense" component={AddExpenseScreen} />
-      <Stack.Screen
-        name="TransactionDetail"
-        component={TransactionDetailScreen}
-      />
-      <Stack.Screen name="Budget" component={BudgetScreen} />
-      <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
-      <Stack.Screen name="Groups" component={GroupsScreen} />
-      <Stack.Screen name="AddGroupExpense" component={AddGroupExpenseScreen} />
-      <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
-      <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
-      <Stack.Screen name="SettleUp" component={SettleUpScreen} />
-      <Stack.Screen name="Friends" component={FriendsScreen} />
-      <Stack.Screen name="FriendDetail" component={FriendDetailScreen} />
-      <Stack.Screen name="Wallets" component={WalletsScreen} />
-      <Stack.Screen name="AddWallet" component={AddWalletScreen} />
-      <Stack.Screen name="EditWallet" component={EditWalletScreen} />
-      <Stack.Screen name="WalletDetail" component={WalletDetailScreen} />
-      <Stack.Screen name="WalletStatement" component={WalletStatementScreen} />
-      <Stack.Screen name="Transfer" component={TransferScreen} />
     </Stack.Navigator>
   );
 };

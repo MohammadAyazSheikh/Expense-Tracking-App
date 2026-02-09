@@ -15,6 +15,11 @@ interface AppSettingsState {
   locale: SupportedLocale;
   isRTL: boolean;
   theme: ThemeMode;
+  // currency: {
+  //   currencyCode: string;
+  //   currencySymbol: string;
+  // };
+
   effectiveTheme: 'light' | 'dark';
   isLoading: boolean;
 

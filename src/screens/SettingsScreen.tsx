@@ -8,7 +8,6 @@ import { Text } from "../components/ui/Text";
 import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { Switch } from "../components/ui/Switch";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { SettingsGroup } from "../components/ui/SettingsGroup";
 import { SettingsRow } from "../components/ui/SettingsRow";
 import { useAppSettingsStore, useAuthStore } from "../store";
@@ -93,6 +92,15 @@ export const SettingsScreen = () => {
           label: t("settings.tags"),
           badge: null,
           path: "TagManager",
+        },
+        {
+          icon: {
+            name: "settings",
+            family: "Feather",
+          },
+          label: t("settings.appSettings"),
+          badge: null,
+          path: "AppSettings",
         },
         {
           icon: {
