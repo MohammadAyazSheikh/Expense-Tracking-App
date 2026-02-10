@@ -6,7 +6,11 @@ import { Currencies, ExchangeRates } from '@/database/models/currency';
 import { currenciesSyncService } from '@/services/syncServices/currenciesSyncService';
 import { exchangeRatesSyncService } from '@/services/syncServices/exchangeRatesSyncService';
 import { useAppSettingsStore } from './appSettingsStore';
-import { calculateCrossRate, convertCurrency, CrossRateResult, FormattedExchangeRate, generateAllCrossRates, getRatesForSpecificCurrency } from '@/utils/exchangeRateCalculator';
+import {
+    calculateCrossRate, convertCurrency, CrossRateResult,
+    FormattedExchangeRate, FormattedRatesForSpecificCurrencyList,
+    generateAllCrossRates, generateSpecificCrossRates
+} from '@/utils/exchangeRateCalculator';
 
 
 
@@ -29,7 +33,7 @@ interface CurrencyStore {
     /** Convert amount from one currency to another */
     convert: (amount: number, from: string, to: string) => number | null;
     /** Get rates for a specific currency */
-    getRatesForCurrency: (currencyCode?: string) => CrossRateResult[];
+    getRatesForCurrency: (currencyCode?: string) => FormattedRatesForSpecificCurrencyList;
 }
 
 export const useCurrencyStore = create<CurrencyStore>((set, get) => ({
@@ -124,7 +128,7 @@ export const useCurrencyStore = create<CurrencyStore>((set, get) => ({
     getRatesForCurrency(code) {
         const { exchangeRates } = get();
         const { currency } = useAppSettingsStore.getState();
-        return getRatesForSpecificCurrency(code || currency?.code!, exchangeRates, "to");
+        return generateSpecificCrossRates(code || currency?.code!, exchangeRates);
     },
 
     convert(amount: number, from: string, to: string): number | null {

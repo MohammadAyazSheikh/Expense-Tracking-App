@@ -80,27 +80,9 @@ export const AddWalletScreen = () => {
   const walletKey = watch("walletType");
 
   const currencyOptions = useMemo(() => {
-    // If wallet type is 'crypto', show crypto currencies
-    // Otherwise show fiat currencies
-    const isCryptoWallet = walletKey?.key === "crypto";
-
-    return getRatesForCurrency()
-      .filter((rate) => {
-        const isRateCrypto = rate.sourceCurrency.type === "crypto";
-        return isCryptoWallet ? isRateCrypto : !isRateCrypto;
-      })
-      .sort((a, b) =>
-        a.sourceCurrency.code.localeCompare(b.sourceCurrency.code),
-      )
-      .map((rate) => ({
-        label: `${rate.sourceCurrency.name}`,
-        value: rate.sourceCurrency.id,
-        rightIcon: (
-          <Text variant="h3">{`1 ${rate.sourceCurrency.code} = ${rate.rate.toPrecision(3)} ${rate.targetCurrency.code}`}</Text>
-        ),
-        originalItem: rate.sourceCurrency,
-      }));
-  }, [exchangeRates, walletKey]);
+    const { cryptoRates, fiatRates } = getRatesForCurrency();
+    return walletKey?.key === "crypto" ? cryptoRates : fiatRates;
+  }, [walletKey]);
 
   const onSubmit = (data: WalletFormValues) => {
     setTimeout(() => {

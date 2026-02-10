@@ -35,6 +35,24 @@ export type CrossRateResult = {
     targetCurrency: CurrencyInfo
 };
 
+
+//formatted types for select sheet
+export type FormattedSpecificCurrencyRate = {
+    value: string;
+    label: string;
+    rightText?: string;
+    rate: CrossRateResult;
+    originalItem: CurrencyInfo;
+}
+
+export type FormattedRatesForSpecificCurrencyList = {
+    allCrossRates: FormattedSpecificCurrencyRate[];
+    cryptoRates: FormattedSpecificCurrencyRate[];
+    fiatRates: FormattedSpecificCurrencyRate[];
+}
+
+
+
 /**
  * Calculate cross rate between two currencies using USD as base
  */
@@ -192,3 +210,60 @@ export function getRatesForSpecificCurrency(
     );
 }
 
+
+
+
+
+/**
+ * Generate for specific currency cross rates from USD-based rates used for select sheet
+ */
+export function generateSpecificCrossRates(
+    currencyCode: string,
+    usdRates: FormattedExchangeRate[]
+): FormattedRatesForSpecificCurrencyList {
+    const allCrossRates: FormattedSpecificCurrencyRate[] = [];
+    const cryptoRates: FormattedSpecificCurrencyRate[] = [];
+    const fiatRates: FormattedSpecificCurrencyRate[] = [];
+    const fromCurrencies: CurrencyInfo[] = usdRates.map(rate => rate.targetCurrency);
+    const toCurrency = fromCurrencies.find(rate => rate.code === currencyCode) || usdRates[0]?.targetCurrency;
+
+    // Add USD as a currency option
+    const usdCurrency = usdRates[0]?.sourceCurrency;
+    if (usdCurrency) {
+        fromCurrencies.push(usdCurrency);
+    }
+
+
+
+    for (let i = 0; i < fromCurrencies.length; i++) {
+
+        // Skip if fromCurrency is same as toCurrency
+        if (fromCurrencies[i].code === currencyCode) continue;
+
+        const crossRate = calculateCrossRate(
+            fromCurrencies[i].code,
+            toCurrency.code,
+            usdRates
+        );
+
+        if (crossRate) {
+            //formatting data for select sheet 
+            const formattedCrossRate: FormattedSpecificCurrencyRate = {
+                rate: crossRate,
+                label: `${crossRate.sourceCurrency.name}`,
+                value: crossRate.sourceCurrency.id,
+                rightText: `1 ${crossRate.sourceCurrency.code} = ${crossRate.rate.toPrecision(3)} ${crossRate.targetCurrency.code}`,
+                originalItem: crossRate.sourceCurrency,
+            };
+            allCrossRates.push(formattedCrossRate);
+            if (crossRate.sourceCurrency.type === 'crypto') {
+                cryptoRates.push(formattedCrossRate);
+            } else {
+                fiatRates.push(formattedCrossRate);
+            }
+        }
+
+    }
+
+    return { allCrossRates, cryptoRates, fiatRates };
+}
