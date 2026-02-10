@@ -1,7 +1,7 @@
 import React from "react";
 import { ViewProps, Pressable } from "react-native";
 import { StyleSheet, UnistylesVariants } from "react-native-unistyles";
-import Animated, { createAnimatedComponent } from "react-native-reanimated";
+import { createAnimatedComponent } from "react-native-reanimated";
 import {
   EnteringAnimation,
   ExitingAnimation,
@@ -22,7 +22,7 @@ type CardProps = ViewProps &
 
 export const Card = ({
   children,
-  variant = "primary",
+  variant = "outlined",
   onPress,
   onLongPress,
   style,

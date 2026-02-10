@@ -4,7 +4,7 @@ import { Text } from "../components/ui/Text";
 import { Card } from "../components/ui/Card";
 import { Feather } from "@expo/vector-icons";
 import { Button } from "../components/ui/Button";
-import { View, TouchableOpacity } from "react-native";
+import { View, Pressable } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
 import { ApiLoader } from "../components/ui/ApiLoader";
@@ -155,9 +155,9 @@ const AuthTab = ({
   });
 
   return (
-    <TouchableOpacity style={styles.tab} onPress={onPress}>
+    <Pressable style={styles.tab} onPress={onPress}>
       <Text weight={isActive ? "bold" : "medium"}>{title}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -208,11 +208,6 @@ const styles = StyleSheet.create((theme) => ({
       active: {
         true: {
           backgroundColor: theme.colors.background,
-          shadowColor: theme.colors.foreground,
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 2,
-          elevation: 2,
         },
       },
     },

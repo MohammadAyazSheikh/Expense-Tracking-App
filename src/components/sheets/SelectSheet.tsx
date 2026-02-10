@@ -50,7 +50,11 @@ export const SelectItem = ({
         <Text weight={selected ? "bold" : "regular"} style={[styles.itemName]}>
           {title}
         </Text>
-        {rightIcon}
+        {typeof rightIcon === "string" ? (
+          <Text variant="h3">{rightIcon}</Text>
+        ) : (
+          rightIcon || null
+        )}
       </View>
       {multiSelect ? (
         <Checkbox checked={selected} />

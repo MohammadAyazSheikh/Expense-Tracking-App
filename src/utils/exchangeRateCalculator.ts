@@ -40,7 +40,7 @@ export type CrossRateResult = {
 export type FormattedSpecificCurrencyRate = {
     value: string;
     label: string;
-    rightText?: string;
+    rightIcon?: string;
     rate: CrossRateResult;
     originalItem: CurrencyInfo;
 }
@@ -225,7 +225,15 @@ export function generateSpecificCrossRates(
     const cryptoRates: FormattedSpecificCurrencyRate[] = [];
     const fiatRates: FormattedSpecificCurrencyRate[] = [];
     const fromCurrencies: CurrencyInfo[] = usdRates.map(rate => rate.targetCurrency);
-    const toCurrency = fromCurrencies.find(rate => rate.code === currencyCode) || usdRates[0]?.targetCurrency;
+
+    let toCurrency: CurrencyInfo;
+    if (currencyCode === "USD") {
+        toCurrency = usdRates[0]?.sourceCurrency;
+    } else {
+        toCurrency = fromCurrencies.find(rate => rate.code === currencyCode) || usdRates[0]?.targetCurrency;
+        fromCurrencies.push(usdRates[0]?.sourceCurrency);
+    }
+
 
     // Add USD as a currency option
     const usdCurrency = usdRates[0]?.sourceCurrency;
@@ -233,16 +241,14 @@ export function generateSpecificCrossRates(
         fromCurrencies.push(usdCurrency);
     }
 
-
-
     for (let i = 0; i < fromCurrencies.length; i++) {
 
         // Skip if fromCurrency is same as toCurrency
         if (fromCurrencies[i].code === currencyCode) continue;
 
         const crossRate = calculateCrossRate(
-            fromCurrencies[i].code,
-            toCurrency.code,
+            fromCurrencies[i]?.code,
+            toCurrency?.code,
             usdRates
         );
 
@@ -252,7 +258,7 @@ export function generateSpecificCrossRates(
                 rate: crossRate,
                 label: `${crossRate.sourceCurrency.name}`,
                 value: crossRate.sourceCurrency.id,
-                rightText: `1 ${crossRate.sourceCurrency.code} = ${crossRate.rate.toPrecision(3)} ${crossRate.targetCurrency.code}`,
+                rightIcon: `1 ${crossRate.sourceCurrency?.code} = ${crossRate.rate.toPrecision(3)} ${crossRate.targetCurrency?.code}`,
                 originalItem: crossRate.sourceCurrency,
             };
             allCrossRates.push(formattedCrossRate);
