@@ -137,7 +137,6 @@ export const useCurrencyStore = create<CurrencyStore>((set, get) => ({
         return result?.convertedAmount ?? null;
     },
 
-
     reset() {
         set({
             currencies: [],

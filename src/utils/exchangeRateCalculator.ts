@@ -212,8 +212,6 @@ export function getRatesForSpecificCurrency(
 
 
 
-
-
 /**
  * Generate for specific currency cross rates from USD-based rates used for select sheet
  */
@@ -225,26 +223,22 @@ export function generateSpecificCrossRates(
     const cryptoRates: FormattedSpecificCurrencyRate[] = [];
     const fiatRates: FormattedSpecificCurrencyRate[] = [];
     const fromCurrencies: CurrencyInfo[] = usdRates.map(rate => rate.targetCurrency);
+    const usdCurrency = usdRates[0]?.sourceCurrency;
 
     let toCurrency: CurrencyInfo;
     if (currencyCode === "USD") {
-        toCurrency = usdRates[0]?.sourceCurrency;
+        toCurrency = usdCurrency;
     } else {
         toCurrency = fromCurrencies.find(rate => rate.code === currencyCode) || usdRates[0]?.targetCurrency;
-        fromCurrencies.push(usdRates[0]?.sourceCurrency);
     }
-
 
     // Add USD as a currency option
-    const usdCurrency = usdRates[0]?.sourceCurrency;
-    if (usdCurrency) {
-        fromCurrencies.push(usdCurrency);
-    }
+    fromCurrencies.push(usdCurrency);
 
     for (let i = 0; i < fromCurrencies.length; i++) {
 
         // Skip if fromCurrency is same as toCurrency
-        if (fromCurrencies[i].code === currencyCode) continue;
+        // if (fromCurrencies[i]?.code === currencyCode) continue;
 
         const crossRate = calculateCrossRate(
             fromCurrencies[i]?.code,
@@ -268,8 +262,6 @@ export function generateSpecificCrossRates(
                 fiatRates.push(formattedCrossRate);
             }
         }
-
     }
-
     return { allCrossRates, cryptoRates, fiatRates };
 }
