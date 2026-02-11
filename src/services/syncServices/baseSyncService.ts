@@ -98,7 +98,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                 .from('trash')
                 .select('*')
                 .eq('deleted_by', userId)
-                .eq('table_name', this.config.supabaseTable)
+                .eq('table_name', this.config.supabaseTable as any)
                 .gt('deleted_at', new Date(lastSync).toISOString())
                 .order('deleted_at', { ascending: true });
 
@@ -106,7 +106,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
 
             console.log(`[${this.config.localTable}] 🔥 Found ${trashData?.length || 0} deletions to apply`);
 
-            const collection = database.collections.get<T>(this.config.localTable);
+            const collection = database.collections.get<localData>(this.config.localTable);
 
             await database.write(async () => {
                 for (const trash of trashData || []) {
@@ -146,8 +146,10 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
 
             for (const deletion of pending) {
                 try {
+                    if (!deletion.serverId) continue;
+
                     const { error } = await supabase
-                        .from(this.config.supabaseTable)
+                        .from(this.config.supabaseTable as any)
                         .delete()
                         .eq('id', deletion.serverId);
 
@@ -179,7 +181,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
 
         try {
             const { data: serverData, error } = await supabase
-                .from(this.config.supabaseTable)
+                .from(this.config.supabaseTable as any)
                 .select('*')
                 .gt('updated_at', new Date(lastSync).toISOString())
                 .order('updated_at', { ascending: true });
@@ -193,7 +195,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
             // Process each record
             for (const serverRecord of serverData || []) {
                 const existing = await collection
-                    .query(Q.where('server_id', serverRecord.id))
+                    .query(Q.where('server_id', (serverRecord as any).id))
                     .fetch();
 
 
@@ -206,10 +208,10 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                         const localRecord = existing[0];
 
                         if (!localRecord.isSynced) {
-                            console.log(`[${this.config.localTable}] ⚠️ Conflict detected for ${serverRecord.id}`);
+                            console.log(`[${this.config.localTable}] ⚠️ Conflict detected for ${(serverRecord as any).id}`);
 
                             const resolution = this.config.resolveConflict
-                                ? this.config.resolveConflict(localRecord, serverRecord)
+                                ? this.config.resolveConflict(localRecord, serverRecord as any)
                                 : 'local';
 
                             if (resolution === 'server') {
@@ -224,7 +226,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                                 console.log(`[${this.config.localTable}] Resolved conflict: merge`);
                                 await localRecord.update((model) => {
                                     if (this.config.mergeConflict) {
-                                        this.config.mergeConflict(localRecord, serverRecord, model);
+                                        this.config.mergeConflict(localRecord, serverRecord as any, model);
                                     } else {
                                         Object.assign(model, preparedData);
                                     }
@@ -239,7 +241,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                         }
                     } else {
                         await collection.create((model) => {
-                            (model as any).serverId = serverRecord.id;
+                            (model as any).serverId = (serverRecord as any).id;
                             Object.assign(model, preparedData);
                             (model as any).isSynced = true;
                         });
@@ -277,7 +279,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                         const updateData = await this.config.mapLocalToServer(record, this);
 
                         const { error } = await supabase
-                            .from(this.config.supabaseTable)
+                            .from(this.config.supabaseTable as any)
                             .update({
                                 ...updateData,
                             } as any)
@@ -296,7 +298,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
                         const insertData = await this.config.mapLocalToServer(record, this);
 
                         const { data, error } = await supabase
-                            .from(this.config.supabaseTable)
+                            .from(this.config.supabaseTable as any)
                             .insert({
                                 ...insertData
                             } as any)
@@ -307,7 +309,7 @@ export class BaseSyncService<localData extends SyncableModel, serverTableName ex
 
                         await database.write(async () => {
                             await record.update((r) => {
-                                (r).serverId = data.id;
+                                (r).serverId = (data as any).id;
                                 (r).isSynced = true;
                             });
                         });
