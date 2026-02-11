@@ -9,7 +9,6 @@ import ActionSheet, {
   RouteScreenProps,
   Route,
 } from "react-native-actions-sheet";
-import { FlashList } from "@shopify/flash-list";
 import { Text } from "../ui/Text";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
