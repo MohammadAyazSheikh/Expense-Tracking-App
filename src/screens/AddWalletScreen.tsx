@@ -79,10 +79,9 @@ export const AddWalletScreen = () => {
   const isDefault = watch("isDefault");
   const walletKey = watch("walletType");
 
-  const currencyOptions = useMemo(() => {
-    const { cryptoRates, fiatRates } = getRatesForCurrency();
-    return walletKey?.key === "crypto" ? cryptoRates : fiatRates;
-  }, [walletKey]);
+  const { cryptoRates, fiatRates } = useMemo(() => {
+    return getRatesForCurrency();
+  }, []);
 
   const onSubmit = (data: WalletFormValues) => {
     const body = {
@@ -102,7 +101,7 @@ export const AddWalletScreen = () => {
     const result = await SheetManager.show("select-sheet", {
       payload: {
         selectedValue: selectedCurrency?.id,
-        options: currencyOptions,
+        options: walletKey?.key === "crypto" ? cryptoRates : fiatRates,
         title: "Select Currency",
       },
     });
@@ -136,12 +135,18 @@ export const AddWalletScreen = () => {
                 iconFamily: item.iconFamily as any,
               }}
               isSelected={walletKey?.key === item.key}
-              onPress={() =>
+              onPress={() => {
+                setValue(
+                  "currency",
+                  item.key === "crypto"
+                    ? cryptoRates[0].originalItem
+                    : fiatRates[0].originalItem,
+                );
                 setValue("walletType", {
                   id: item.id,
                   key: item.key,
-                })
-              }
+                });
+              }}
             />
           ))}
         </View>

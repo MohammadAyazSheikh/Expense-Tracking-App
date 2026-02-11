@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
+import Fab from "@/components/ui/Fab";
+import { LegendList } from "@legendapp/list";
 import { Text } from "../components/ui/Text";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
@@ -12,7 +14,7 @@ import { Icon } from "../components/ui/Icon";
 import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui/Button";
 import { Header } from "../components/ui/Headers";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { SafeArea } from "@/components/ui/SafeArea";
 import { storeWallet, useWalletStore } from "@/store/walletStore";
 
 const recentTransfers = [
@@ -129,107 +131,122 @@ export const WalletsScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { wallets: data, loadWallets } = useWalletStore();
 
-  const totalBalance = data.reduce(
-    (sum, wallet) => sum + wallet.wallet.balance,
-    0,
+  const totalBalance = useMemo(
+    () => data.reduce((sum, wallet) => sum + wallet.wallet.balance, 0),
+    [data],
   );
+
+  const renderItems = useCallback(({ item }: { item: storeWallet }) => {
+    return (
+      <WalletCard
+        data={item}
+        onPress={() =>
+          navigation.navigate("WalletDetail", {
+            walletId: item.wallet.id,
+          })
+        }
+        onLongPress={() =>
+          navigation.navigate("EditWallet", {
+            walletId: item.wallet.id,
+          })
+        }
+      />
+    );
+  }, []);
 
   useEffect(() => {
     loadWallets();
   }, []);
-
   return (
-    <ScreenWrapper style={styles.container} scrollable>
-      <Header
-        title="Wallets & Accounts"
-        showBack={true}
-        onBack={() => navigation.goBack()}
-        right={
-          <Button
-            title="Add"
-            icon={<Feather name="plus" size={16} color="white" />}
-            variant="secondary"
-            size="sm"
-            style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}
-            textStyle={{ color: "white" }}
-            onPress={() => {
-              navigation.navigate("AddWallet");
-            }}
-          />
-        }
-      >
-        <View style={styles.balanceCard}>
-          <Text variant="caption" style={styles.balanceLabel}>
-            Total Balance
-          </Text>
-          <Text style={styles.balanceValue} weight="bold">
-            ${totalBalance.toFixed(2)}
-          </Text>
-          <Badge
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              borderWidth: 0,
-            }}
+    <SafeArea applyBottomInset style={styles.container}>
+      <LegendList
+        data={data}
+        recycleItems
+        renderItem={renderItems}
+        keyExtractor={(item) => item.wallet.id}
+        contentContainerStyle={{ paddingBottom: theme.paddings.xl }}
+        showsVerticalScrollIndicator={false}
+        ListFooterComponentStyle={{
+          paddingHorizontal: theme.paddings.md,
+          paddingBottom: theme.paddings.xl,
+        }}
+        ListHeaderComponentStyle={{
+          marginBottom: theme.margins.md,
+        }}
+        ItemSeparatorComponent={() => (
+          <View style={{ height: theme.margins.md }} />
+        )}
+        ListHeaderComponent={() => (
+          <Header
+            applySafeAreaPadding
+            title="Wallets & Accounts"
+            showBack={true}
+            onBack={() => navigation.goBack()}
           >
-            <Text style={{ color: "white", fontSize: 12 }}>
-              {data.length} Accounts
-            </Text>
-          </Badge>
-        </View>
-      </Header>
-
-      <View style={styles.content}>
-        {/* Wallets List */}
-        <View style={{ gap: theme.margins.sm }}>
-          {data.map((wallet, index) => (
-            <WalletCard
-              key={`${wallet.wallet.id}`}
-              data={wallet}
-              onPress={() =>
-                navigation.navigate("WalletDetail", {
-                  walletId: wallet.wallet.id,
-                })
-              }
-              onLongPress={() =>
-                navigation.navigate("EditWallet", {
-                  walletId: wallet.wallet.id,
-                })
-              }
+            <View style={styles.balanceCard}>
+              <Text variant="caption" style={styles.balanceLabel}>
+                Total Balance
+              </Text>
+              <Text style={styles.balanceValue} weight="bold">
+                ${totalBalance.toFixed(2)}
+              </Text>
+              <Badge
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  borderWidth: 0,
+                }}
+              >
+                <Text style={{ color: "white", fontSize: 12 }}>
+                  {data.length} Accounts
+                </Text>
+              </Badge>
+            </View>
+          </Header>
+        )}
+        ListFooterComponent={() => (
+          <View>
+            {/* Transfer Button */}
+            <Button
+              title={t("wallets.transfer")}
+              icon={<Feather name="refresh-cw" size={20} color="white" />}
+              size="lg"
+              style={styles.transferButton}
+              onPress={() => navigation.navigate("Transfer")}
             />
-          ))}
-        </View>
 
-        {/* Transfer Button */}
-        <Button
-          title={t("wallets.transfer")}
-          icon={<Feather name="refresh-cw" size={20} color="white" />}
-          size="lg"
-          style={styles.transferButton}
-          onPress={() => navigation.navigate("Transfer")}
-        />
+            {/* Recent Transfers */}
+            <View>
+              <Text variant="h3" style={{ marginBottom: theme.margins.sm }}>
+                Recent Transfers
+              </Text>
+              <View style={{ gap: theme.margins.sm }}>
+                {recentTransfers.map((transfer, index) => (
+                  <RecentTransferCard
+                    key={`${transfer.from}-${transfer.to}-${index}`}
+                    transfer={transfer}
+                  />
+                ))}
+              </View>
+            </View>
 
-        {/* Recent Transfers */}
-        <View>
-          <Text variant="h3" style={{ marginBottom: theme.margins.sm }}>
-            Recent Transfers
-          </Text>
-          <View style={{ gap: theme.margins.sm }}>
-            {recentTransfers.map((transfer, index) => (
-              <RecentTransferCard
-                key={`${transfer.from}-${transfer.to}-${index}`}
-                transfer={transfer}
+            {/* Account Stats */}
+            <View style={styles.statsGrid}>
+              <AccountStateCard
+                title="This Month"
+                value="+$1,240"
+                type="income"
               />
-            ))}
+              <AccountStateCard
+                title="This Month"
+                value="-$890"
+                type="expenses"
+              />
+            </View>
           </View>
-        </View>
-
-        {/* Account Stats */}
-        <View style={styles.statsGrid}>
-          <AccountStateCard title="This Month" value="+$1,240" type="income" />
-          <AccountStateCard title="This Month" value="-$890" type="expenses" />
-        </View>
-      </View>
-    </ScreenWrapper>
+        )}
+      />
+      <Fab onPress={() => navigation.navigate("AddWallet")} />
+    </SafeArea>
   );
 };
 
@@ -294,6 +311,7 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     justifyContent: "space-between",
     padding: theme.paddings.lg,
+    marginHorizontal: theme.margins.md,
   },
   walletInfo: {
     flexDirection: "row",
