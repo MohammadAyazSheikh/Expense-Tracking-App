@@ -18,6 +18,7 @@ export interface SelectorOption {
   value: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  originalItem?: any;
 }
 
 type ItemProps = {
@@ -49,7 +50,11 @@ export const SelectItem = ({
         <Text weight={selected ? "bold" : "regular"} style={[styles.itemName]}>
           {title}
         </Text>
-        {<View style={styles.itemRight}>{rightIcon}</View>}
+        {typeof rightIcon === "string" ? (
+          <Text variant="h3">{rightIcon}</Text>
+        ) : (
+          rightIcon || null
+        )}
       </View>
       {multiSelect ? (
         <Checkbox checked={selected} />
@@ -80,8 +85,9 @@ export const SelectSheet = (props: SheetProps) => {
     opt.label.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleSelect = (value: string) => {
-    SheetManager.hide("select-sheet", { payload: value });
+  const handleSelect = (value: string, originalItem: any) => {
+    payload?.onSelect?.(value, originalItem);
+    SheetManager.hide("select-sheet", { payload: { value, originalItem } });
   };
 
   return (
@@ -98,7 +104,9 @@ export const SelectSheet = (props: SheetProps) => {
         </Text>
         <Pressable
           onPress={() =>
-            SheetManager.hide("select-sheet", { payload: selectedValue })
+            SheetManager.hide("select-sheet", {
+              payload: undefined,
+            })
           }
         >
           <Icon
@@ -137,7 +145,7 @@ export const SelectSheet = (props: SheetProps) => {
           <SelectItem
             title={item.label}
             selected={selectedValue === item.value}
-            onPress={() => handleSelect(item.value)}
+            onPress={() => handleSelect(item.value, item?.originalItem)}
             leftIcon={item.leftIcon}
             rightIcon={item.rightIcon}
           />
@@ -198,13 +206,9 @@ const styles = StyleSheet.create((theme, rt) => ({
     alignItems: "center",
     gap: 12,
   },
-  itemRight: {
-    flex: 1,
-    alignItems: "flex-end",
-    paddingRight: theme.paddings.md,
-  },
   itemName: {
     fontSize: theme.fontSize.md,
     color: theme.colors.foreground,
+    flex: 1,
   },
 }));

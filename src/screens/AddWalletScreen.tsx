@@ -1,69 +1,90 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import * as z from "zod";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
+import { Button, DropDownButton } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { Switch } from "../components/ui/Switch";
 import { useTranslation } from "../hooks/useTranslation";
-import { useFinanceStore } from "../store";
+import { useAppSettingsStore } from "../store";
 import Toast from "react-native-toast-message";
 import { CategoryItem } from "../screens/AddExpenseScreen";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Header } from "../components/ui/Headers";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useWalletTypeStore } from "@/store";
+import { useWalletTypeStore, useCurrencyStore } from "@/store";
+import { SheetManager } from "react-native-actions-sheet";
+import { SafeArea } from "@/components/ui/SafeArea";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const currencies = ["USD", "EUR", "GBP", "PKR", "INR", "AED"];
+const walletSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  balance: z
+    .string()
+    .min(1, "Balance is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid balance format"),
+  walletType: z.object({
+    id: z.string(),
+    key: z.string(),
+  }),
+  currency: z.object({
+    id: z.string(),
+    code: z.string(),
+    decimalPlaces: z.number(),
+    isActive: z.boolean(),
+    name: z.string(),
+    symbol: z.string(),
+    type: z.string(),
+  }),
+  accountNumber: z.string().optional(),
+  includeInTotal: z.boolean(),
+  isDefault: z.boolean(),
+});
+
+type WalletFormValues = z.infer<typeof walletSchema>;
 
 export const AddWalletScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { addWallet } = useFinanceStore();
+  const { currency } = useAppSettingsStore();
   const { walletTypes, loadWalletTypes } = useWalletTypeStore();
+  const { exchangeRates, loadExchangeRates, getRatesForCurrency } =
+    useCurrencyStore();
+
   const {
     control,
     handleSubmit,
     setValue,
     watch,
     formState: { errors },
-  } = useForm({
+  } = useForm<WalletFormValues>({
+    resolver: zodResolver(walletSchema),
     defaultValues: {
       name: "",
       balance: "",
-      type: "cash",
-      currency: "USD",
+      walletType: walletTypes[0],
+      currency: currency,
       accountNumber: "",
       includeInTotal: true,
       isDefault: false,
     },
   });
 
-  const type = watch("type");
-  const currency = watch("currency");
+  const selectedCurrency = watch("currency");
   const includeInTotal = watch("includeInTotal");
   const isDefault = watch("isDefault");
+  const walletKey = watch("walletType");
 
-  const onSubmit = (data: any) => {
-    const selectedType = walletTypes.find((t) => t.id === data.type);
+  const currencyOptions = useMemo(() => {
+    const { cryptoRates, fiatRates } = getRatesForCurrency();
+    return walletKey?.key === "crypto" ? cryptoRates : fiatRates;
+  }, [walletKey]);
 
-    addWallet({
-      name: data.name,
-      balance: parseFloat(data.balance),
-      type: data.type,
-      color: selectedType?.color || theme.colors.primary,
-      icon: selectedType?.icon || "wallet",
-      accountNumber: data.accountNumber,
-      currency: data.currency,
-      includeInTotal: data.includeInTotal,
-      isDefault: data.isDefault,
-    });
-
+  const onSubmit = (data: WalletFormValues) => {
     setTimeout(() => {
       navigation.goBack();
     }, 1000);
@@ -74,17 +95,26 @@ export const AddWalletScreen = () => {
       text2: t("wallets.addedSuccess"),
     });
   };
+
+  const handleSelectCurrency = async () => {
+    const result = await SheetManager.show("select-sheet", {
+      payload: {
+        selectedValue: selectedCurrency?.id,
+        options: currencyOptions,
+        title: "Select Currency",
+      },
+    });
+
+    if (result) setValue("currency", result?.originalItem);
+  };
+
   useEffect(() => {
     loadWalletTypes();
+    loadExchangeRates();
   }, []);
+
   return (
-    <ScreenWrapper style={{ height: "100%" }}>
-      <Header
-        onBack={() => {
-          navigation.goBack();
-        }}
-        title={t("wallets.addWallet")}
-      />
+    <SafeArea applyBottomInset scrollable>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -101,27 +131,49 @@ export const AddWalletScreen = () => {
                 name: t(`wallets.types.${item.key}` as any, item.key),
                 color: item.color,
                 icon: item.icon,
-                iconFamily: "MaterialCommunityIcons",
+                iconFamily: item.iconFamily as any,
               }}
-              isSelected={type === item.id}
-              onPress={() => setValue("type", item.id)}
+              isSelected={walletKey?.key === item.key}
+              onPress={() =>
+                setValue("walletType", {
+                  id: item.id,
+                  key: item.key,
+                })
+              }
             />
           ))}
         </View>
+        {errors.walletType?.key && (
+          <Text style={{ color: theme.colors.destructive }}>
+            {errors.walletType?.key.message}
+          </Text>
+        )}
 
         {/* Basic Info */}
         <Card style={styles.formCard}>
           <Controller
             control={control}
             name="name"
-            rules={{ required: t("wallets.fillRequired") }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t("wallets.name")}
                 placeholder="e.g. Main Account"
                 value={value}
                 onChangeText={onChange}
-                error={errors.name?.message as string}
+                error={errors.name?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="currency"
+            render={({ field: { onChange, value } }) => (
+              <DropDownButton
+                label={t("wallets.currency")}
+                selectedValue={value?.name}
+                onPress={handleSelectCurrency}
+                error={errors.currency?.message}
               />
             )}
           />
@@ -129,7 +181,6 @@ export const AddWalletScreen = () => {
           <Controller
             control={control}
             name="balance"
-            rules={{ required: t("wallets.fillRequired") }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t("wallets.initialBalance")}
@@ -137,57 +188,17 @@ export const AddWalletScreen = () => {
                 keyboardType="numeric"
                 value={value}
                 onChangeText={onChange}
-                error={errors.balance?.message as string}
+                error={errors.balance?.message}
                 leftIcon={
                   <Text weight="bold" style={{ marginRight: 4 }}>
-                    {currencies.find((c) => c === currency)
-                      ? currency === "USD"
-                        ? "$"
-                        : currency === "EUR"
-                          ? "€"
-                          : currency === "GBP"
-                            ? "£"
-                            : currency
-                      : "$"}
+                    {selectedCurrency?.code || "$"}
                   </Text>
                 }
               />
             )}
           />
 
-          <View style={styles.row}>
-            {/* Simplified currency selector for now */}
-            <Text style={styles.label}>{t("wallets.currency")}</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 8 }}
-            >
-              {currencies.map((c) => (
-                <Pressable
-                  key={c}
-                  onPress={() => setValue("currency", c)}
-                  style={[
-                    styles.currencyChip,
-                    currency === c && {
-                      backgroundColor: theme.colors.primary,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      color: currency === c ? "white" : theme.colors.foreground,
-                      fontSize: 12,
-                    }}
-                  >
-                    {c}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-
-          {(type === "bank" || type === "card") && (
+          {(walletKey?.key === "bank" || walletKey?.key === "card") && (
             <Controller
               control={control}
               name="accountNumber"
@@ -195,7 +206,7 @@ export const AddWalletScreen = () => {
                 <Input
                   label={t("wallets.accountNumber")}
                   placeholder="**** **** **** 1234"
-                  value={value}
+                  value={value ?? ""}
                   onChangeText={onChange}
                   keyboardType="number-pad"
                 />
@@ -243,7 +254,7 @@ export const AddWalletScreen = () => {
 
         <Button title={t("common.save")} onPress={handleSubmit(onSubmit)} />
       </ScrollView>
-    </ScreenWrapper>
+    </SafeArea>
   );
 };
 
@@ -270,26 +281,6 @@ export const styles = StyleSheet.create((theme, rt) => ({
   formCard: {
     padding: theme.paddings.md,
     gap: theme.margins.md,
-  },
-  row: {
-    flexDirection: "row",
-    gap: theme.margins.md,
-    alignItems: "center",
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: theme.colors.foreground,
-  },
-  currencyChip: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    minWidth: 36,
-    alignItems: "center",
-    justifyContent: "center",
   },
   settingsCard: {
     padding: theme.paddings.md,

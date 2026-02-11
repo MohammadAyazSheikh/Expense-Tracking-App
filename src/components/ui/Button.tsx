@@ -79,6 +79,7 @@ type DropDownButtonProps = {
   leftIcon?: React.ReactNode;
   label?: string;
   onPress: () => void;
+  error?: string;
   selectedValue: string;
   style?: ViewStyle;
   labelStyle?: TextStyle;
@@ -89,6 +90,7 @@ type DropDownButtonProps = {
 export const DropDownButton = ({
   leftIcon,
   label,
+  error,
   onPress,
   selectedValue,
   style,
@@ -114,6 +116,7 @@ export const DropDownButton = ({
           style={{ marginLeft: "auto" }}
         />
       </Pressable>
+      {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
 };
@@ -151,11 +154,13 @@ const styles = StyleSheet.create((theme) => ({
           paddingHorizontal: theme.paddings.md,
         },
         md: {
-          paddingVertical: theme.paddings.xs,
+          // paddingVertical: theme.paddings.xs,
+          height: 50,
           paddingHorizontal: theme.paddings.lg,
         },
         lg: {
-          paddingVertical: theme.paddings.sm,
+          // paddingVertical: theme.paddings.sm,
+          height: 60,
           paddingHorizontal: theme.paddings.xl,
         },
       },
@@ -195,10 +200,16 @@ const styles = StyleSheet.create((theme) => ({
   selectorButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: theme.paddings.md,
+    height: 50,
+    paddingHorizontal: theme.paddings.md,
     borderRadius: theme.radius.md,
     borderWidth: 1,
     borderColor: theme.colors.border,
     gap: theme.margins.sm,
+  },
+  error: {
+    marginTop: theme.margins.xs,
+    color: theme.colors.destructive,
+    fontSize: theme.fontSize.sm,
   },
 }));

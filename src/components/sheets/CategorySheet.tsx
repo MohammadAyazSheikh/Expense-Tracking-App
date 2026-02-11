@@ -9,7 +9,6 @@ import ActionSheet, {
   RouteScreenProps,
   Route,
 } from "react-native-actions-sheet";
-
 import { Text } from "../ui/Text";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -142,6 +141,7 @@ const ManageCategory = ({
         </TouchableOpacity>
       </View>
       <LegendList
+        renderScrollComponent={(props) => <ScrollView {...props} />}
         recycleItems
         data={CATEGORY_GROUPS}
         estimatedItemSize={50}

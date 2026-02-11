@@ -361,7 +361,7 @@ export const TransferScreen = () => {
                       });
                       // Fallback if result is returned directly
                       if (result) {
-                        onChange(result);
+                        onChange(result?.value);
                       }
                     }}
                   >

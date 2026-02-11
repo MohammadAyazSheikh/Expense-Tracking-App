@@ -25,7 +25,7 @@ export const AppSettingsScreen = () => {
     (currency) => ({
       label: `${currency.name}`,
       value: currency.id.toString(),
-      rightIcon: <Text style={{ flex: 1 }}>{`${currency.code}`}</Text>,
+      rightIcon: <Text>{`${currency.code}`}</Text>,
     }),
     [currencies],
   );
@@ -38,15 +38,16 @@ export const AppSettingsScreen = () => {
         selectedValue: currency.id,
       },
     });
-    if (result) {
+    if (result?.value) {
       try {
         const [currency] = await database
           .get<Currencies>("currencies")
-          .query(Q.where("id", result))
+          .query(Q.where("id", result.value))
           .fetch();
 
         if (currency) {
           updateCurrency(currency);
+          return;
         }
         console.warn("currency not found in local db");
       } catch (e) {

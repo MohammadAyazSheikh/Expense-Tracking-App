@@ -95,7 +95,7 @@ export const CreateBudgetScreen = () => {
     });
 
     if (result) {
-      setValue("categoryId", result as string);
+      setValue("categoryId", result?.value);
     }
   };
 
@@ -109,7 +109,7 @@ export const CreateBudgetScreen = () => {
     });
 
     if (result) {
-      setValue("period", result as "weekly" | "monthly" | "yearly");
+      setValue("period", result?.value as "weekly" | "monthly" | "yearly");
     }
   };
 
@@ -123,7 +123,7 @@ export const CreateBudgetScreen = () => {
     });
 
     if (result) {
-      setValue("alertThreshold", result as string);
+      setValue("alertThreshold", result?.value);
     }
   };
 
@@ -155,7 +155,7 @@ export const CreateBudgetScreen = () => {
 
   const getAlertThresholdLabel = () => {
     const option = alertThresholdOptions.find(
-      (a) => a.value === alertThreshold
+      (a) => a.value === alertThreshold,
     );
     return option?.label || "80% of budget";
   };

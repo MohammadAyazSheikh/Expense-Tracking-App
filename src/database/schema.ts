@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb';
 
 export const schema = appSchema({
-  version: 1,
+  version: 2,
   tables: [
     tableSchema({
       name: 'categories',
@@ -83,6 +83,24 @@ export const schema = appSchema({
         { name: 'color', type: 'string' },
         { name: 'icon', type: 'string' },
         { name: 'icon_family', type: 'string' },
+        { name: 'is_synced', type: 'boolean' },
+        { name: 'server_id', type: 'string', isOptional: true },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+      ]
+    }),
+    tableSchema({
+      name: 'wallets',
+      columns: [
+        { name: 'name', type: 'string' },
+        { name: 'user_id', type: 'string' },
+        { name: 'balance', type: 'number' },
+        { name: 'is_default', type: 'boolean' },
+        { name: 'currency_id', type: 'string' },
+        { name: 'wallet_type_id', type: 'string' },
+        { name: 'include_in_total', type: 'boolean' },
+        { name: 'last_digits', type: 'string', isOptional: true },
+        { name: 'account_number', type: 'string', isOptional: true },
         { name: 'is_synced', type: 'boolean' },
         { name: 'server_id', type: 'string', isOptional: true },
         { name: 'created_at', type: 'number' },

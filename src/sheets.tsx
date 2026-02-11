@@ -78,9 +78,9 @@ declare module "react-native-actions-sheet" {
         options: SelectorOption[];
         title?: string;
         selectedValue?: string;
-        onSelect?: (value: string) => void;
+        onSelect?: (value: string, originalItem: any) => void;
       };
-      returnValue: string | undefined;
+      returnValue: { value: string; originalItem: any } | undefined;
     }>;
     "multi-select-sheet": SheetDefinition<{
       payload: {

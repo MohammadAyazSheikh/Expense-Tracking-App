@@ -174,7 +174,7 @@ export const AddGroupExpenseScreen = () => {
         onSelect: (value) => setValue("paidBy", value),
       },
     });
-    setValue("paidBy", result!);
+    if (result) setValue("paidBy", result?.value);
   };
 
   return (
