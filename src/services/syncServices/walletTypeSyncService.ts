@@ -10,8 +10,6 @@ const walletTypeSyncConfig: SyncConfig<WalletTypes, "wallet_types"> = {
         model.color = serverData.color!;
         model.icon = serverData.icon!;
         model.iconFamily = serverData.icon_family!;
-        model.isSynced = serverData.is_synced!;
-        model.serverId = serverData.server_id!;
     },
     mapLocalToServer: async (localModel) => ({}),
     resolveConflict: () => "server",
