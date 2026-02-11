@@ -10,7 +10,6 @@ import { Card } from "../components/ui/Card";
 import { Switch } from "../components/ui/Switch";
 import { useTranslation } from "../hooks/useTranslation";
 import { useAppSettingsStore } from "../store";
-import Toast from "react-native-toast-message";
 import { CategoryItem } from "../screens/AddExpenseScreen";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
@@ -19,6 +18,7 @@ import { useWalletTypeStore, useCurrencyStore } from "@/store";
 import { SheetManager } from "react-native-actions-sheet";
 import { SafeArea } from "@/components/ui/SafeArea";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useWalletStore } from "@/store/walletStore";
 
 const walletSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -51,9 +51,9 @@ export const AddWalletScreen = () => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const { currency } = useAppSettingsStore();
+  const { addWallet } = useWalletStore();
   const { walletTypes, loadWalletTypes } = useWalletTypeStore();
-  const { exchangeRates, loadExchangeRates, getRatesForCurrency } =
-    useCurrencyStore();
+  const { loadExchangeRates, getRatesForCurrency } = useCurrencyStore();
 
   const {
     control,
@@ -85,15 +85,17 @@ export const AddWalletScreen = () => {
   }, [walletKey]);
 
   const onSubmit = (data: WalletFormValues) => {
-    setTimeout(() => {
-      navigation.goBack();
-    }, 1000);
-
-    Toast.show({
-      type: "success",
-      text1: t("common.success"),
-      text2: t("wallets.addedSuccess"),
-    });
+    const body = {
+      name: data.name,
+      balance: parseFloat(data.balance),
+      walletTypeId: data.walletType.id,
+      currencyId: data.currency.id,
+      lastDigits: data?.accountNumber?.slice(-4) || null,
+      accountNumber: data.accountNumber || null,
+      includeInTotal: data.includeInTotal,
+      isDefault: data.isDefault,
+    };
+    addWallet(body);
   };
 
   const handleSelectCurrency = async () => {
