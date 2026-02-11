@@ -1,21 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
 import { Feather } from "@expo/vector-icons";
 import { Icon } from "../components/ui/Icon";
-import { Header } from "../components/ui/Headers";
-
-import { useFinanceStore } from "../store";
-import { Wallet } from "../types";
 import { useTranslation } from "react-i18next";
+import { Button } from "../components/ui/Button";
+import { Header } from "../components/ui/Headers";
+import { ScreenWrapper } from "../components/ui/ScreenWrapper";
+import { storeWallet, useWalletStore } from "@/store/walletStore";
 
 const recentTransfers = [
   { from: "Chase Checking", to: "Cash", amount: 200, date: "Today" },
@@ -23,35 +21,28 @@ const recentTransfers = [
 ];
 
 type walletCardProps = {
-  wallet: Wallet;
+  data: storeWallet;
   onPress?: () => void;
   onLongPress?: () => void;
 };
 
-const WalletCard = ({ wallet, onPress, onLongPress }: walletCardProps) => {
-  const { theme } = useUnistyles();
+const WalletCard = ({ data, onPress, onLongPress }: walletCardProps) => {
+  const { wallet, walletType } = data;
 
-  const getColor = (colorName: string) => {
-    if (colorName?.startsWith("#")) return colorName;
-    return (
-      (theme.colors[colorName as keyof typeof theme.colors] as string) ||
-      theme.colors.primary
-    );
-  };
   return (
     <Card onPress={onPress} onLongPress={onLongPress} style={styles.walletCard}>
       <View style={styles.walletInfo}>
         <View
           style={[
             styles.walletIcon,
-            { backgroundColor: getColor(wallet.color) + "20" },
+            { backgroundColor: walletType.color + "20" },
           ]}
         >
           <Icon
-            type="MaterialCommunityIcons"
-            name={wallet.icon as any}
+            type={walletType.iconFamily as any}
+            name={walletType.icon as any}
             size={24}
-            color={getColor(wallet.textColor || wallet.color)}
+            color={walletType.color}
           />
         </View>
         <View>
@@ -64,7 +55,7 @@ const WalletCard = ({ wallet, onPress, onLongPress }: walletCardProps) => {
             style={{ marginTop: 4 }}
             textStyle={{ textTransform: "capitalize" }}
           >
-            {wallet.type}
+            {walletType.label}
           </Badge>
         </View>
       </View>
@@ -136,9 +127,16 @@ export const WalletsScreen = () => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const wallets = useFinanceStore((state) => state.wallets);
+  const { wallets: data, loadWallets } = useWalletStore();
 
-  const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0);
+  const totalBalance = data.reduce(
+    (sum, wallet) => sum + wallet.wallet.balance,
+    0,
+  );
+
+  useEffect(() => {
+    loadWallets();
+  }, []);
 
   return (
     <ScreenWrapper style={styles.container} scrollable>
@@ -174,7 +172,7 @@ export const WalletsScreen = () => {
             }}
           >
             <Text style={{ color: "white", fontSize: 12 }}>
-              {wallets.length} Accounts
+              {data.length} Accounts
             </Text>
           </Badge>
         </View>
@@ -183,15 +181,19 @@ export const WalletsScreen = () => {
       <View style={styles.content}>
         {/* Wallets List */}
         <View style={{ gap: theme.margins.sm }}>
-          {wallets.map((wallet, index) => (
+          {data.map((wallet, index) => (
             <WalletCard
-              key={`${wallet.id}-${index}`}
-              wallet={wallet}
+              key={`${wallet.wallet.id}`}
+              data={wallet}
               onPress={() =>
-                navigation.navigate("WalletDetail", { walletId: wallet.id })
+                navigation.navigate("WalletDetail", {
+                  walletId: wallet.wallet.id,
+                })
               }
               onLongPress={() =>
-                navigation.navigate("EditWallet", { walletId: wallet.id })
+                navigation.navigate("EditWallet", {
+                  walletId: wallet.wallet.id,
+                })
               }
             />
           ))}
