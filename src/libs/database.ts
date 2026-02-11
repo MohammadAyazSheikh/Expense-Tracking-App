@@ -2,14 +2,15 @@ import { Database } from '@nozbe/watermelondb';
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import { schema } from '@/database/schema';
 import { Tag } from '@/database/models/tags';
-import { WalletTypes } from '@/database/models/wallet';
 import { PendingDeletions } from '@/database/models/local';
+import { WalletTypes, Wallet } from '@/database/models/wallet';
 import { Currencies, ExchangeRates } from '@/database/models/currency';
 import { Category, SystemCategory } from '@/database/models/category';
 
 
 const modelClasses = [
     Tag,
+    Wallet,
     Category,
     Currencies,
     WalletTypes,
