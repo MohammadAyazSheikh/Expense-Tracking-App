@@ -265,7 +265,7 @@ export const SettingsScreen = () => {
           {t("settings.version")} 1.0.0
         </Text>
       </View>
-      <ApiLoader isLoading={isLoading} message="Logging out..." />
+      <ApiLoader isLoading={isLoading} message="Loading..." />
     </SafeArea>
   );
 };

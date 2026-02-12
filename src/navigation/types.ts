@@ -1,5 +1,6 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { Category } from '../types';
+import { storeWallet } from '@/store/walletStore';
 
 export type RootStackParamList = {
   Index: undefined;
@@ -41,7 +42,7 @@ export type RootStackParamList = {
   Wallets: undefined;
   AddWallet: undefined;
   EditWallet: { walletId: string };
-  WalletDetail: { walletId: string };
+  WalletDetail: { data: storeWallet };
   WalletStatement: { walletId: string };
   Transfer: undefined;
   AppSettings: undefined;

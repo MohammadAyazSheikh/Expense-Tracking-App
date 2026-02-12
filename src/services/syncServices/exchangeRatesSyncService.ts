@@ -15,6 +15,9 @@ const exchangeRatesSyncConfig: SyncConfig<ExchangeRates, 'exchange_rates'> = {
             'currencies',
             serverData.quote_currency_id!
         );
+        if (!baseCurrencyLocalId || !quoteCurrencyLocalId) {
+            throw new Error('Base Currency or Quote Currency not synced');
+        }
 
         model.baseCurrencyId = baseCurrencyLocalId!;
         model.quoteCurrencyId = quoteCurrencyLocalId!;
@@ -25,24 +28,6 @@ const exchangeRatesSyncConfig: SyncConfig<ExchangeRates, 'exchange_rates'> = {
 
     mapLocalToServer: async (localModel) => {
 
-        /* 
-            Notes:
-            we don't need to map local to server for exchange rates
-            because we are not creating/updating exchange rates from local
-            Below commented code only for understanding how to map local to server when there is a relation between tables
-        */
-
-        // Get server IDs from local currency records
-        // const baseCurrency = await localModel.baseCurrency.fetch();
-        // const quoteCurrency = await localModel.quoteCurrency.fetch();
-
-        // return {
-        //     base_currency_id: baseCurrency.serverId!,
-        //     quote_currency_id: quoteCurrency.serverId!,
-        //     rate: localModel.rate,
-        //     rate_date: localModel.rateDate,
-        //     source: localModel.source,
-        // };
     },
 };
 

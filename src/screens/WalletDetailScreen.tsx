@@ -7,7 +7,7 @@ import { Icon } from "../components/ui/Icon";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-import { useFinanceStore } from "../store";
+import { useFinanceStore, useWalletStore } from "../store";
 import { TabView } from "../components/ui/TabView";
 import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
@@ -20,6 +20,8 @@ import { MenuItem } from "../components/sheets/MenuSheet";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TransactionCard } from "../components/transactions/TransactionCard";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { Transaction } from "@/types";
+import { SafeArea } from "@/components/ui/SafeArea";
 
 type WalletDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -31,13 +33,12 @@ export default function WalletDetailScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<WalletDetailScreenRouteProp>();
-  const { walletId } = route.params;
-  const { wallets, transactions, categories, deleteWallet } = useFinanceStore();
+  const { data } = route.params;
+  const { wallet, walletType, currency } = data;
+  const { categories } = useFinanceStore();
+  const { deleteWallet } = useWalletStore();
 
   const [showBalance, setShowBalance] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
-
-  const wallet = wallets.find((w) => w.id === walletId);
 
   const getColor = (colorName: string) => {
     if (colorName?.startsWith("#")) return colorName;
@@ -59,9 +60,7 @@ export default function WalletDetailScreen() {
   }
 
   // Filter transactions for this wallet
-  const walletTransactions = transactions
-    .filter((t) => t.walletId === walletId || t.toWalletId === walletId)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const walletTransactions: Transaction[] = [];
 
   // Calculate stats
   const currentMonth = new Date().getMonth();
@@ -90,33 +89,45 @@ export default function WalletDetailScreen() {
   ];
 
   const handleDelete = () => {
-    return;
-    alertService.show({
-      title: t("common.delete"),
-      message: t("wallets.deleteConfirm"),
-      buttons: [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("common.delete"),
-          style: "destructive",
-          onPress: () => {
-            if (wallet) {
-              deleteWallet(wallet.id);
+    if (wallet) {
+      deleteWallet(wallet.id);
 
-              Toast.show({
-                type: "success",
-                text1: t("common.success"),
-                text2: t("wallets.deletedSuccess"),
-              });
+      Toast.show({
+        type: "success",
+        text1: t("common.success"),
+        text2: t("wallets.deletedSuccess"),
+      });
 
-              setTimeout(() => {
-                navigation.navigate("Wallets");
-              }, 1000);
-            }
-          },
-        },
-      ],
-    });
+      setTimeout(() => {
+        navigation.navigate("Wallets");
+      }, 1000);
+    }
+    // alertService.show({
+    //   title: t("common.delete"),
+    //   message: t("wallets.deleteConfirm"),
+    //   buttons: [
+    //     { text: t("common.cancel"), style: "cancel" },
+    //     {
+    //       text: t("common.delete"),
+    //       style: "destructive",
+    //       onPress: () => {
+    //         if (wallet) {
+    //           deleteWallet(wallet.id);
+
+    //           Toast.show({
+    //             type: "success",
+    //             text1: t("common.success"),
+    //             text2: t("wallets.deletedSuccess"),
+    //           });
+
+    //           setTimeout(() => {
+    //             navigation.navigate("Wallets");
+    //           }, 1000);
+    //         }
+    //       },
+    //     },
+    //   ],
+    // });
   };
 
   const handleMenuAction = () => {
@@ -214,10 +225,10 @@ export default function WalletDetailScreen() {
       </ScreenWrapper>
     );
   return (
-    <ScreenWrapper style={styles.container} scrollable>
+    <SafeArea applyBottomInset style={styles.container} scrollable>
       {/*˝ Header Area */}
-
       <Header
+        applySafeAreaPadding
         title={t("wallets.title")}
         showBack={true}
         onBack={() => navigation.goBack()}
@@ -233,14 +244,14 @@ export default function WalletDetailScreen() {
             <View
               style={[
                 styles.walletIcon,
-                { backgroundColor: getColor(wallet.color) + "20" },
+                { backgroundColor: walletType.color + "20" },
               ]}
             >
               <Icon
-                type="MaterialCommunityIcons"
-                name={wallet.icon as any}
+                type={walletType.iconFamily as any}
+                name={walletType.icon}
                 size={28}
-                color={getColor(wallet.color)}
+                color={walletType.color}
               />
             </View>
             <View>
@@ -248,8 +259,8 @@ export default function WalletDetailScreen() {
                 {wallet.name}
               </Text>
               <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
-                <Badge variant="secondary">{wallet.type}</Badge>
-                <Badge variant="secondary">{wallet.currency || "USD"}</Badge>
+                <Badge variant="secondary">{walletType.label}</Badge>
+                <Badge variant="secondary">{currency.code || "USD"}</Badge>
               </View>
             </View>
           </View>
@@ -414,7 +425,9 @@ export default function WalletDetailScreen() {
               />
             }
             style={{ flex: 1 }}
-            onPress={() => navigation.navigate("WalletStatement", { walletId })}
+            onPress={() =>
+              navigation.navigate("WalletStatement", { walletId: wallet.id })
+            }
           />
           <Button
             title={t("wallets.transfer")}
@@ -422,7 +435,9 @@ export default function WalletDetailScreen() {
               <Icon type="Feather" name="refresh-cw" size={16} color="white" />
             }
             style={{ flex: 1 }}
-            onPress={() => SheetManager.show("transfer-sheet")}
+            onPress={() => {
+              navigation.navigate("Transfer");
+            }}
           />
         </View>
 
@@ -441,7 +456,7 @@ export default function WalletDetailScreen() {
           />
         </View>
       </View>
-    </ScreenWrapper>
+    </SafeArea>
   );
 }
 
