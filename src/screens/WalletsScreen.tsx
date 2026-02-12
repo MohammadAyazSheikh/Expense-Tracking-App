@@ -61,8 +61,8 @@ const WalletCard = ({ data, onPress, onLongPress }: walletCardProps) => {
           </Badge>
         </View>
       </View>
-      <Text weight="bold" style={{ fontSize: 18 }}>
-        ${wallet.balance.toFixed(2)}
+      <Text weight="bold" style={{ fontSize: 14 }}>
+        {`${data.currency.code} ${wallet.balance.toFixed(2)}`}
       </Text>
     </Card>
   );
@@ -142,7 +142,7 @@ export const WalletsScreen = () => {
         data={item}
         onPress={() =>
           navigation.navigate("WalletDetail", {
-            walletId: item.wallet.id,
+            data: item,
           })
         }
         onLongPress={() =>
