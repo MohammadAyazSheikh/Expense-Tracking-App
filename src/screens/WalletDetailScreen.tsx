@@ -7,7 +7,7 @@ import { Icon } from "../components/ui/Icon";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-import { useFinanceStore } from "../store";
+import { useFinanceStore, useWalletStore } from "../store";
 import { TabView } from "../components/ui/TabView";
 import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
@@ -35,7 +35,8 @@ export default function WalletDetailScreen() {
   const route = useRoute<WalletDetailScreenRouteProp>();
   const { data } = route.params;
   const { wallet, walletType, currency } = data;
-  const { categories, deleteWallet } = useFinanceStore();
+  const { categories } = useFinanceStore();
+  const { deleteWallet } = useWalletStore();
 
   const [showBalance, setShowBalance] = useState(true);
 
@@ -88,33 +89,45 @@ export default function WalletDetailScreen() {
   ];
 
   const handleDelete = () => {
-    return;
-    alertService.show({
-      title: t("common.delete"),
-      message: t("wallets.deleteConfirm"),
-      buttons: [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("common.delete"),
-          style: "destructive",
-          onPress: () => {
-            if (wallet) {
-              deleteWallet(wallet.id);
+    if (wallet) {
+      deleteWallet(wallet.id);
 
-              Toast.show({
-                type: "success",
-                text1: t("common.success"),
-                text2: t("wallets.deletedSuccess"),
-              });
+      Toast.show({
+        type: "success",
+        text1: t("common.success"),
+        text2: t("wallets.deletedSuccess"),
+      });
 
-              setTimeout(() => {
-                navigation.navigate("Wallets");
-              }, 1000);
-            }
-          },
-        },
-      ],
-    });
+      setTimeout(() => {
+        navigation.navigate("Wallets");
+      }, 1000);
+    }
+    // alertService.show({
+    //   title: t("common.delete"),
+    //   message: t("wallets.deleteConfirm"),
+    //   buttons: [
+    //     { text: t("common.cancel"), style: "cancel" },
+    //     {
+    //       text: t("common.delete"),
+    //       style: "destructive",
+    //       onPress: () => {
+    //         if (wallet) {
+    //           deleteWallet(wallet.id);
+
+    //           Toast.show({
+    //             type: "success",
+    //             text1: t("common.success"),
+    //             text2: t("wallets.deletedSuccess"),
+    //           });
+
+    //           setTimeout(() => {
+    //             navigation.navigate("Wallets");
+    //           }, 1000);
+    //         }
+    //       },
+    //     },
+    //   ],
+    // });
   };
 
   const handleMenuAction = () => {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { View } from "react-native";
+import { RefreshControl, View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -15,7 +15,9 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui/Button";
 import { Header } from "../components/ui/Headers";
 import { SafeArea } from "@/components/ui/SafeArea";
-import { storeWallet, useWalletStore } from "@/store/walletStore";
+import { useWalletStore } from "@/store";
+import { storeWallet } from "@/store/walletStore";
+import { ApiLoader } from "@/components/ui/ApiLoader";
 
 const recentTransfers = [
   { from: "Chase Checking", to: "Cash", amount: 200, date: "Today" },
@@ -129,10 +131,13 @@ export const WalletsScreen = () => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { wallets: data, loadWallets } = useWalletStore();
+  const { wallets: data, loadWallets, isLoading } = useWalletStore();
 
   const totalBalance = useMemo(
-    () => data.reduce((sum, wallet) => sum + wallet.wallet.balance, 0),
+    () =>
+      data
+        ?.filter((wallet) => wallet.wallet.includeInTotal)
+        .reduce((sum, wallet) => sum + wallet.wallet.balance, 0),
     [data],
   );
 
@@ -160,6 +165,9 @@ export const WalletsScreen = () => {
   return (
     <SafeArea applyBottomInset style={styles.container}>
       <LegendList
+        refreshControl={
+          <RefreshControl refreshing={false} onRefresh={loadWallets} />
+        }
         data={data}
         recycleItems
         renderItem={renderItems}
@@ -246,6 +254,7 @@ export const WalletsScreen = () => {
         )}
       />
       <Fab onPress={() => navigation.navigate("AddWallet")} />
+      <ApiLoader isLoading={isLoading} />
     </SafeArea>
   );
 };

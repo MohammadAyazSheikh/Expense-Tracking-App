@@ -175,7 +175,6 @@ const mainRoutes = ({ theme }: { theme: typeof lightTheme }) => {
       <Stack.Screen name="Friends" component={FriendsScreen} />
       <Stack.Screen name="FriendDetail" component={FriendDetailScreen} />
       <Stack.Screen name="Wallets" component={WalletsScreen} />
-      <Stack.Screen name="EditWallet" component={EditWalletScreen} />
       <Stack.Screen name="WalletDetail" component={WalletDetailScreen} />
       <Stack.Screen name="WalletStatement" component={WalletStatementScreen} />
       <Stack.Screen name="Transfer" component={TransferScreen} />
@@ -183,6 +182,11 @@ const mainRoutes = ({ theme }: { theme: typeof lightTheme }) => {
         name="AddWallet"
         component={AddWalletScreen}
         options={{ headerShown: true, title: t("wallets.addWallet") }}
+      />
+      <Stack.Screen
+        name="EditWallet"
+        component={EditWalletScreen}
+        options={{ headerShown: true, title: t("wallets.editWallet") }}
       />
       <Stack.Screen
         name="AppSettings"

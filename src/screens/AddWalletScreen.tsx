@@ -18,7 +18,8 @@ import { useWalletTypeStore, useCurrencyStore } from "@/store";
 import { SheetManager } from "react-native-actions-sheet";
 import { SafeArea } from "@/components/ui/SafeArea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useWalletStore } from "@/store/walletStore";
+import { useWalletStore } from "@/store";
+import { ApiLoader } from "@/components/ui/ApiLoader";
 
 const walletSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -53,7 +54,8 @@ export const AddWalletScreen = () => {
   const { currency } = useAppSettingsStore();
   const { addWallet } = useWalletStore();
   const { walletTypes, loadWalletTypes } = useWalletTypeStore();
-  const { loadExchangeRates, getRatesForCurrency } = useCurrencyStore();
+  const { loadExchangeRates, loadCurrencies, getRatesForCurrency, isLoading } =
+    useCurrencyStore();
 
   const {
     control,
@@ -110,12 +112,16 @@ export const AddWalletScreen = () => {
   };
 
   useEffect(() => {
-    loadWalletTypes();
-    loadExchangeRates();
+    const loadData = async () => {
+      await loadWalletTypes();
+      await loadCurrencies();
+      await loadExchangeRates();
+    };
+    loadData();
   }, []);
 
   return (
-    <SafeArea applyBottomInset scrollable>
+    <SafeArea applyBottomInset>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -139,8 +145,8 @@ export const AddWalletScreen = () => {
                 setValue(
                   "currency",
                   item.key === "crypto"
-                    ? cryptoRates[0].originalItem
-                    : fiatRates[0].originalItem,
+                    ? cryptoRates?.[0]?.originalItem
+                    : fiatRates?.[0]?.originalItem,
                 );
                 setValue("walletType", {
                   id: item.id,
@@ -258,9 +264,9 @@ export const AddWalletScreen = () => {
             />
           </View>
         </Card>
-
         <Button title={t("common.save")} onPress={handleSubmit(onSubmit)} />
       </ScrollView>
+      <ApiLoader isLoading={isLoading} />
     </SafeArea>
   );
 };

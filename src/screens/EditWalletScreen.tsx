@@ -1,44 +1,66 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { View, ScrollView, Pressable } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 import { Text } from "../components/ui/Text";
-import { Button } from "../components/ui/Button";
+import { Button, DropDownButton } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Card } from "../components/ui/Card";
 import { Switch } from "../components/ui/Switch";
 import { useTranslation } from "../hooks/useTranslation";
-import { useFinanceStore } from "../store";
 import Toast from "react-native-toast-message";
 import { CategoryItem } from "../screens/AddExpenseScreen";
-import { ScreenWrapper } from "../components/ui/ScreenWrapper";
-import { Header } from "../components/ui/Headers";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Icon } from "../components/ui/Icon";
 import { alertService } from "../utils/alertService";
 import { styles } from "./AddWalletScreen";
+import { useWalletStore, useWalletTypeStore, useCurrencyStore } from "@/store";
+import { SheetManager } from "react-native-actions-sheet";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SafeArea } from "@/components/ui/SafeArea";
 
-const walletTypes = [
-  { id: "cash", icon: "wallet", label: "Cash", color: "#2E7D32" },
-  { id: "bank", icon: "bank", label: "Bank", color: "#1565C0" },
-  { id: "card", icon: "credit-card", label: "Card", color: "#6A1B9A" },
-  { id: "digital", icon: "smartphone", label: "Digital", color: "#0277BD" },
-  { id: "crypto", icon: "bitcoin", label: "Crypto", color: "#F57F17" },
-  { id: "savings", icon: "piggy-bank", label: "Savings", color: "#C62828" },
-];
+const walletSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  balance: z
+    .string()
+    .min(1, "Balance is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid balance format"),
+  walletType: z.object({
+    id: z.string(),
+    key: z.string(),
+  }),
+  currency: z.object({
+    id: z.string(),
+    code: z.string(),
+    decimalPlaces: z.number(),
+    isActive: z.boolean(),
+    name: z.string(),
+    symbol: z.string(),
+    type: z.string(),
+  }),
+  accountNumber: z.string().optional(),
+  includeInTotal: z.boolean(),
+  isDefault: z.boolean(),
+});
 
-const currencies = ["USD", "EUR", "GBP", "PKR", "INR", "AED"];
+type WalletFormValues = z.infer<typeof walletSchema>;
 
 export const EditWalletScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const route = useRoute<RouteProp<RootStackParamList, "EditWallet">>();
-  const { updateWallet, deleteWallet, wallets } = useFinanceStore();
+  const {
+    params: { walletId },
+  } = useRoute<RouteProp<RootStackParamList, "EditWallet">>();
+
+  const { getWalletById, deleteWallet, updateWallet } = useWalletStore();
+  const wallet = getWalletById(walletId);
+
+  const { walletTypes, loadWalletTypes } = useWalletTypeStore();
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-
-  const wallet = wallets.find((w) => w.id === route?.params?.walletId);
+  const { loadExchangeRates, getRatesForCurrency } = useCurrencyStore();
 
   const {
     control,
@@ -47,57 +69,116 @@ export const EditWalletScreen = () => {
     watch,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<WalletFormValues>({
+    resolver: zodResolver(walletSchema),
     defaultValues: {
       name: "",
       balance: "",
-      type: "cash",
-      currency: "USD",
+      walletType: walletTypes[0],
+      currency: {
+        id: "",
+        code: "USD",
+        decimalPlaces: 2,
+        isActive: true,
+        name: "US Dollar",
+        symbol: "$",
+        type: "fiat",
+      },
       accountNumber: "",
       includeInTotal: true,
       isDefault: false,
     },
   });
 
-  const type = watch("type");
-  const currency = watch("currency");
+  const selectedCurrency = watch("currency");
   const includeInTotal = watch("includeInTotal");
   const isDefault = watch("isDefault");
+  const walletKey = watch("walletType");
+
+  const { cryptoRates, fiatRates } = useMemo(() => {
+    return getRatesForCurrency();
+  }, []);
 
   useEffect(() => {
-    if (wallet) {
+    loadWalletTypes();
+    loadExchangeRates();
+  }, []);
+
+  useEffect(() => {
+    if (wallet && walletTypes.length > 0) {
+      // storeWallet has nested wallet, currency, and walletType objects
+      const matchingWalletType = wallet.walletType;
+      const matchingCurrency = wallet.currency;
+
       reset({
-        name: wallet.name,
-        balance: wallet.balance.toString(),
-        type: wallet.type.toLowerCase(),
-        currency: wallet.currency || "USD",
-        accountNumber: wallet.accountNumber || "",
-        includeInTotal: wallet.includeInTotal ?? true,
-        isDefault: wallet.isDefault ?? false,
+        name: wallet.wallet.name,
+        balance: wallet.wallet.balance.toString(),
+        walletType: matchingWalletType
+          ? {
+              id: matchingWalletType.id,
+              key: matchingWalletType.key,
+            }
+          : walletTypes[0],
+        currency: matchingCurrency
+          ? {
+              id: matchingCurrency.id,
+              code: matchingCurrency.code,
+              decimalPlaces: matchingCurrency.decimalPlaces,
+              isActive: matchingCurrency.isActive,
+              name: matchingCurrency.name,
+              symbol: matchingCurrency.symbol,
+              type: matchingCurrency.type,
+            }
+          : {
+              id: "",
+              code: "USD",
+              decimalPlaces: 2,
+              isActive: true,
+              name: "US Dollar",
+              symbol: "$",
+              type: "fiat",
+            },
+        accountNumber: wallet.wallet.accountNumber || "",
+        includeInTotal: wallet.wallet.includeInTotal ?? true,
+        isDefault: wallet.wallet.isDefault ?? false,
       });
     }
-  }, [wallet, reset]);
+  }, [wallet, walletTypes, reset, cryptoRates, fiatRates]);
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: WalletFormValues) => {
     if (!wallet) return;
 
-    const selectedType = walletTypes.find((t) => t.id === data.type);
-
-    updateWallet(wallet.id, {
+    const body = {
       name: data.name,
-      type: data.type,
-      color: selectedType?.color || wallet.color,
-      icon: selectedType?.icon || wallet.icon || "wallet",
-      accountNumber: data.accountNumber,
+      balance: parseFloat(data.balance),
+      walletTypeId: data.walletType.id,
+      currencyId: data.currency.id,
+      lastDigits: data?.accountNumber?.slice(-4) || null,
+      accountNumber: data.accountNumber || null,
       includeInTotal: data.includeInTotal,
       isDefault: data.isDefault,
-    });
+    };
+
+    console.log({ body });
+    updateWallet(wallet.wallet.id, body);
 
     Toast.show({
       type: "success",
       text1: t("common.success"),
       text2: t("wallets.updatedSuccess"),
     });
+  };
+
+  const handleSelectCurrency = async () => {
+    const result = await SheetManager.show("select-sheet", {
+      payload: {
+        selectedValue: selectedCurrency?.id,
+        options: walletKey?.key === "crypto" ? cryptoRates : fiatRates,
+        title: "Select Currency",
+      },
+    });
+
+    if (result) setValue("currency", result?.originalItem);
   };
 
   const handleDelete = () => {
@@ -111,7 +192,7 @@ export const EditWalletScreen = () => {
           style: "destructive",
           onPress: () => {
             if (wallet) {
-              deleteWallet(wallet.id);
+              deleteWallet(wallet.wallet.id);
 
               Toast.show({
                 type: "success",
@@ -130,14 +211,9 @@ export const EditWalletScreen = () => {
   };
 
   if (!wallet) return null;
+
   return (
-    <ScreenWrapper style={{ height: "100%" }}>
-      <Header
-        onBack={() => {
-          navigation.goBack();
-        }}
-        title={t("wallets.editWallet")}
-      />
+    <SafeArea applyBottomInset>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -151,30 +227,58 @@ export const EditWalletScreen = () => {
             <CategoryItem
               key={`${item.id}-${item.label}`}
               item={{
-                name: t(`wallets.types.${item.id}` as any),
+                name: t(`wallets.types.${item.key}` as any, item.key),
                 color: item.color,
                 icon: item.icon,
-                iconFamily: "MaterialCommunityIcons",
+                iconFamily: item.iconFamily as any,
               }}
-              isSelected={type === item.id}
-              onPress={() => setValue("type", item.id)}
+              isSelected={walletKey?.key === item.key}
+              onPress={() => {
+                setValue(
+                  "currency",
+                  item.key === "crypto"
+                    ? cryptoRates[0].originalItem
+                    : fiatRates[0].originalItem,
+                );
+                setValue("walletType", {
+                  id: item.id,
+                  key: item.key,
+                });
+              }}
             />
           ))}
         </View>
+        {errors.walletType?.key && (
+          <Text style={{ color: theme.colors.destructive }}>
+            {errors.walletType?.key.message}
+          </Text>
+        )}
 
         {/* Basic Info */}
         <Card style={styles.formCard}>
           <Controller
             control={control}
             name="name"
-            rules={{ required: t("wallets.fillRequired") }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t("wallets.name")}
                 placeholder="e.g. Main Account"
                 value={value}
                 onChangeText={onChange}
-                error={errors.name?.message as string}
+                error={errors.name?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="currency"
+            render={({ field: { onChange, value } }) => (
+              <DropDownButton
+                label={t("wallets.currency")}
+                selectedValue={value?.name}
+                onPress={handleSelectCurrency}
+                error={errors.currency?.message}
               />
             )}
           />
@@ -182,7 +286,6 @@ export const EditWalletScreen = () => {
           <Controller
             control={control}
             name="balance"
-            rules={{ required: t("wallets.fillRequired") }}
             render={({ field: { onChange, value } }) => (
               <Input
                 label={t("wallets.initialBalance")}
@@ -190,57 +293,17 @@ export const EditWalletScreen = () => {
                 keyboardType="numeric"
                 value={value}
                 onChangeText={onChange}
-                error={errors.balance?.message as string}
+                error={errors.balance?.message}
                 leftIcon={
                   <Text weight="bold" style={{ marginRight: 4 }}>
-                    {currencies.find((c) => c === currency)
-                      ? currency === "USD"
-                        ? "$"
-                        : currency === "EUR"
-                          ? "€"
-                          : currency === "GBP"
-                            ? "£"
-                            : currency
-                      : "$"}
+                    {selectedCurrency?.code || "$"}
                   </Text>
                 }
               />
             )}
           />
 
-          <View style={styles.row}>
-            {/* Simplified currency selector for now */}
-            <Text style={styles.label}>{t("wallets.currency")}</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 8 }}
-            >
-              {currencies.map((c) => (
-                <Pressable
-                  key={c}
-                  onPress={() => setValue("currency", c)}
-                  style={[
-                    styles.currencyChip,
-                    currency === c && {
-                      backgroundColor: theme.colors.primary,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      color: currency === c ? "white" : theme.colors.foreground,
-                      fontSize: 12,
-                    }}
-                  >
-                    {c}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-
-          {(type === "bank" || type === "card") && (
+          {(walletKey?.key === "bank" || walletKey?.key === "card") && (
             <Controller
               control={control}
               name="accountNumber"
@@ -248,7 +311,7 @@ export const EditWalletScreen = () => {
                 <Input
                   label={t("wallets.accountNumber")}
                   placeholder="**** **** **** 1234"
-                  value={value}
+                  value={value ?? ""}
                   onChangeText={onChange}
                   keyboardType="number-pad"
                 />
@@ -312,6 +375,6 @@ export const EditWalletScreen = () => {
           onPress={handleDelete}
         />
       </ScrollView>
-    </ScreenWrapper>
+    </SafeArea>
   );
 };

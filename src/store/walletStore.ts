@@ -19,6 +19,7 @@ interface WalletStore {
     wallets: storeWallet[];
     deleteWallet: (walletId: string) => Promise<void>;
     loadWallets: () => Promise<void>;
+    getWalletById: (walletId: string) => storeWallet | undefined;
     addWallet: (data: Partial<Wallet>) => Promise<void>;
     updateWallet: (walletId: string, data: Partial<Wallet>) => Promise<void>;
     syncNow: () => Promise<void>;
@@ -31,8 +32,15 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
     wallets: [],
     isLoading: false,
     isSyncing: false,
-
+    getWalletById: (walletId: string) => {
+        const wallet = get().wallets.find((w) => w.wallet.id === walletId);
+        if (!wallet) {
+            throw new Error('Wallet not found');
+        }
+        return wallet;
+    },
     loadWallets: async () => {
+
         try {
             set({ isLoading: true });
 
@@ -48,7 +56,6 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
                     walletType,
                 };
             }));
-
 
             set({ wallets });
 
@@ -113,13 +120,12 @@ export const useWalletStore = create<WalletStore>((set, get) => ({
 
             const walletsCollection = database.collections.get<Wallet>('wallets');
             const wallet = await walletsCollection.find(walletId);
-
             await database.write(async () => {
                 await wallet.update((w) => {
                     if (data.name) w.name = data.name;
                     if (data.balance) w.balance = data.balance;
-                    if (data.isDefault) w.isDefault = data.isDefault;
-                    if (data.includeInTotal) w.includeInTotal = data.includeInTotal;
+                    if (typeof data.isDefault === 'boolean') w.isDefault = data.isDefault;
+                    if (typeof data.includeInTotal === 'boolean') w.includeInTotal = data.includeInTotal;
                     if (data.lastDigits) w.lastDigits = data.lastDigits;
                     if (data.accountNumber) w.accountNumber = data.accountNumber;
                     if (data.currencyId) w.currencyId = data.currencyId;
