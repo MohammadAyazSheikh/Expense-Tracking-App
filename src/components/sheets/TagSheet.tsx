@@ -10,15 +10,15 @@ import { Text } from "../ui/Text";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { useTranslation } from "../../hooks/useTranslation";
-import { Tag } from "../../types";
 import { alertService } from "../../utils/alertService";
-import { useTagStore } from "@/store";
+import { tagService } from "../../services/business/tagService";
+import { useAuthStore } from "@/store";
 
 export const TagSheet = (props: SheetProps<"tag-sheet">) => {
   const { sheetId, payload } = props;
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { addTag, updateTag } = useTagStore();
+  const userId = useAuthStore((state) => state.user?.id);
 
   const isEditing = !!payload?.tag;
   const initialTag = payload?.tag;
@@ -28,7 +28,7 @@ export const TagSheet = (props: SheetProps<"tag-sheet">) => {
     initialTag?.color || "hsl(255, 70%, 65%)",
   );
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) {
       alertService.show({
         title: t("common.error"),
@@ -37,18 +37,37 @@ export const TagSheet = (props: SheetProps<"tag-sheet">) => {
       return;
     }
 
-    const tagData: Omit<Tag, "id"> = {
-      name: name.trim(),
-      color: selectedColor,
-    };
-
-    if (isEditing && initialTag) {
-      updateTag(initialTag.id, tagData);
-    } else {
-      addTag(tagData);
+    if (!userId) {
+      alertService.show({
+        title: t("common.error"),
+        message: t("common.userNotAuthenticated", "User not authenticated"),
+      });
+      return;
     }
 
-    SheetManager.hide(sheetId);
+    try {
+      if (isEditing && initialTag) {
+        await tagService.update(
+          initialTag.id,
+          {
+            name: name.trim(),
+            color: selectedColor,
+          },
+          userId,
+        );
+      } else {
+        await tagService.create({
+          name: name.trim(),
+          color: selectedColor,
+          userId,
+        });
+      }
+
+      SheetManager.hide(sheetId);
+    } catch (error) {
+      console.error(error);
+      // Service handles toast
+    }
   };
 
   const openColorPicker = async () => {
