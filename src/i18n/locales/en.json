@@ -24,7 +24,8 @@
         "submit": "Submit",
         "yes": "Yes",
         "no": "No",
-        "others": "Others"
+        "others": "Others",
+        "userNotAuthenticated": "User not authenticated"
     },
     "auth": {
         "welcome": "Welcome to HisaabBee",

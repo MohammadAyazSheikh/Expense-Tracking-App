@@ -7,57 +7,47 @@ import { Icon } from "../components/ui/Icon";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-import { useFinanceStore, useWalletStore } from "../store";
+import { useFinanceStore } from "../store";
 import { TabView } from "../components/ui/TabView";
 import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
 import { RootStackParamList } from "../navigation/types";
 import Toast from "react-native-toast-message";
-import { alertService } from "../utils/alertService";
 import { Header } from "../components/ui/Headers";
 import { LineChart } from "react-native-gifted-charts";
 import { MenuItem } from "../components/sheets/MenuSheet";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { TransactionCard } from "../components/transactions/TransactionCard";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Transaction } from "@/types";
 import { SafeArea } from "@/components/ui/SafeArea";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { database } from "@/libs/database";
+import { Wallet } from "@/database/models/wallet";
+import { Currencies } from "@/database/models/currency";
+import { WalletTypes } from "@/database/models/wallet";
+import { walletService } from "@/services/business/walletService";
+import { switchMap } from "rxjs/operators";
+import { of } from "rxjs";
+import { ApiLoader } from "@/components/ui/ApiLoader";
 
-type WalletDetailScreenRouteProp = RouteProp<
-  RootStackParamList,
-  "WalletDetail"
->;
+type WalletDetailProps = {
+  wallet: Wallet;
+  walletType: WalletTypes | null;
+  currency: Currencies | null;
+};
 
-export default function WalletDetailScreen() {
+const BaseWalletDetailScreen = ({
+  wallet,
+  walletType,
+  currency,
+}: WalletDetailProps) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const route = useRoute<WalletDetailScreenRouteProp>();
-  const { data } = route.params;
-  const { wallet, walletType, currency } = data;
   const { categories } = useFinanceStore();
-  const { deleteWallet } = useWalletStore();
 
   const [showBalance, setShowBalance] = useState(true);
-
-  const getColor = (colorName: string) => {
-    if (colorName?.startsWith("#")) return colorName;
-    return (
-      (theme.colors[colorName as keyof typeof theme.colors] as string) ||
-      theme.colors.primary
-    );
-  };
-
-  if (!wallet) {
-    return (
-      <ScreenWrapper>
-        <View style={styles.errorContainer}>
-          <Text>Wallet not found</Text>
-          <Button title="Go Back" onPress={() => navigation.goBack()} />
-        </View>
-      </ScreenWrapper>
-    );
-  }
 
   // Filter transactions for this wallet
   const walletTransactions: Transaction[] = [];
@@ -88,9 +78,9 @@ export default function WalletDetailScreen() {
     { value: wallet.balance },
   ];
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (wallet) {
-      deleteWallet(wallet.id);
+      await walletService.delete(wallet.id);
 
       Toast.show({
         type: "success",
@@ -201,10 +191,15 @@ export default function WalletDetailScreen() {
             transaction={item}
             category={categories.find((c) => c.name === item.category)}
             onPress={() => {
-              navigation.navigate("TransactionDetail", {
-                id: item.id,
-                category: item.category,
-              });
+              const categoryObj = categories.find(
+                (c) => c.name === item.category,
+              );
+              if (categoryObj) {
+                navigation.navigate("TransactionDetail", {
+                  id: item.id,
+                  category: categoryObj,
+                });
+              }
             }}
           />
         ))}
@@ -218,12 +213,16 @@ export default function WalletDetailScreen() {
     { key: "expense", title: t("wallets.expense") },
   ];
 
-  if (!wallet)
+  if (!wallet || !walletType || !currency) {
     return (
-      <ScreenWrapper style={styles.container} scrollable>
-        <Text>Wallet not found</Text>
+      <ScreenWrapper>
+        <View style={styles.errorContainer}>
+          <ApiLoader isLoading={true} />
+        </View>
       </ScreenWrapper>
     );
+  }
+
   return (
     <SafeArea applyBottomInset style={styles.container} scrollable>
       {/*˝ Header Area */}
@@ -458,7 +457,31 @@ export default function WalletDetailScreen() {
       </View>
     </SafeArea>
   );
-}
+};
+
+const enhanceDetail = withObservables(
+  ["route"],
+  ({ route }: { route: any }) => {
+    const walletId = route.params.walletId;
+    const walletQuery = database
+      .get<Wallet>("wallets")
+      .findAndObserve(walletId);
+
+    return {
+      wallet: walletQuery,
+      walletType: walletQuery.pipe(
+        switchMap((wallet) =>
+          wallet ? wallet.walletType.observe() : of(null),
+        ),
+      ),
+      currency: walletQuery.pipe(
+        switchMap((wallet) => (wallet ? wallet.currency.observe() : of(null))),
+      ),
+    };
+  },
+);
+
+export default enhanceDetail(BaseWalletDetailScreen);
 
 const styles = StyleSheet.create((theme) => ({
   container: {

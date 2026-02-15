@@ -16,7 +16,7 @@ import { Icon } from "../ui/Icon";
 import { Ionicons } from "@expo/vector-icons";
 import { alertService } from "../../utils/alertService";
 import { CategoryCard } from "../categories/CategoryCard";
-import { useCategoryStore, useAuthStore } from "@/store";
+import { useAuthStore } from "@/store";
 import { useTranslation } from "../../hooks/useTranslation";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import {
@@ -25,16 +25,18 @@ import {
   CategoryGroup,
 } from "../../utils/categoryIcons";
 import { Category, SystemCategory } from "@/database/models/category";
-import { ApiLoader } from "../ui/ApiLoader";
 import { transactionTypes } from "@/data/dbConstantData";
+import { categoryService } from "@/services/business/categoryService";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { database } from "@/libs/database";
 
 const ManageCategory = ({
   router,
 }: RouteScreenProps<"manage-category-sheet", "add-update-category">) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { user } = useAuthStore();
-  const { addCategory, updateCategory } = useCategoryStore();
+
+  const user = useAuthStore((state) => state.user);
   const payload = useSheetPayload("manage-category-sheet");
 
   const isEditing = !!payload?.category;
@@ -54,8 +56,8 @@ const ManageCategory = ({
   const [selectedColor, setSelectedColor] = useState(
     initialCategory?.color || "#FF6B6B",
   );
-  console.log(selectedIconKey);
-  const handleSave = () => {
+
+  const handleSave = async () => {
     if (!name.trim()) {
       alertService.show({
         title: t("common.error"),
@@ -64,10 +66,18 @@ const ManageCategory = ({
       return;
     }
 
+    if (!user?.id) {
+      alertService.show({
+        title: t("common.error"),
+        message: t("common.userNotAuthenticated"),
+      });
+      return;
+    }
+
     const iconConfig = CATEGORY_ICONS[selectedIconKey];
 
     const categoryData: any = {
-      userId: user?.id!,
+      userId: user.id,
       name: name.trim(),
       icon: iconConfig.name as string,
       iconFamily: iconConfig.type as string,
@@ -79,13 +89,17 @@ const ManageCategory = ({
       systemCategoryId: null,
     };
 
-    if (isEditing && initialCategory) {
-      updateCategory(initialCategory.id, categoryData);
-    } else {
-      addCategory(categoryData);
-    }
+    try {
+      if (isEditing && initialCategory) {
+        await categoryService.update(initialCategory.id, categoryData, user.id);
+      } else {
+        await categoryService.create(categoryData);
+      }
 
-    SheetManager.hide("manage-category-sheet");
+      SheetManager.hide("manage-category-sheet");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const openColorPicker = async () => {
@@ -141,7 +155,7 @@ const ManageCategory = ({
         </TouchableOpacity>
       </View>
       <LegendList
-        renderScrollComponent={(props) => <ScrollView {...props} />}
+        // renderScrollComponent={(props) => <ScrollView {...props} />}
         recycleItems
         data={CATEGORY_GROUPS}
         estimatedItemSize={50}
@@ -254,7 +268,7 @@ const CategoryFormHeader = ({
           {t("categoryManager.categoryName")}
         </Text>
         <Input
-          value={name}
+          // value={name}
           onChangeText={setName}
           placeholder={t("categoryManager.namePlaceholder")}
         />
@@ -267,62 +281,49 @@ const CategoryFormHeader = ({
   );
 };
 
-const SystemPicker = ({
+const BaseSystemPicker = ({
   router,
-}: RouteScreenProps<"manage-category-sheet", "system-category-picker">) => {
+  systemCategories: systemCat,
+  userCategories,
+}: RouteScreenProps<"manage-category-sheet", "system-category-picker"> & {
+  systemCategories: SystemCategory[];
+  userCategories: Category[];
+}) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
+  const user = useAuthStore((state) => state.user);
   const payload = useSheetPayload("manage-category-sheet");
   const transactionTypeId =
     payload?.type === "expense"
       ? transactionTypes[0].id
       : transactionTypes[1].id;
-  const {
-    systemCategories: systemCat = [],
-    addCategory,
-    isLoading,
-  } = useCategoryStore();
 
-  const systemCategories = useMemo(
-    () =>
-      systemCat.filter((cat) => cat.transactionTypeId === transactionTypeId),
-    [systemCat, transactionTypeId],
-  );
+  const systemCategories = useMemo(() => {
+    const filtered = systemCat.filter(
+      (cat) => cat.transactionTypeId === transactionTypeId,
+    );
+    return filtered.filter(
+      (cat) =>
+        !userCategories.find((uc) => uc.systemCategoryId === cat.serverId),
+    );
+  }, [systemCat, transactionTypeId, userCategories]);
 
   // Prefer params from navigation (local override), fallback to sheet payload
   const categoryType = payload?.type || "expense";
 
   const handleAddSystemCategory = async (cat: SystemCategory) => {
-    await addCategory({
+    if (!user?.id) return;
+
+    await categoryService.create({
       name: cat.name,
       icon: cat.icon,
-      color: cat.color,
       iconFamily: cat.iconFamily,
-      systemCategoryId: cat.serverId,
+      color: cat.color,
       transactionTypeId,
+      userId: user.id,
+      systemCategoryId: cat.serverId,
     });
     SheetManager.hide("manage-category-sheet");
-    // alertService.show({
-    //   title: "Do you want to add this category?",
-    //   buttons: [
-    //     { text: t("common.cancel"), style: "cancel" },
-    //     {
-    //       text: t("common.yes"),
-    //       style: "destructive",
-    //       onPress: async () => {
-    //         await addCategory({
-    //           name: cat.name,
-    //           icon: cat.icon,
-    //           color: cat.color,
-    //           iconFamily: cat.iconFamily,
-    //           systemCategoryId: cat.serverId,
-    //           transactionTypeId,
-    //         });
-    //         SheetManager.hide("category-sheet");
-    //       },
-    //     },
-    //   ],
-    // });
   };
 
   return (
@@ -364,10 +365,19 @@ const SystemPicker = ({
           ))
         )}
       </ScrollView>
-      <ApiLoader isLoading={isLoading} />
     </View>
   );
 };
+
+const enhance = withObservables([], () => ({
+  systemCategories: database
+    .get<SystemCategory>("system_categories")
+    .query()
+    .observe(),
+  userCategories: database.get<Category>("categories").query().observe(),
+}));
+
+const SystemPicker = enhance(BaseSystemPicker);
 
 const IconItem = ({
   iconKey,

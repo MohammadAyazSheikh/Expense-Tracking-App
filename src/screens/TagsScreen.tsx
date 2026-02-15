@@ -1,8 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { LegendList } from "@legendapp/list";
-import { Tag } from "../types";
 import Fab from "@/components/ui/Fab";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -16,7 +15,11 @@ import { useTranslation } from "../hooks/useTranslation";
 import { SheetManager } from "react-native-actions-sheet";
 import { alertService } from "@/utils/alertService";
 import { SafeArea } from "@/components/ui/SafeArea";
-import { useTagStore } from "@/store";
+import { database } from "@/libs/database";
+import { Tag } from "@/database/models/tags";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { tagService } from "@/services/business/tagService";
+import { useAuthStore } from "@/store";
 
 const SUGGESTED_TAGS = [
   "Travel",
@@ -62,10 +65,14 @@ export const TagItem = ({ data, onEdit, onDelete }: TagItemProps) => {
   );
 };
 
-export const TagsScreen = () => {
+interface TagsScreenProps {
+  tags: Tag[];
+}
+
+const BaseTagsScreen = ({ tags }: TagsScreenProps) => {
   const { t } = useTranslation();
-  const { tags, deleteTag, addTag, loadTags } = useTagStore();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const userId = useAuthStore((state) => state.user?.id);
 
   const handleAddTag = () => {
     SheetManager.show("tag-sheet");
@@ -73,7 +80,9 @@ export const TagsScreen = () => {
 
   const handleEditTag = (tag: Tag) => {
     SheetManager.show("tag-sheet", {
-      payload: { tag },
+      payload: {
+        tag,
+      },
     });
   };
 
@@ -86,13 +95,15 @@ export const TagsScreen = () => {
         {
           text: t("common.delete"),
           style: "destructive",
-          onPress: () => deleteTag(id),
+          onPress: () => tagService.delete(id),
         },
       ],
     });
   };
 
-  const handleAddSuggested = (name: string) => {
+  const handleAddSuggested = async (name: string) => {
+    if (!userId) return;
+
     const colors = [
       "hsl(0, 75%, 60%)",
       "hsl(210, 80%, 55%)",
@@ -102,12 +113,13 @@ export const TagsScreen = () => {
       "hsl(340, 70%, 60%)",
     ];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    addTag({ name, color: randomColor });
-  };
 
-  useEffect(() => {
-    loadTags();
-  }, []);
+    await tagService.create({
+      name,
+      color: randomColor,
+      userId,
+    });
+  };
 
   const renderItem = ({ item }: { item: Tag }) => {
     return (
@@ -183,6 +195,13 @@ export const TagsScreen = () => {
     </SafeArea>
   );
 };
+
+// Enhance the component with observables
+const enhance = withObservables([], () => ({
+  tags: database.get<Tag>("tags").query().observe(),
+}));
+
+export const TagsScreen = enhance(BaseTagsScreen);
 
 const styles = StyleSheet.create((theme) => ({
   container: {

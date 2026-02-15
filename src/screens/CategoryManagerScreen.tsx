@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { View, FlatList, useWindowDimensions } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { SheetManager } from "react-native-actions-sheet";
@@ -9,16 +9,21 @@ import { SafeArea } from "@/components/ui/SafeArea";
 import Fab from "@/components/ui/Fab";
 import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import { CategoryCard } from "../components/categories/CategoryCard";
-import { useCategoryStore } from "@/store";
 import { Category } from "@/database/models/category";
-import { ApiLoader } from "@/components/ui/ApiLoader";
 import { transactionTypes } from "@/data/dbConstantData";
+import { database } from "@/libs/database";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { categoryService } from "@/services/business/categoryService";
 
-export const CategoryManagerScreen = ({ navigation }: any) => {
+interface CategoryManagerScreenProps {
+  categories: Category[];
+}
+
+const BaseCategoryManagerScreen = ({
+  categories,
+}: CategoryManagerScreenProps) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { categories, isLoading, loadCategories, deleteCategory } =
-    useCategoryStore();
 
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
@@ -67,7 +72,7 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
         {
           text: isSystem ? t("common.remove") : t("common.delete"),
           style: "destructive",
-          onPress: async () => await deleteCategory(category.id),
+          onPress: async () => await categoryService.delete(category.id),
         },
       ],
       options: {
@@ -75,13 +80,6 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
       },
     });
   };
-
-  useEffect(() => {
-    const loadData = async () => {
-      await loadCategories();
-    };
-    loadData();
-  }, []);
 
   const renderCategoryItem = ({ item }: { item: Category }) => (
     <CategoryCard
@@ -152,10 +150,15 @@ export const CategoryManagerScreen = ({ navigation }: any) => {
         renderTabBar={renderTabBar}
       />
       <Fab onPress={handleAddCategory} />
-      <ApiLoader isLoading={isLoading} />
     </SafeArea>
   );
 };
+
+const enhance = withObservables([], () => ({
+  categories: database.get<Category>("categories").query().observe(),
+}));
+
+export const CategoryManagerScreen = enhance(BaseCategoryManagerScreen);
 
 const styles = StyleSheet.create((theme) => ({
   container: {

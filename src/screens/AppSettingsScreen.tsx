@@ -1,99 +1,101 @@
-import React, { useEffect } from "react";
-import { View } from "react-native";
+import React from "react";
+import { View, ScrollView } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
 import { Text } from "../components/ui/Text";
-import { Button, DropDownButton } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
-import { Input } from "../components/ui/Input";
-import { Feather } from "@expo/vector-icons";
-import { useAppSettingsStore, useCurrencyStore } from "@/store";
+import { DropDownButton } from "../components/ui/Button";
+import { useTranslation } from "../hooks/useTranslation";
+import { useAppSettingsStore } from "@/store";
 import { SafeArea } from "@/components/ui/SafeArea";
 import { SheetManager } from "react-native-actions-sheet";
-import { Currencies } from "@/database/models/currency";
+import { withObservables } from "@nozbe/watermelondb/react";
 import { database } from "@/libs/database";
-import { Q } from "@nozbe/watermelondb";
+import { Currencies } from "@/database/models/currency";
+import { Card } from "@/components/ui/Card";
 
-export const AppSettingsScreen = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { currencies, loadCurrencies } = useCurrencyStore();
-  const { updateCurrency, currency } = useAppSettingsStore();
+const CurrencyPickerBase = ({ currencies }: { currencies: Currencies[] }) => {
+  const { currency, updateCurrency } = useAppSettingsStore();
 
-  const currencyOptions = currencies.map(
-    (currency) => ({
-      label: `${currency.name}`,
-      value: currency.id.toString(),
-      rightIcon: <Text>{`${currency.code}`}</Text>,
-    }),
-    [currencies],
-  );
+  const { t } = useTranslation();
 
   const handleSelectCurrency = async () => {
+    const options = currencies.map((c) => ({
+      value: c.id,
+      id: c.id,
+      name: c.name,
+      code: c.code,
+      label: c.name,
+      originalItem: c,
+    }));
+
     const result = await SheetManager.show("select-sheet", {
       payload: {
-        options: currencyOptions,
-        title: "Select Currency",
-        selectedValue: currency.id,
+        selectedValue: currency?.id || "",
+        options,
+        title: t("wallets.currency"),
       },
     });
-    if (result?.value) {
-      try {
-        const [currency] = await database
-          .get<Currencies>("currencies")
-          .query(Q.where("id", result.value))
-          .fetch();
 
-        if (currency) {
-          updateCurrency(currency);
-          return;
-        }
-        console.warn("currency not found in local db");
-      } catch (e) {
-        console.error("Error setting currency:", e);
-      }
+    if (result) {
+      updateCurrency(result.originalItem);
     }
   };
 
-  useEffect(() => {
-    loadCurrencies();
-  }, []);
   return (
-    <SafeArea applyBottomInset style={styles.container} scrollable>
-      <View style={styles.content}>
-        {/* Preferences */}
-        <Card>
-          <Text variant="h3" style={styles.sectionTitle}>
-            Preferences
-          </Text>
-          <View style={styles.formGroup}>
-            <DropDownButton
-              label="Default Currency"
-              selectedValue={`${currency.name} (${currency.code})`}
-              onPress={handleSelectCurrency}
-            />
-            <Input label="Language" defaultValue="English" />
-            <Input label="Timezone" defaultValue="America/New_York (EST)" />
-          </View>
-        </Card>
+    <DropDownButton
+      label={t("wallets.currency")}
+      selectedValue={currency?.code as string}
+      onPress={handleSelectCurrency}
+    />
+  );
+};
 
-        {/* Actions */}
-        <View style={styles.actions}>
-          <Button
-            title="Save Changes"
-            icon={<Feather name="save" size={20} color="white" />}
-            size="lg"
-            onPress={() => {}}
-          />
-          <Button
-            title="Export Profile Data"
-            variant="outline"
-            size="lg"
-            onPress={() => {}}
-          />
+const enhanceCurrencyPicker = withObservables([], () => ({
+  currencies: database.get<Currencies>("currencies").query().observe(),
+}));
+
+const CurrencyPicker = enhanceCurrencyPicker(CurrencyPickerBase);
+
+export const AppSettingsScreen = () => {
+  const { t } = useTranslation();
+  const navigation = useNavigation();
+
+  // App Settings Store
+  const { language, changeLanguage } = useAppSettingsStore();
+
+  return (
+    <SafeArea applyBottomInset style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Preferences Section */}
+        <View style={styles.section}>
+          <Text variant="h3" style={styles.sectionTitle}>
+            {t("settings.preferences")}
+          </Text>
+          <Card style={styles.card}>
+            {/* Currency Picker */}
+            <CurrencyPicker />
+            <View style={styles.divider} />
+            {/* Language Picker */}
+            <DropDownButton
+              label={t("settings.language")}
+              selectedValue={language === "en" ? "English" : "Arabic"}
+              onPress={async () => {
+                const result = await SheetManager.show("select-sheet", {
+                  payload: {
+                    selectedValue: language,
+                    options: [
+                      { label: "English", value: "en" },
+                      { label: "Arabic", value: "ar" },
+                    ],
+                    title: t("settings.language"),
+                  },
+                });
+                if (result) changeLanguage(result.value as "en" | "ar");
+              }}
+            />
+          </Card>
         </View>
-      </View>
+      </ScrollView>
     </SafeArea>
   );
 };
@@ -105,22 +107,21 @@ const styles = StyleSheet.create((theme) => ({
   },
   content: {
     padding: theme.paddings.md,
-    gap: theme.margins.md,
-    maxWidth: {
-      md: 800,
-    },
-    alignSelf: "center",
-    width: "100%",
+    gap: theme.margins.lg,
+  },
+  section: {
+    gap: theme.margins.sm,
   },
   sectionTitle: {
-    marginBottom: theme.margins.md,
+    marginBottom: theme.margins.xs,
   },
-  formGroup: {
+  card: {
     gap: theme.margins.md,
   },
-  actions: {
-    gap: theme.margins.md,
-    marginTop: theme.margins.md,
-    marginBottom: theme.margins.xl,
+
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: theme.margins.xs,
   },
 }));
