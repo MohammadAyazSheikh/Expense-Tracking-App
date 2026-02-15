@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo } from "react";
-import { RefreshControl, View } from "react-native";
+import React, { useCallback, useMemo } from "react";
+import { View } from "react-native";
 import { StyleSheet, useUnistyles } from "react-native-unistyles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -15,24 +15,30 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui/Button";
 import { Header } from "../components/ui/Headers";
 import { SafeArea } from "@/components/ui/SafeArea";
-import { useWalletStore } from "@/store";
-import { storeWallet } from "@/store/walletStore";
-import { ApiLoader } from "@/components/ui/ApiLoader";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { database } from "@/libs/database";
+import { Wallet } from "@/database/models/wallet";
+import { WalletTypes } from "@/database/models/wallet";
+import { Currencies } from "@/database/models/currency";
 
 const recentTransfers = [
   { from: "Chase Checking", to: "Cash", amount: 200, date: "Today" },
   { from: "PayPal", to: "Chase Checking", amount: 150, date: "Yesterday" },
 ];
 
-type walletCardProps = {
-  data: storeWallet;
+const WalletCardBase = ({
+  wallet,
+  currency,
+  walletType,
+  onPress,
+  onLongPress,
+}: {
+  wallet: Wallet;
+  currency: Currencies;
+  walletType: WalletTypes;
   onPress?: () => void;
   onLongPress?: () => void;
-};
-
-const WalletCard = ({ data, onPress, onLongPress }: walletCardProps) => {
-  const { wallet, walletType } = data;
-
+}) => {
   return (
     <Card onPress={onPress} onLongPress={onLongPress} style={styles.walletCard}>
       <View style={styles.walletInfo}>
@@ -64,11 +70,22 @@ const WalletCard = ({ data, onPress, onLongPress }: walletCardProps) => {
         </View>
       </View>
       <Text weight="bold" style={{ fontSize: 14 }}>
-        {`${data.currency.code} ${wallet.balance.toFixed(2)}`}
+        {`${currency.code} ${wallet.balance.toFixed(2)}`}
       </Text>
     </Card>
   );
 };
+
+const enhanceWalletCard = withObservables(
+  ["wallet"],
+  ({ wallet }: { wallet: Wallet }) => ({
+    wallet: wallet.observe(),
+    currency: wallet.currency.observe(),
+    walletType: wallet.walletType.observe(),
+  }),
+);
+
+const WalletCard = enhanceWalletCard(WalletCardBase);
 
 const AccountStateCard = ({
   title,
@@ -127,51 +144,44 @@ const RecentTransferCard = ({
   );
 };
 
-export const WalletsScreen = () => {
+const BaseWalletsScreen = ({ wallets }: { wallets: Wallet[] }) => {
   const { theme } = useUnistyles();
   const { t } = useTranslation();
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { wallets: data, loadWallets, isLoading } = useWalletStore();
 
   const totalBalance = useMemo(
     () =>
-      data
-        ?.filter((wallet) => wallet.wallet.includeInTotal)
-        .reduce((sum, wallet) => sum + wallet.wallet.balance, 0),
-    [data],
+      wallets
+        ?.filter((wallet) => wallet.includeInTotal)
+        .reduce((sum, wallet) => sum + wallet.balance, 0),
+    [wallets],
   );
 
-  const renderItems = useCallback(({ item }: { item: storeWallet }) => {
+  const renderItems = useCallback(({ item }: { item: Wallet }) => {
     return (
       <WalletCard
-        data={item}
+        wallet={item}
         onPress={() =>
           navigation.navigate("WalletDetail", {
-            data: item,
+            walletId: item.id,
           })
         }
         onLongPress={() =>
           navigation.navigate("EditWallet", {
-            walletId: item.wallet.id,
+            walletId: item.id,
           })
         }
       />
     );
   }, []);
 
-  useEffect(() => {
-    loadWallets();
-  }, []);
   return (
     <SafeArea applyBottomInset style={styles.container}>
       <LegendList
-        refreshControl={
-          <RefreshControl refreshing={false} onRefresh={loadWallets} />
-        }
-        data={data}
+        data={wallets}
         recycleItems
         renderItem={renderItems}
-        keyExtractor={(item) => item.wallet.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: theme.paddings.xl }}
         showsVerticalScrollIndicator={false}
         ListFooterComponentStyle={{
@@ -205,7 +215,7 @@ export const WalletsScreen = () => {
                 }}
               >
                 <Text style={{ color: "white", fontSize: 12 }}>
-                  {data.length} Accounts
+                  {wallets.length} Accounts
                 </Text>
               </Badge>
             </View>
@@ -254,10 +264,15 @@ export const WalletsScreen = () => {
         )}
       />
       <Fab onPress={() => navigation.navigate("AddWallet")} />
-      <ApiLoader isLoading={isLoading} />
     </SafeArea>
   );
 };
+
+const enhance = withObservables([], () => ({
+  wallets: database.get<Wallet>("wallets").query().observe(),
+}));
+
+export const WalletsScreen = enhance(BaseWalletsScreen);
 
 const styles = StyleSheet.create((theme) => ({
   container: {

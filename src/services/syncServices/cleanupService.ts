@@ -1,6 +1,6 @@
 import { database } from '@/libs/database';
 import { mmkvStorage } from '@/utils/storage';
-import { useAuthStore } from '@/store';
+import { useAppSettingsStore, useAuthStore } from "@/store";
 
 class CleanupService {
     /**
@@ -32,11 +32,12 @@ class CleanupService {
     }
 
     /**
-     * Reset all Zustand stores
+     * Clear all stores
      */
     resetStores() {
         try {
             useAuthStore.getState().reset();
+            useAppSettingsStore.getState().initialize();
 
         } catch (error) {
             console.error('❌ Failed to reset stores:', error);

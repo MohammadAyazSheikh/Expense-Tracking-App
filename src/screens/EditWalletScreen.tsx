@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { SheetManager } from "react-native-actions-sheet";
 import { View, ScrollView } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 import { Text } from "../components/ui/Text";
@@ -16,11 +19,13 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Icon } from "../components/ui/Icon";
 import { alertService } from "../utils/alertService";
 import { styles } from "./AddWalletScreen";
-import { useWalletStore, useWalletTypeStore, useCurrencyStore } from "@/store";
-import { SheetManager } from "react-native-actions-sheet";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { SafeArea } from "@/components/ui/SafeArea";
+import { withObservables } from "@nozbe/watermelondb/react";
+import { database } from "@/libs/database";
+import { Wallet } from "@/database/models/wallet";
+import { WalletTypes } from "@/database/models/wallet";
+import { Currencies } from "@/database/models/currency";
+import { walletService } from "@/services/business/walletService";
 
 const walletSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -32,15 +37,17 @@ const walletSchema = z.object({
     id: z.string(),
     key: z.string(),
   }),
-  currency: z.object({
-    id: z.string(),
-    code: z.string(),
-    decimalPlaces: z.number(),
-    isActive: z.boolean(),
-    name: z.string(),
-    symbol: z.string(),
-    type: z.string(),
-  }),
+  currency: z
+    .object({
+      id: z.string(),
+      code: z.string(),
+      decimalPlaces: z.number(),
+      isActive: z.boolean(),
+      name: z.string(),
+      symbol: z.string(),
+      type: z.string(),
+    })
+    .optional(),
   accountNumber: z.string().optional(),
   includeInTotal: z.boolean(),
   isDefault: z.boolean(),
@@ -48,19 +55,15 @@ const walletSchema = z.object({
 
 type WalletFormValues = z.infer<typeof walletSchema>;
 
-export const EditWalletScreen = () => {
+type EditWalletProps = {
+  wallet: Wallet;
+  walletTypes: WalletTypes[];
+};
+
+const BaseEditWalletScreen = ({ wallet, walletTypes }: EditWalletProps) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const {
-    params: { walletId },
-  } = useRoute<RouteProp<RootStackParamList, "EditWallet">>();
-
-  const { getWalletById, deleteWallet, updateWallet } = useWalletStore();
-  const wallet = getWalletById(walletId);
-
-  const { walletTypes, loadWalletTypes } = useWalletTypeStore();
   const { theme } = useUnistyles();
   const { t } = useTranslation();
-  const { loadExchangeRates, getRatesForCurrency } = useCurrencyStore();
 
   const {
     control,
@@ -75,15 +78,7 @@ export const EditWalletScreen = () => {
       name: "",
       balance: "",
       walletType: walletTypes[0],
-      currency: {
-        id: "",
-        code: "USD",
-        decimalPlaces: 2,
-        isActive: true,
-        name: "US Dollar",
-        symbol: "$",
-        type: "fiat",
-      },
+      currency: undefined,
       accountNumber: "",
       includeInTotal: true,
       isDefault: false,
@@ -95,58 +90,52 @@ export const EditWalletScreen = () => {
   const isDefault = watch("isDefault");
   const walletKey = watch("walletType");
 
-  const { cryptoRates, fiatRates } = useMemo(() => {
-    return getRatesForCurrency();
-  }, []);
-
-  useEffect(() => {
-    loadWalletTypes();
-    loadExchangeRates();
-  }, []);
-
   useEffect(() => {
     if (wallet && walletTypes.length > 0) {
-      // storeWallet has nested wallet, currency, and walletType objects
-      const matchingWalletType = wallet.walletType;
-      const matchingCurrency = wallet.currency;
+      const loadRelations = async () => {
+        const wt = await wallet.walletType.fetch();
+        const c = await wallet.currency.fetch();
 
-      reset({
-        name: wallet.wallet.name,
-        balance: wallet.wallet.balance.toString(),
-        walletType: matchingWalletType
-          ? {
-              id: matchingWalletType.id,
-              key: matchingWalletType.key,
-            }
-          : walletTypes[0],
-        currency: matchingCurrency
-          ? {
-              id: matchingCurrency.id,
-              code: matchingCurrency.code,
-              decimalPlaces: matchingCurrency.decimalPlaces,
-              isActive: matchingCurrency.isActive,
-              name: matchingCurrency.name,
-              symbol: matchingCurrency.symbol,
-              type: matchingCurrency.type,
-            }
-          : {
-              id: "",
-              code: "USD",
-              decimalPlaces: 2,
-              isActive: true,
-              name: "US Dollar",
-              symbol: "$",
-              type: "fiat",
-            },
-        accountNumber: wallet.wallet.accountNumber || "",
-        includeInTotal: wallet.wallet.includeInTotal ?? true,
-        isDefault: wallet.wallet.isDefault ?? false,
-      });
+        reset({
+          name: wallet.name,
+          balance: wallet.balance.toString(),
+          walletType: wt
+            ? {
+                id: wt.id,
+                key: wt.key,
+              }
+            : walletTypes[0],
+          currency: c
+            ? {
+                id: c.id,
+                code: c.code,
+                decimalPlaces: c.decimalPlaces,
+                isActive: c.isActive,
+                name: c.name,
+                symbol: c.symbol,
+                type: c.type,
+              }
+            : undefined,
+          accountNumber: wallet.accountNumber || "",
+          includeInTotal: wallet.includeInTotal ?? true,
+          isDefault: wallet.isDefault ?? false,
+        });
+      };
+      loadRelations();
     }
-  }, [wallet, walletTypes, reset, cryptoRates, fiatRates]);
+  }, [wallet, walletTypes, reset]);
 
   const onSubmit = (data: WalletFormValues) => {
     if (!wallet) return;
+
+    if (!data.currency) {
+      Toast.show({
+        type: "error",
+        text1: t("common.error"),
+        text2: "Please select currency",
+      });
+      return;
+    }
 
     const body = {
       name: data.name,
@@ -159,8 +148,7 @@ export const EditWalletScreen = () => {
       isDefault: data.isDefault,
     };
 
-    console.log({ body });
-    updateWallet(wallet.wallet.id, body);
+    walletService.update(wallet.id, body, wallet.userId); // userId from wallet or auth store
 
     Toast.show({
       type: "success",
@@ -170,10 +158,35 @@ export const EditWalletScreen = () => {
   };
 
   const handleSelectCurrency = async () => {
+    const options = await database
+      .get<Currencies>("currencies")
+      .query()
+      .fetch();
+    // Filter based on wallet type (crypto/fiat)
+    const type = walletKey?.key === "crypto" ? "crypto" : "fiat";
+    const filtered = options
+      .filter((c) => c.type === type)
+      .map((c) => ({
+        value: c.id,
+        id: c.id,
+        name: c.name,
+        code: c.code,
+        label: c.name,
+        originalItem: {
+          id: c.id,
+          code: c.code,
+          decimalPlaces: c.decimalPlaces,
+          isActive: c.isActive,
+          name: c.name,
+          symbol: c.symbol,
+          type: c.type,
+        },
+      }));
+
     const result = await SheetManager.show("select-sheet", {
       payload: {
         selectedValue: selectedCurrency?.id,
-        options: walletKey?.key === "crypto" ? cryptoRates : fiatRates,
+        options: filtered,
         title: "Select Currency",
       },
     });
@@ -190,9 +203,9 @@ export const EditWalletScreen = () => {
         {
           text: t("common.delete"),
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
             if (wallet) {
-              deleteWallet(wallet.wallet.id);
+              await walletService.delete(wallet.id);
 
               Toast.show({
                 type: "success",
@@ -236,9 +249,7 @@ export const EditWalletScreen = () => {
               onPress={() => {
                 setValue(
                   "currency",
-                  item.key === "crypto"
-                    ? cryptoRates[0].originalItem
-                    : fiatRates[0].originalItem,
+                  undefined, // Clear currency when type changes
                 );
                 setValue("walletType", {
                   id: item.id,
@@ -276,7 +287,7 @@ export const EditWalletScreen = () => {
             render={({ field: { onChange, value } }) => (
               <DropDownButton
                 label={t("wallets.currency")}
-                selectedValue={value?.name}
+                selectedValue={value?.name ?? ""}
                 onPress={handleSelectCurrency}
                 error={errors.currency?.message}
               />
@@ -378,3 +389,15 @@ export const EditWalletScreen = () => {
     </SafeArea>
   );
 };
+
+const enhance = withObservables(
+  ["route"],
+  ({ route }: { route: RouteProp<RootStackParamList, "EditWallet"> }) => ({
+    wallet: database
+      .get<Wallet>("wallets")
+      .findAndObserve(route.params.walletId),
+    walletTypes: database.get<WalletTypes>("wallet_types").query().observe(),
+  }),
+);
+
+export const EditWalletScreen = enhance(BaseEditWalletScreen);

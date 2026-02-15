@@ -1,5 +1,5 @@
 import { database } from '@/libs/database';
-import { Category, SystemCategory } from '@/database/models/category';
+import { Category } from '@/database/models/category';
 import { PendingDeletions } from '@/database/models/local';
 import Toast from 'react-native-toast-message';
 import { categorySyncService } from '@/services/syncServices/categorySyncService';
@@ -37,7 +37,7 @@ export const categoryService = {
                     category.icon = data.icon;
                     category.iconFamily = data.iconFamily;
                     category.transactionTypeId = data.transactionTypeId;
-                    // category.userId = data.userId;
+                    category.userId = data.userId;
                     category.systemCategoryId = data.systemCategoryId || null; // Ensure null if not provided
                     category.isSynced = false;
                 });
