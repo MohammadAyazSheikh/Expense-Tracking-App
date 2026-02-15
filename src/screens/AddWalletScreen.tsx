@@ -17,8 +17,9 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { withObservables } from "@nozbe/watermelondb/react";
 import { database } from "@/libs/database";
 import { WalletTypes } from "@/database/models/wallet";
-import { Currencies } from "@/database/models/currency";
 import { walletService } from "@/services/business/walletService";
+import { currencyService } from "@/services/business/currencyService";
+import { useAppSettingsStore } from "@/store";
 import { CategoryItem } from "./AddExpenseScreen";
 import { SheetManager } from "react-native-actions-sheet";
 import { SafeArea } from "@/components/ui/SafeArea";
@@ -118,32 +119,15 @@ const BaseAddWalletScreen = ({
     }
   };
 
-  const handleSelectCurrency = async () => {
-    const options = await database
-      .get<Currencies>("currencies")
-      .query()
-      .fetch();
-    const type = walletKey?.key === "crypto" ? "crypto" : "fiat";
+  const { currency: userCurrency } = useAppSettingsStore();
 
-    // Filter by type
-    const filteredOptions = options
-      .filter((c) => c.type === type)
-      .map((c) => ({
-        value: c.id,
-        id: c.id,
-        name: c.name,
-        code: c.code,
-        label: c.name,
-        originalItem: {
-          id: c.id,
-          code: c.code,
-          decimalPlaces: c.decimalPlaces,
-          isActive: c.isActive,
-          name: c.name,
-          symbol: c.symbol,
-          type: c.type,
-        },
-      }));
+  const handleSelectCurrency = async () => {
+    const { cryptoRates, fiatRates } = await currencyService.getRatesForDisplay(
+      userCurrency?.code || "USD",
+    );
+
+    const type = walletKey?.key === "crypto" ? "crypto" : "fiat";
+    const filteredOptions = type === "crypto" ? cryptoRates : fiatRates;
 
     const result = await SheetManager.show("select-sheet", {
       payload: {

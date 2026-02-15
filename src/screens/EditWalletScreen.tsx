@@ -24,8 +24,9 @@ import { withObservables } from "@nozbe/watermelondb/react";
 import { database } from "@/libs/database";
 import { Wallet } from "@/database/models/wallet";
 import { WalletTypes } from "@/database/models/wallet";
-import { Currencies } from "@/database/models/currency";
 import { walletService } from "@/services/business/walletService";
+import { currencyService } from "@/services/business/currencyService";
+import { useAppSettingsStore } from "@/store";
 
 const walletSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -157,31 +158,15 @@ const BaseEditWalletScreen = ({ wallet, walletTypes }: EditWalletProps) => {
     });
   };
 
+  const { currency: userCurrency } = useAppSettingsStore();
+
   const handleSelectCurrency = async () => {
-    const options = await database
-      .get<Currencies>("currencies")
-      .query()
-      .fetch();
+    const { cryptoRates, fiatRates } = await currencyService.getRatesForDisplay(
+      userCurrency?.code || "USD",
+    );
     // Filter based on wallet type (crypto/fiat)
     const type = walletKey?.key === "crypto" ? "crypto" : "fiat";
-    const filtered = options
-      .filter((c) => c.type === type)
-      .map((c) => ({
-        value: c.id,
-        id: c.id,
-        name: c.name,
-        code: c.code,
-        label: c.name,
-        originalItem: {
-          id: c.id,
-          code: c.code,
-          decimalPlaces: c.decimalPlaces,
-          isActive: c.isActive,
-          name: c.name,
-          symbol: c.symbol,
-          type: c.type,
-        },
-      }));
+    const filtered = type === "crypto" ? cryptoRates : fiatRates;
 
     const result = await SheetManager.show("select-sheet", {
       payload: {

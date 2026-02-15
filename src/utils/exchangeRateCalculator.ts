@@ -217,7 +217,7 @@ export function getRatesForSpecificCurrency(
  */
 export function generateSpecificCrossRates(
     currencyCode: string,
-    usdRates: FormattedExchangeRate[]
+    usdRates: FormattedExchangeRate[],
 ): FormattedRatesForSpecificCurrencyList {
     const allCrossRates: FormattedSpecificCurrencyRate[] = [];
     const cryptoRates: FormattedSpecificCurrencyRate[] = [];
