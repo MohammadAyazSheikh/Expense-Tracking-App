@@ -1,6 +1,6 @@
 import { database } from '@/libs/database';
 import { mmkvStorage } from '@/utils/storage';
-import { useAuthStore, useCategoryStore } from '@/store';
+import { useAuthStore } from '@/store';
 
 class CleanupService {
     /**
@@ -37,7 +37,7 @@ class CleanupService {
     resetStores() {
         try {
             useAuthStore.getState().reset();
-            useCategoryStore.getState().reset();
+
         } catch (error) {
             console.error('❌ Failed to reset stores:', error);
             throw error;

@@ -27,7 +27,6 @@ export const tagService = {
                 return await tagsCollection.create((tag) => {
                     tag.name = data.name;
                     tag.color = data.color;
-                    tag.userId = data.userId;
                     tag.isSynced = false;
                 });
             });
