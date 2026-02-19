@@ -37,7 +37,7 @@ export type Database = {
           system_category_id?: string | null
           transaction_type_id: string
           updated_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           color?: string | null
@@ -244,7 +244,7 @@ export type Database = {
           id?: string
           name: string
           updated_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           color?: string | null
@@ -372,7 +372,7 @@ export type Database = {
           last_digits?: string | null
           name: string
           updated_at?: string
-          user_id: string
+          user_id?: string
           wallet_type_id: string
         }
         Update: {
@@ -413,20 +413,6 @@ export type Database = {
     Functions: {
       call_sync_exchange_rates: { Args: never; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
-      store_in_trash:
-        | {
-            Args: { p_record: Json; p_schema: string; p_table: string }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              p_record: Json
-              p_record_id: string
-              p_schema: string
-              p_table: string
-            }
-            Returns: undefined
-          }
     }
     Enums: {
       [_ in never]: never
