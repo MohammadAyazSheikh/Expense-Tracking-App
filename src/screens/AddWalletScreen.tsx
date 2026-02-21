@@ -20,10 +20,10 @@ import { WalletTypes } from "@/database/models/wallet";
 import { walletService } from "@/services/business/walletService";
 import { currencyService } from "@/services/business/currencyService";
 import { useAppSettingsStore } from "@/store";
-import { CategoryItem } from "./AddExpenseScreen";
 import { SheetManager } from "react-native-actions-sheet";
 import { SafeArea } from "@/components/ui/SafeArea";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CategoryItem } from "@/components/categories/CategoryItem";
 
 const walletSchema = z.object({
   name: z.string().min(1, "Name is required"),

@@ -12,8 +12,7 @@ import { Card } from "../components/ui/Card";
 import { Switch } from "../components/ui/Switch";
 import { useTranslation } from "../hooks/useTranslation";
 import Toast from "react-native-toast-message";
-import { CategoryItem } from "../screens/AddExpenseScreen";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Icon } from "../components/ui/Icon";
@@ -27,6 +26,7 @@ import { WalletTypes } from "@/database/models/wallet";
 import { walletService } from "@/services/business/walletService";
 import { currencyService } from "@/services/business/currencyService";
 import { useAppSettingsStore } from "@/store";
+import { CategoryItem } from "@/components/categories/CategoryItem";
 
 const walletSchema = z.object({
   name: z.string().min(1, "Name is required"),

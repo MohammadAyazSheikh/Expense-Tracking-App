@@ -25,74 +25,11 @@ import { SheetManager } from "react-native-actions-sheet";
 import Animated from "react-native-reanimated";
 import { LayoutAnimation } from "../utils/animation";
 import { Header } from "../components/ui/Headers";
+import { CategoryItem } from "@/components/categories/CategoryItem";
 
 const PressAbleAnimated = Animated.createAnimatedComponent(Pressable);
 
 const paymentModes = ["Cash", "Bank", "Card", "Wallet"];
-
-export const CategoryItem = ({
-  item,
-  isSelected,
-  onPress,
-  isTag = false,
-}: {
-  item: {
-    name: string;
-    color: string;
-    icon?: string;
-    iconFamily?: IconType;
-  };
-  isSelected: boolean;
-  onPress: () => void;
-  isTag?: boolean;
-}) => {
-  const { theme } = useUnistyles();
-
-  return (
-    <PressAbleAnimated
-      layout={LayoutAnimation}
-      style={[
-        styles.selectionItem,
-        isTag && styles.tagItem,
-        isSelected && styles.selectionItemSelected,
-        isTag && isSelected && styles.tagItemSelected,
-      ]}
-      onPress={onPress}
-    >
-      {!isTag ? (
-        <View
-          style={[
-            styles.iconContainer,
-            { backgroundColor: item.color || theme.colors.primary },
-          ]}
-        >
-          <Icon
-            type={item.iconFamily || "Ionicons"}
-            name={item.icon || "help-circle"}
-            size={20}
-            color="white"
-          />
-        </View>
-      ) : (
-        <View
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: 6,
-            backgroundColor: isSelected ? "white" : item.color,
-          }}
-        />
-      )}
-      <Text
-        variant="caption"
-        weight="medium"
-        style={[isTag ? { fontSize: 14 } : undefined]}
-      >
-        {item.name}
-      </Text>
-    </PressAbleAnimated>
-  );
-};
 
 export const AddExpenseScreen = () => {
   const { theme } = useUnistyles();
@@ -582,44 +519,6 @@ const styles = StyleSheet.create((theme) => ({
     flexWrap: "wrap",
     gap: theme.margins.md,
   },
-  selectionItem: {
-    width: {
-      xs: "30%",
-      sm: "23%",
-      md: "18%",
-    },
-    aspectRatio: 1,
-    borderRadius: theme.radius.lg,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: theme.colors.card,
-    gap: 4,
-  },
-  tagItem: {
-    width: "auto",
-    aspectRatio: undefined,
-    height: 40,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    gap: 8,
-    borderRadius: 20,
-  },
-  selectionItemSelected: {
-    borderColor: theme.colors.primary,
-  },
-  tagItemSelected: {
-    backgroundColor: theme.colors.primary,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 4,
-  },
   moreButton: {
     width: {
       xs: "30%",
@@ -691,5 +590,14 @@ const styles = StyleSheet.create((theme) => ({
   },
   manageButton: {
     marginTop: theme.margins.md,
+  },
+  tagItem: {
+    width: "auto",
+    aspectRatio: undefined,
+    height: 40,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    gap: 8,
+    borderRadius: 20,
   },
 }));
